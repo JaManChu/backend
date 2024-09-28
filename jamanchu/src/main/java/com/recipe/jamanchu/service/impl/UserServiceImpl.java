@@ -4,17 +4,21 @@ import com.recipe.jamanchu.entity.UserEntity;
 import com.recipe.jamanchu.exceptions.exception.DuplicatedEmailException;
 import com.recipe.jamanchu.exceptions.exception.DuplicatedNicknameException;
 import com.recipe.jamanchu.model.dto.request.SignupDTO;
+import com.recipe.jamanchu.model.dto.request.UserDetailsDTO;
 import com.recipe.jamanchu.model.dto.response.UserResponse;
 import com.recipe.jamanchu.model.type.UserRole;
 import com.recipe.jamanchu.repository.UserRepository;
 import com.recipe.jamanchu.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl implements UserService, UserDetailsService {
 
   private final UserRepository userRepository;
   private final BCryptPasswordEncoder passwordEncoder;
@@ -38,5 +42,13 @@ public class UserServiceImpl implements UserService {
         .build());
 
     return UserResponse.SUCCESS_SIGNUP;
+  }
+
+  @Override
+  public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    UserEntity user = userRepository.findByEmail(username)
+        .orElseThrow(() -> new UsernameNotFoundException("해당 유저를 찾을 수 없습니다."));
+
+    return new UserDetailsDTO(user);
   }
 }
