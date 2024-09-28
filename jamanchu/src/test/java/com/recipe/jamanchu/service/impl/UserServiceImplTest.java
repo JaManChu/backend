@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 
+import com.recipe.jamanchu.exceptions.exception.DuplicatedEmailException;
+import com.recipe.jamanchu.exceptions.exception.DuplicatedNicknameException;
 import com.recipe.jamanchu.model.dto.request.SignupDTO;
 import com.recipe.jamanchu.model.dto.response.UserResponse;
 import com.recipe.jamanchu.repository.UserRepository;
