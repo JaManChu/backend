@@ -1,10 +1,9 @@
 package com.recipe.jamanchu.entity;
 
 import static com.recipe.jamanchu.model.type.UserRole.USER;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
-import com.recipe.jamanchu.model.type.UserRole;
 import com.recipe.jamanchu.repository.IngredientRatingRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

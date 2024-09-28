@@ -2,18 +2,14 @@ package com.recipe.jamanchu.entity;
 
 import static com.recipe.jamanchu.model.type.UserRole.USER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import com.recipe.jamanchu.repository.CommentRepository;
-import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 @ExtendWith(MockitoExtension.class)
 class CommentEntityTest {
