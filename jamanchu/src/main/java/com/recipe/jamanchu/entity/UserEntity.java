@@ -23,13 +23,13 @@ public class UserEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long userId;
 
-  @Column(name = "email")
+  @Column(name = "usr_email")
   private String email;
 
-  @Column(name = "password")
+  @Column(name = "usr_password")
   private String password;
 
-  @Column(name = "nickname")
+  @Column(name = "usr_nickname")
   private String nickname;
 
   @Enumerated(EnumType.STRING)
