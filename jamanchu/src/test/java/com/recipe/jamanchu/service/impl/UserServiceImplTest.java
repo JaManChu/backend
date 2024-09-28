@@ -74,5 +74,4 @@ class UserServiceImplTest {
     // when then
     assertThrows(GlobalException.class, () -> userServiceimpl.signup(newUser));
   }
-
 }
