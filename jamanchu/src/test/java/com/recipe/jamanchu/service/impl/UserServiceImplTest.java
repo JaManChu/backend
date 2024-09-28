@@ -2,7 +2,7 @@ package com.recipe.jamanchu.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
 
 import com.recipe.jamanchu.exceptions.exception.DuplicatedEmailException;
 import com.recipe.jamanchu.exceptions.exception.DuplicatedNicknameException;
@@ -36,8 +36,8 @@ class UserServiceImplTest {
     // given
     SignupDTO signup = new SignupDTO("dlrkdhsoff@gmail.com", "1234", "nickname");
 
-    given(userRepository.existsByEmail(signup.getEmail())).willReturn(false);
-    given(userRepository.existsByNickname(signup.getNickname())).willReturn(false);
+    when(userRepository.existsByEmail(signup.getEmail())).thenReturn(false);
+    when(userRepository.existsByNickname(signup.getNickname())).thenReturn(false);
 
     // when
     UserResponse result = userServiceimpl.signup(signup);
@@ -55,7 +55,7 @@ class UserServiceImplTest {
     UserResponse result = userServiceimpl.signup(signup);
 
     SignupDTO newUser = new SignupDTO("dlrkdhsoff@gmail.com", "1234", "nickname");
-    given(userRepository.existsByEmail(signup.getEmail())).willReturn(true);
+    when(userRepository.existsByEmail(signup.getEmail())).thenReturn(true);
 
     // when then
     assertThrows(DuplicatedEmailException.class, () -> userServiceimpl.signup(newUser));
@@ -70,7 +70,7 @@ class UserServiceImplTest {
     UserResponse result = userServiceimpl.signup(signup);
 
     SignupDTO newUser = new SignupDTO("newEmail@gmail.com", "1234", "nickname");
-    given(userRepository.existsByNickname(signup.getNickname())).willReturn(true);
+    when(userRepository.existsByNickname(signup.getNickname())).thenReturn(true);
 
     // when then
     assertThrows(DuplicatedNicknameException.class, () -> userServiceimpl.signup(newUser));

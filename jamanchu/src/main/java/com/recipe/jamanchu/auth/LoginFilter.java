@@ -82,10 +82,13 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     response.setCharacterEncoding("UTF-8");
 
     UserEntity user = userRepository.findByEmail(request.getParameter("email"))
-        .orElseThrow(() -> new UsernameNotFoundException("해당 유저를 찾을 수 없습니다."));
+        .orElseGet(() -> null);
 
     String enPassword = passwordEncoder.encode(request.getParameter("password"));
-    if (!enPassword.equals(user.getPassword())) {
+
+    if (user == null) {
+      response.getWriter().write("이미 존재하는 아이디 입니다.");
+    } else if (!enPassword.equals(user.getPassword())) {
       response.getWriter().write("비밀번호를 다시 입력해주세요");
     }
   }
