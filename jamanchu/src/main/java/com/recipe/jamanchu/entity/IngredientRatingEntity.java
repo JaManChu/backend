@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @Entity
 @Table(name = "ingredient_rating")
-public class IngredientRatingEntity extends BaseTimeEntity {
+public class IngredientRatingEntity{
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
