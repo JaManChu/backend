@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 
-import com.recipe.jamanchu.exceptions.GlobalException;
 import com.recipe.jamanchu.model.dto.request.SignupDTO;
 import com.recipe.jamanchu.model.dto.response.UserResponse;
 import com.recipe.jamanchu.repository.UserRepository;
@@ -57,7 +56,7 @@ class UserServiceImplTest {
     given(userRepository.existsByEmail(signup.getEmail())).willReturn(true);
 
     // when then
-    assertThrows(GlobalException.class, () -> userServiceimpl.signup(newUser));
+    assertThrows(DuplicatedEmailException.class, () -> userServiceimpl.signup(newUser));
   }
 
   @Test
@@ -72,6 +71,6 @@ class UserServiceImplTest {
     given(userRepository.existsByNickname(signup.getNickname())).willReturn(true);
 
     // when then
-    assertThrows(GlobalException.class, () -> userServiceimpl.signup(newUser));
+    assertThrows(DuplicatedNicknameException.class, () -> userServiceimpl.signup(newUser));
   }
 }

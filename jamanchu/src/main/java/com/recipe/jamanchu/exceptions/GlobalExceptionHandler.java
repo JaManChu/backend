@@ -1,5 +1,6 @@
 package com.recipe.jamanchu.exceptions;
 
+import com.recipe.jamanchu.exceptions.exception.GlobalException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
