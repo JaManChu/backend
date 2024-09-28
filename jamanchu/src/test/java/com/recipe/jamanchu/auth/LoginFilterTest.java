@@ -1,7 +1,6 @@
 package com.recipe.jamanchu.auth;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -17,16 +16,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -39,9 +34,6 @@ class LoginFilterTest {
 
   @Mock
   private BCryptPasswordEncoder passwordEncoder;
-
-  @Mock
-  private AuthenticationManager authenticationManager;
 
   @Mock
   private JwtUtil jwtUtil;
@@ -67,7 +59,7 @@ class LoginFilterTest {
 
   @Test
   @DisplayName("로그인 성공")
-  void testSuccessfulAuthentication() throws Exception {
+  void login() throws Exception {
     // given
     String email = "test@example.com";
     String password = "password";
@@ -107,7 +99,7 @@ class LoginFilterTest {
   @DisplayName("로그인 실패: 사용자 없음")
   void testUnsuccessfulAuthenticationUserNotFound() throws IOException {
     // Given
-    String email = "nonexistent@example.com";
+    String email = "test@example.com";
     String password = "password";
 
     when(request.getParameter("email")).thenReturn(email);
@@ -132,13 +124,15 @@ class LoginFilterTest {
   void testUnsuccessfulAuthenticationIncorrectPassword() throws IOException {
     // Given
     String email = "test@example.com";
-    String password = "wrongpassword";
+    String password = "1234";
     String encodedPassword = "encodedWrongPassword";
-    String storedPassword = "encodedCorrectPassword";
 
-    UserEntity user = new UserEntity();
-    user.setEmail(email);
-    user.setPassword(storedPassword);
+    UserEntity user = UserEntity.builder()
+        .userId(1L)
+        .email(email)
+        .password(passwordEncoder.encode(password))
+        .role(UserRole.USER)
+        .build();
 
     when(request.getParameter("email")).thenReturn(email);
     when(request.getParameter("password")).thenReturn(password);
@@ -159,4 +153,3 @@ class LoginFilterTest {
   }
 }
 
-}
