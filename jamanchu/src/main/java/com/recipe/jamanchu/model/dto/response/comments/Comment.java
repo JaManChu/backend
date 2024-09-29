@@ -2,10 +2,7 @@ package com.recipe.jamanchu.model.dto.response.comments;
 
 import com.recipe.jamanchu.entity.CommentEntity;
 import java.time.LocalDateTime;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Getter
 public class Comment {
