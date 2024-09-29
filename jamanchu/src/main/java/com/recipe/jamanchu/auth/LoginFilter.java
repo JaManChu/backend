@@ -1,6 +1,7 @@
 package com.recipe.jamanchu.auth;
 
 import com.recipe.jamanchu.entity.UserEntity;
+import com.recipe.jamanchu.exceptions.exception.UserNotFoundException;
 import com.recipe.jamanchu.model.dto.request.UserDetailsDTO;
 import com.recipe.jamanchu.repository.UserRepository;
 import jakarta.servlet.FilterChain;
@@ -15,7 +16,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -52,7 +52,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     UserDetailsDTO userDetails = (UserDetailsDTO) authentication.getPrincipal();
 
     UserEntity user = userRepository.findByEmail(userDetails.getUsername())
-        .orElseThrow(() -> new UsernameNotFoundException("해당 유저를 찾을 수 없습니다."));
+        .orElseThrow(UserNotFoundException::new);
 
     String access = jwtUtil.createJwt("access", user.getUserId(), user.getRole());
     String refresh = jwtUtil.createJwt("refresh", user.getUserId(), user.getRole());
