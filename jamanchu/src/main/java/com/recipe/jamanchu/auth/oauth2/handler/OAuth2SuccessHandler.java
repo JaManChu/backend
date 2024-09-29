@@ -57,6 +57,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     response.setCharacterEncoding("UTF-8");
     response.getWriter().write("로그인 성공");
 
+    log.info("OAuth 로그인 성공");
     String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:8080/api/v1/test")
         .build()
         .toUriString();
