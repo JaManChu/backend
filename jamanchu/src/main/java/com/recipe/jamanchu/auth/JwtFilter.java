@@ -30,6 +30,14 @@ public class JwtFilter extends OncePerRequestFilter {
       FilterChain filterChain)
       throws ServletException, IOException {
 
+    String requestURI = request.getRequestURI();
+
+    // 인증이 필요 없는 경로
+    if (isExcludedPath(requestURI)) {
+      filterChain.doFilter(request, response);
+      return;
+    }
+
     String accessToken = request.getHeader("access");
 
     if (accessToken == null) {
@@ -115,6 +123,12 @@ public class JwtFilter extends OncePerRequestFilter {
     response.setContentType("application/json");
     response.setCharacterEncoding("UTF-8");
     response.getWriter().write("인증 토큰이 만료되었습니다. 다시 로그인해 주세요.");
+  }
+
+  private boolean isExcludedPath(String requestURI) {
+    return requestURI.equals("/")
+        || requestURI.equals("/login")
+        || requestURI.equals("/api/v1/user/signup");
   }
 }
 
