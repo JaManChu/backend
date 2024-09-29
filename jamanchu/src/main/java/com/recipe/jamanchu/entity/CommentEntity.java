@@ -38,7 +38,7 @@ public class CommentEntity extends BaseTimeEntity{
   private RecipeEntity recipe;
 
   @NotNull
-  @Column(name = "cmt_content", length = 100)
+  @Column(name = "cmt_content", length = 300)
   private String commentContent;
 
   @NotNull
