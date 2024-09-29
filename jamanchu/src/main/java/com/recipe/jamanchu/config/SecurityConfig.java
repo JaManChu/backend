@@ -1,8 +1,8 @@
 package com.recipe.jamanchu.config;
 
-import com.recipe.jamanchu.auth.JwtFilter;
-import com.recipe.jamanchu.auth.JwtUtil;
-import com.recipe.jamanchu.auth.LoginFilter;
+import com.recipe.jamanchu.auth.jwt.JwtFilter;
+import com.recipe.jamanchu.auth.jwt.JwtUtil;
+import com.recipe.jamanchu.auth.jwt.LoginFilter;
 import com.recipe.jamanchu.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
