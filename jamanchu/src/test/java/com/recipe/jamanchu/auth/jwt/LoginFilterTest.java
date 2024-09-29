@@ -1,12 +1,10 @@
-package com.recipe.jamanchu.auth;
+package com.recipe.jamanchu.auth.jwt;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.recipe.jamanchu.auth.jwt.JwtUtil;
-import com.recipe.jamanchu.auth.jwt.LoginFilter;
 import com.recipe.jamanchu.entity.UserEntity;
 import com.recipe.jamanchu.model.dto.request.UserDetailsDTO;
 import com.recipe.jamanchu.model.type.UserRole;
