@@ -97,8 +97,8 @@ class LoginFilterTest {
 
   @Test
   @DisplayName("로그인 실패: 사용자 없음")
-  void testUnsuccessfulAuthenticationUserNotFound() throws IOException {
-    // Given
+  void loginUserNotFound() throws IOException {
+    // given
     String email = "test@example.com";
     String password = "password";
 
@@ -109,10 +109,10 @@ class LoginFilterTest {
     PrintWriter writer = mock(PrintWriter.class);
     when(response.getWriter()).thenReturn(writer);
 
-    // When
+    // when
     loginFilter.unsuccessfulAuthentication(request, response, authException);
 
-    // Then
+    // then
     verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
     verify(response).setContentType("application/json");
     verify(response).setCharacterEncoding("UTF-8");
@@ -121,8 +121,8 @@ class LoginFilterTest {
 
   @Test
   @DisplayName("로그인 실패: 비밀번호 불일치")
-  void testUnsuccessfulAuthenticationIncorrectPassword() throws IOException {
-    // Given
+  void loginValidatePassword() throws IOException {
+    // given
     String email = "test@example.com";
     String password = "1234";
     String encodedPassword = "encodedWrongPassword";
@@ -142,10 +142,10 @@ class LoginFilterTest {
     PrintWriter writer = mock(PrintWriter.class);
     when(response.getWriter()).thenReturn(writer);
 
-    // When
+    // when
     loginFilter.unsuccessfulAuthentication(request, response, authException);
 
-    // Then
+    // then
     verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
     verify(response).setContentType("application/json");
     verify(response).setCharacterEncoding("UTF-8");
