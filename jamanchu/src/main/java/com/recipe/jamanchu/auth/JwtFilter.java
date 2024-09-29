@@ -1,7 +1,7 @@
 package com.recipe.jamanchu.auth;
 
 import com.recipe.jamanchu.entity.UserEntity;
-import com.recipe.jamanchu.model.dto.request.UserDetailsDTO;
+import com.recipe.jamanchu.model.dto.request.users.UserDetailsDTO;
 import com.recipe.jamanchu.model.type.UserRole;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;

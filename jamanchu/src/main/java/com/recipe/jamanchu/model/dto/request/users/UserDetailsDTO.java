@@ -1,4 +1,4 @@
-package com.recipe.jamanchu.model.dto.request;
+package com.recipe.jamanchu.model.dto.request.users;
 
 import com.recipe.jamanchu.entity.UserEntity;
 import java.util.ArrayList;

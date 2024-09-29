@@ -4,16 +4,15 @@ import com.recipe.jamanchu.entity.UserEntity;
 import com.recipe.jamanchu.exceptions.exception.DuplicatedEmailException;
 import com.recipe.jamanchu.exceptions.exception.DuplicatedNicknameException;
 import com.recipe.jamanchu.exceptions.exception.UserNotFoundException;
-import com.recipe.jamanchu.model.dto.request.SignupDTO;
-import com.recipe.jamanchu.model.dto.request.UserDetailsDTO;
-import com.recipe.jamanchu.model.dto.response.UserResponse;
+import com.recipe.jamanchu.model.dto.request.users.SignupDTO;
+import com.recipe.jamanchu.model.dto.request.users.UserDetailsDTO;
+import com.recipe.jamanchu.model.type.ResultCode;
 import com.recipe.jamanchu.model.type.UserRole;
 import com.recipe.jamanchu.repository.UserRepository;
 import com.recipe.jamanchu.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +24,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
   private final BCryptPasswordEncoder passwordEncoder;
 
   @Override
-  public UserResponse signup(SignupDTO signupDTO) {
+  public ResultCode signup(SignupDTO signupDTO) {
     if (userRepository.existsByEmail(signupDTO.getEmail())) {
       throw new DuplicatedEmailException();
     }
@@ -42,7 +41,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         .role(UserRole.USER)
         .build());
 
-    return UserResponse.SUCCESS_SIGNUP;
+    return ResultCode.SUCCESS_SIGNUP;
   }
 
   @Override

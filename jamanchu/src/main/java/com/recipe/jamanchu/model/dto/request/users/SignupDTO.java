@@ -1,4 +1,4 @@
-package com.recipe.jamanchu.model.dto.request;
+package com.recipe.jamanchu.model.dto.request.users;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
