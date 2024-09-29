@@ -13,13 +13,12 @@ import org.springframework.web.multipart.MultipartFile;
 @AllArgsConstructor
 public class RecipesManual {
 
-  @Min(1)
+  @Min(value = 1, message = "조리 순서는 1이상이어야 합니다.")
   private final Long recipeOrder;
 
-  @NotEmpty
+  @NotEmpty(message = "조리 과정을 설명해주세요.")
   private final String recipeOrderContent;
 
-  @NotEmpty
   private final MultipartFile recipeOrderImage;
 
 }
