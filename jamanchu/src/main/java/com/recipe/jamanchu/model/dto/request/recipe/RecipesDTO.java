@@ -1,7 +1,7 @@
 package com.recipe.jamanchu.model.dto.request.recipe;
 
 import com.recipe.jamanchu.model.dto.response.ingredients.Ingredients;
-import com.recipe.jamanchu.model.dto.response.recipes.RecipesOrders;
+import com.recipe.jamanchu.model.dto.response.recipes.RecipesManuals;
 import com.recipe.jamanchu.model.type.CookingTimeType;
 import com.recipe.jamanchu.model.type.LevelType;
 import lombok.AllArgsConstructor;
@@ -22,6 +22,6 @@ public class RecipesDTO {
 
   private final Ingredients ingredients;
 
-  private final RecipesOrders orders;
+  private final RecipesManuals orders;
 
 }

@@ -1,7 +1,7 @@
 package com.recipe.jamanchu.model.dto.request.recipe;
 
 import com.recipe.jamanchu.model.dto.response.ingredients.Ingredients;
-import com.recipe.jamanchu.model.dto.response.recipes.RecipesOrders;
+import com.recipe.jamanchu.model.dto.response.recipes.RecipesManuals;
 import com.recipe.jamanchu.model.type.CookingTimeType;
 import com.recipe.jamanchu.model.type.LevelType;
 import jakarta.validation.constraints.Min;
@@ -20,7 +20,7 @@ public class RecipesUpdateDTO extends RecipesDTO{
       CookingTimeType cookingTime,
       MultipartFile recipeImage,
       Ingredients ingredients,
-      RecipesOrders orders,
+      RecipesManuals orders,
       Long recipeId) {
     super(recipeName, level, cookingTime, recipeImage, ingredients, orders);
     this.recipeId = recipeId;
