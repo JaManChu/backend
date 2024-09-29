@@ -39,11 +39,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     String email = kakaoUserDetails.getEmail();
     String nickname = kakaoUserDetails.getNickname();
 
-    if (userRepository.existsByEmail(email)) {
-      throw new DuplicatedEmailException();
-    }
-
-    UserEntity user = userRepository.findByEmail(email)
+    UserEntity user = userRepository.findByProviderId(providerId)
         .orElseGet(() -> userRepository.save(UserEntity.builder()
             .email(email)
             .password(passwordEncoder.encode(String.valueOf(Math.random() * 8)))
