@@ -12,15 +12,14 @@ import lombok.Getter;
 @AllArgsConstructor
 public class CommentsDTO {
 
-  @NotEmpty
-  @Min(1)
+  @Min(value = 1, message = "잘못된 레시피 ID 입력입니다.")
   private final Long recipeId;
 
-  @NotEmpty
-  @Size(min = 1, max = 300)
+  @NotEmpty(message = "댓글을 입력해주세요.")
+  @Size(min = 1, max = 300, message = "댓글은 1자 이상 300자 이하로 입력해주세요.")
   private final String comment;
 
-  @DecimalMin(value = "1.0", inclusive = false)
-  @DecimalMax(value = "5.0", inclusive = false)
+  @DecimalMin(value = "1.0", inclusive = false, message = "평점은 1.0 이상으로 입력해주세요.")
+  @DecimalMax(value = "5.0", inclusive = false, message = "평점은 5.0 이하로 입력해주세요.")
   private final Double rating;
 }
