@@ -39,6 +39,8 @@ public class SecurityConfig {
     http
         .csrf(AbstractHttpConfigurer::disable);
     http
+        .formLogin(AbstractHttpConfigurer::disable);
+    http
         .httpBasic(AbstractHttpConfigurer::disable);
     http
         .authorizeHttpRequests(auth -> auth
