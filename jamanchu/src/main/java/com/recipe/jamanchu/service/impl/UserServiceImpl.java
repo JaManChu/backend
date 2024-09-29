@@ -3,6 +3,7 @@ package com.recipe.jamanchu.service.impl;
 import com.recipe.jamanchu.entity.UserEntity;
 import com.recipe.jamanchu.exceptions.exception.DuplicatedEmailException;
 import com.recipe.jamanchu.exceptions.exception.DuplicatedNicknameException;
+import com.recipe.jamanchu.exceptions.exception.UserNotFoundException;
 import com.recipe.jamanchu.model.dto.request.SignupDTO;
 import com.recipe.jamanchu.model.dto.request.UserDetailsDTO;
 import com.recipe.jamanchu.model.dto.response.UserResponse;
@@ -45,9 +46,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
   }
 
   @Override
-  public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+  public UserDetails loadUserByUsername(String username) {
     UserEntity user = userRepository.findByEmail(username)
-        .orElseThrow(() -> new UsernameNotFoundException("해당 유저를 찾을 수 없습니다."));
+        .orElseThrow(UserNotFoundException::new);
 
     return new UserDetailsDTO(user);
   }
