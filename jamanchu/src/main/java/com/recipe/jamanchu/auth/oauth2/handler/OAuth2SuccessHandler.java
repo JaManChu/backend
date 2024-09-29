@@ -3,7 +3,6 @@ package com.recipe.jamanchu.auth.oauth2.handler;
 import com.recipe.jamanchu.auth.jwt.JwtUtil;
 import com.recipe.jamanchu.auth.oauth2.KakaoUserDetails;
 import com.recipe.jamanchu.entity.UserEntity;
-import com.recipe.jamanchu.exceptions.exception.DuplicatedEmailException;
 import com.recipe.jamanchu.repository.UserRepository;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
