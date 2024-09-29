@@ -6,7 +6,7 @@ import static org.mockito.Mockito.when;
 
 import com.recipe.jamanchu.exceptions.exception.DuplicatedEmailException;
 import com.recipe.jamanchu.exceptions.exception.DuplicatedNicknameException;
-import com.recipe.jamanchu.model.dto.request.users.SignupDTO;
+import com.recipe.jamanchu.model.dto.request.SignupDTO;
 import com.recipe.jamanchu.model.type.ResultCode;
 import com.recipe.jamanchu.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;

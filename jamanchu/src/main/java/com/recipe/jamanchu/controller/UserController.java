@@ -1,6 +1,6 @@
 package com.recipe.jamanchu.controller;
 
-import com.recipe.jamanchu.model.dto.request.users.SignupDTO;
+import com.recipe.jamanchu.model.dto.request.SignupDTO;
 import com.recipe.jamanchu.model.type.ResultCode;
 import com.recipe.jamanchu.service.UserService;
 import lombok.RequiredArgsConstructor;
