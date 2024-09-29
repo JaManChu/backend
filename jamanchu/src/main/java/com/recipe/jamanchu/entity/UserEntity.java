@@ -36,6 +36,12 @@ public class UserEntity extends BaseTimeEntity {
   @Column(name = "usr_nickname")
   private String nickname;
 
+  @Column(name = "usr_provider")
+  private String provider;
+
+  @Column(name = "usr_provider_sub")
+  private String providerId;
+
   @Enumerated(EnumType.STRING)
   private UserRole role;
 }
