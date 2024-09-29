@@ -6,9 +6,12 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.web.multipart.MultipartFile;
 
+/**
+ * 단일 레시피 조리 순서
+ */
 @Getter
 @AllArgsConstructor
-public class RecipesOrder {
+public class RecipesManual {
 
   @Min(1)
   private final Long recipeOrder;
