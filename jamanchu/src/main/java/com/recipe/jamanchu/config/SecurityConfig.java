@@ -1,8 +1,11 @@
 package com.recipe.jamanchu.config;
 
-import com.recipe.jamanchu.auth.JwtFilter;
-import com.recipe.jamanchu.auth.JwtUtil;
-import com.recipe.jamanchu.auth.LoginFilter;
+import com.recipe.jamanchu.auth.jwt.JwtFilter;
+import com.recipe.jamanchu.auth.jwt.JwtUtil;
+import com.recipe.jamanchu.auth.jwt.LoginFilter;
+import com.recipe.jamanchu.auth.oauth2.CustomOauth2UserService;
+import com.recipe.jamanchu.auth.oauth2.handler.OAuth2FailureHandler;
+import com.recipe.jamanchu.auth.oauth2.handler.OAuth2SuccessHandler;
 import com.recipe.jamanchu.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -26,6 +29,9 @@ public class SecurityConfig {
   private final BCryptPasswordEncoder passwordEncoder;
   private final JwtUtil jwtUtil;
   private final UserRepository userRepository;
+  private final CustomOauth2UserService customOauth2UserService;
+  private final OAuth2SuccessHandler oAuth2SuccessHandler;
+  private final OAuth2FailureHandler oAuth2FailureHandler;
 
   @Bean
   public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
@@ -47,6 +53,15 @@ public class SecurityConfig {
             .requestMatchers("/", "/api/v1/user/signup", "login").permitAll()
             .anyRequest().authenticated()
         );
+
+    http
+        .oauth2Login(oauth2Login -> oauth2Login
+            .userInfoEndpoint(userInfoEndpoint -> userInfoEndpoint
+                .userService(customOauth2UserService)
+            )
+            .successHandler(oAuth2SuccessHandler)
+            .failureHandler(oAuth2FailureHandler)
+    );
 
     http
         .addFilterBefore(new JwtFilter(jwtUtil), LoginFilter.class);

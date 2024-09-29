@@ -1,4 +1,4 @@
-package com.recipe.jamanchu.auth;
+package com.recipe.jamanchu.auth.jwt;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;

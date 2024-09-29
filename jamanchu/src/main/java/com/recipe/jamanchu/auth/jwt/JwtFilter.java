@@ -1,4 +1,4 @@
-package com.recipe.jamanchu.auth;
+package com.recipe.jamanchu.auth.jwt;
 
 import com.recipe.jamanchu.entity.UserEntity;
 import com.recipe.jamanchu.model.dto.request.UserDetailsDTO;

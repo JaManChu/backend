@@ -1,4 +1,4 @@
-package com.recipe.jamanchu.auth;
+package com.recipe.jamanchu.auth.jwt;
 
 import com.recipe.jamanchu.model.type.UserRole;
 import io.jsonwebtoken.Jwts;
