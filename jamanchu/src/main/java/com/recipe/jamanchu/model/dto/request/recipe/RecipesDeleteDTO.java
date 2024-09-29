@@ -8,6 +8,6 @@ import lombok.Getter;
 @AllArgsConstructor
 public class RecipesDeleteDTO {
 
-  @Min(1)
+  @Min(value = 1, message = "잘못된 레시피 번호입니다.")
   private final Long recipeId;
 }
