@@ -8,7 +8,9 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 public enum ResultCode {
 
-  SUCCESS_SIGNUP(HttpStatus.CREATED, "회원가입 성공!");
+  SUCCESS_SIGNUP(HttpStatus.CREATED, "회원가입 성공!"),
+  SUCCESS_COMMENTS(HttpStatus.CREATED, "댓글 작성 성공!"),
+  ;
 
   private final HttpStatus statusCode;
   private final String message;
