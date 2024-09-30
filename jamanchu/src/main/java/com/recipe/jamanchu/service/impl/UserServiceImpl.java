@@ -6,7 +6,7 @@ import com.recipe.jamanchu.exceptions.exception.DuplicatedNicknameException;
 import com.recipe.jamanchu.exceptions.exception.UserNotFoundException;
 import com.recipe.jamanchu.model.dto.request.SignupDTO;
 import com.recipe.jamanchu.model.dto.request.UserDetailsDTO;
-import com.recipe.jamanchu.model.dto.response.UserResponse;
+import com.recipe.jamanchu.model.type.ResultCode;
 import com.recipe.jamanchu.model.type.UserRole;
 import com.recipe.jamanchu.repository.UserRepository;
 import com.recipe.jamanchu.service.UserService;
@@ -24,7 +24,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
   private final BCryptPasswordEncoder passwordEncoder;
 
   @Override
-  public UserResponse signup(SignupDTO signupDTO) {
+  public ResultCode signup(SignupDTO signupDTO) {
     if (userRepository.existsByEmail(signupDTO.getEmail())) {
       throw new DuplicatedEmailException();
     }
@@ -41,7 +41,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         .role(UserRole.USER)
         .build());
 
-    return UserResponse.SUCCESS_SIGNUP;
+    return ResultCode.SUCCESS_SIGNUP;
   }
 
   @Override

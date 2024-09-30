@@ -1,4 +1,4 @@
-package com.recipe.jamanchu.model.dto.response;
+package com.recipe.jamanchu.model.type;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -6,9 +6,11 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 @AllArgsConstructor
-public enum UserResponse {
+public enum ResultCode {
 
-  SUCCESS_SIGNUP(HttpStatus.CREATED, "회원가입 성공!");
+  SUCCESS_SIGNUP(HttpStatus.CREATED, "회원가입 성공!"),
+  SUCCESS_COMMENTS(HttpStatus.CREATED, "댓글 작성 성공!"),
+  ;
 
   private final HttpStatus statusCode;
   private final String message;
