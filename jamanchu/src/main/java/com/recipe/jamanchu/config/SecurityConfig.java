@@ -50,7 +50,11 @@ public class SecurityConfig {
         .httpBasic(AbstractHttpConfigurer::disable);
     http
         .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/", "/api/v1/user/signup", "login").permitAll()
+            .requestMatchers("/",
+                "/api/v1/user/signup",
+                "login",
+                "/oauth2/authorization/kakao",
+                "/login/oauth2/code/kakao").permitAll()
             .anyRequest().authenticated()
         );
 

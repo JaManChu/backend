@@ -15,7 +15,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
-import org.springframework.web.util.UriComponentsBuilder;
 
 @Slf4j
 @Component
@@ -50,23 +49,16 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     String access = jwtUtil.createJwt("access", user.getUserId(), user.getRole());
     String refresh = jwtUtil.createJwt("refresh", user.getUserId(), user.getRole());
 
-    response.addHeader("access", access);
+    response.addHeader("access-token", access);
     response.addCookie(createCookie(refresh));
     response.setStatus(HttpServletResponse.SC_OK);
     response.setContentType("application/json");
     response.setCharacterEncoding("UTF-8");
     response.getWriter().write("로그인 성공");
-
-    log.info("OAuth 로그인 성공");
-    String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:8080/api/v1/test")
-        .build()
-        .toUriString();
-
-    getRedirectStrategy().sendRedirect(request, response, targetUrl);
   }
 
   private Cookie createCookie(String value) {
-    Cookie cookie = new Cookie("refresh", value);
+    Cookie cookie = new Cookie("refresh-token", value);
     cookie.setMaxAge(24 * 60 * 60);
     cookie.setHttpOnly(true);
 
