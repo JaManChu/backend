@@ -57,7 +57,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     String access = jwtUtil.createJwt("access", user.getUserId(), user.getRole());
     String refresh = jwtUtil.createJwt("refresh", user.getUserId(), user.getRole());
 
-    response.addHeader("access", access);
+    response.addHeader("access-token", access);
     response.addCookie(createCookie(refresh));
     response.setStatus(HttpServletResponse.SC_OK);
     response.setContentType("application/json");
@@ -66,7 +66,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
   }
 
   private Cookie createCookie(String value) {
-    Cookie cookie = new Cookie("refresh", value);
+    Cookie cookie = new Cookie("refresh-token", value);
     cookie.setMaxAge(24 * 60 * 60);
     cookie.setHttpOnly(true);
 

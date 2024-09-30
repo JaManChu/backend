@@ -38,7 +38,7 @@ public class JwtFilter extends OncePerRequestFilter {
       return;
     }
 
-    String accessToken = request.getHeader("access");
+    String accessToken = request.getHeader("access-token");
 
     if (accessToken == null) {
       logger.info("Access token is null");
@@ -60,7 +60,7 @@ public class JwtFilter extends OncePerRequestFilter {
   }
 
   private void setAuthenticationFromToken(HttpServletResponse response, String token) {
-    response.addHeader("access", token);
+    response.addHeader("access-token", token);
 
     Authentication authToken = getAuthToken(token);
     SecurityContextHolder.getContext().setAuthentication(authToken);
@@ -90,7 +90,7 @@ public class JwtFilter extends OncePerRequestFilter {
   // refresh 토큰 반환
   private String getRefreshTokenFromCookies(HttpServletRequest request) {
     return Arrays.stream(request.getCookies())
-        .filter(cookie -> "refresh".equals(cookie.getName()))
+        .filter(cookie -> "refresh-token".equals(cookie.getName()))
         .map(Cookie::getValue)
         .findFirst()
         .orElse(null);
@@ -128,7 +128,9 @@ public class JwtFilter extends OncePerRequestFilter {
   private boolean isExcludedPath(String requestURI) {
     return requestURI.equals("/")
         || requestURI.equals("/login")
-        || requestURI.equals("/api/v1/user/signup");
+        || requestURI.equals("/api/v1/user/signup")
+        || requestURI.equals("/oauth2/authorization/kakao")
+        || requestURI.equals("/login/oauth2/code/kakao");
   }
 }
 
