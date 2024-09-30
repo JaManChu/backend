@@ -43,7 +43,7 @@ class CommentsDTOTest {
     assertEquals("댓글은 1자 이상 300자 이하로 입력해주세요.", violations.iterator().next().getMessage());
   }
 
-  @DisplayName("코멘트는 1자 이상 300자 이하로 입력해야 한다.")
+  @DisplayName("댓글 내용은 null이 아니어야ㄴ한다.")
   @Test
   void commentMustNotNull() {
     //given
