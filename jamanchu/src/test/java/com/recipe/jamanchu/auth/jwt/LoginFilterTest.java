@@ -6,7 +6,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.recipe.jamanchu.entity.UserEntity;
-import com.recipe.jamanchu.model.dto.request.UserDetailsDTO;
+import com.recipe.jamanchu.model.dto.request.auth.UserDetailsDTO;
 import com.recipe.jamanchu.model.type.UserRole;
 import com.recipe.jamanchu.repository.UserRepository;
 import jakarta.servlet.FilterChain;
