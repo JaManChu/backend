@@ -8,6 +8,7 @@ import com.recipe.jamanchu.auth.oauth2.handler.OAuth2FailureHandler;
 import com.recipe.jamanchu.auth.oauth2.handler.OAuth2SuccessHandler;
 import com.recipe.jamanchu.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -50,6 +51,12 @@ public class SecurityConfig {
         .httpBasic(AbstractHttpConfigurer::disable);
     http
         .authorizeHttpRequests(auth -> auth
+            //swagger ui 허용
+            .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
+            .requestMatchers("/v3/api-docs/**",
+                "/swagger-ui/**",
+                "/swagger-ui.html",
+                "/swagger-resources/**").permitAll()
             .requestMatchers("/",
                 "/api/v1/user/signup",
                 "login",
