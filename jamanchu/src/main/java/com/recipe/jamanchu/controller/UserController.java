@@ -8,8 +8,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequiredArgsConstructor
@@ -25,13 +27,15 @@ public class UserController {
     return ResponseEntity.ok(userService.signup(signupDTO));
   }
 
-//  @GetMapping("/test")
-//  public ResponseEntity<?> test(@RequestParam("access") String access,
-//      @RequestParam("refresh") String refresh) {
-//
-//    log.info("access : {}", access);
-//    log.info("refresh : {}", refresh);
-//
-//    return ResponseEntity.ok().body(access);
-//  }
+  @GetMapping("/test")
+  public ResponseEntity<?> test(@RequestParam("access") String access,
+      @RequestParam("refresh") String refresh) {
+
+    log.info("method -> test");
+
+    log.info("access : {}", access);
+    log.info("refresh : {}", refresh);
+
+    return ResponseEntity.ok().body("로그인 성공");
+  }
 }
