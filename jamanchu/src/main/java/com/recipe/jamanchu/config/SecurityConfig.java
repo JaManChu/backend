@@ -34,9 +34,9 @@ public class SecurityConfig {
   private final OAuth2FailureHandler oAuth2FailureHandler;
 
   @Bean
-  public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+  public AuthenticationManager authenticationManager() throws Exception {
 
-    return configuration.getAuthenticationManager();
+    return authenticationConfiguration.getAuthenticationManager();
   }
 
   @Bean
@@ -52,32 +52,31 @@ public class SecurityConfig {
         .authorizeHttpRequests(auth -> auth
             .requestMatchers("/",
                 "/api/v1/user/signup",
-                "login",
-                "/oauth2/authorization/kakao",
-                "/login/oauth2/code/kakao").permitAll()
-            .anyRequest().authenticated()
-        );
+                "/api/v1/user/login",
+                "/api/v1/user/test").permitAll()
+            .anyRequest().authenticated());
 
     http
         .oauth2Login(oauth2Login -> oauth2Login
             .userInfoEndpoint(userInfoEndpoint -> userInfoEndpoint
-                .userService(customOauth2UserService)
-            )
+                .userService(customOauth2UserService))
             .successHandler(oAuth2SuccessHandler)
-            .failureHandler(oAuth2FailureHandler)
-    );
+            .failureHandler(oAuth2FailureHandler));
 
     http
         .addFilterBefore(new JwtFilter(jwtUtil), LoginFilter.class);
     http
-        .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration)
-            ,passwordEncoder, jwtUtil, userRepository), UsernamePasswordAuthenticationFilter.class);
+        .addFilterAt(customLoginFilter(), UsernamePasswordAuthenticationFilter.class);
     http
         .sessionManagement(session -> session
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
     return http.build();
-
   }
 
+  private LoginFilter customLoginFilter() throws Exception {
+    LoginFilter loginFilter = new LoginFilter(authenticationManager(), passwordEncoder, jwtUtil, userRepository);
+    loginFilter.setFilterProcessesUrl("/api/v1/user/login");
+    return loginFilter;
+  }
 }
