@@ -30,7 +30,6 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
   @Override
   public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
       Authentication authentication) throws IOException {
-    SecurityContextHolder.getContext().setAuthentication(authentication);
     OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
 
     KakaoUserDetails kakaoUserDetails = new KakaoUserDetails(oAuth2User.getAttributes());
