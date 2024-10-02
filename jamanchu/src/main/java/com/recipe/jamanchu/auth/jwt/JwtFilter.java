@@ -130,7 +130,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
   private boolean isExcludedPath(String requestURI) {
     return requestURI.equals("/")
-        || requestURI.equals("/login")
+        || requestURI.equals("/api/v1/user/login")
         || requestURI.equals("/api/v1/user/signup");
   }
 }
