@@ -10,6 +10,7 @@ public enum ResultCode {
 
   SUCCESS_SIGNUP(HttpStatus.CREATED, "회원가입 성공!"),
   SUCCESS_COMMENTS(HttpStatus.CREATED, "댓글 작성 성공!"),
+  SUCCESS_CR_RECIPE(HttpStatus.CREATED, "스크래핑 레시피 저장 성공!"),
   ;
 
   private final HttpStatus statusCode;

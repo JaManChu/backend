@@ -11,4 +11,16 @@ public enum LevelType {
   HIGH("고급");
 
   private final String level;
+
+  public static LevelType fromString(String level) {
+    if (level == null) {
+      return null;
+    }
+
+    return switch (level) {
+      case "중급" -> MEDIUM;
+      case "고급" -> HIGH;
+      default -> LOW;
+    };
+  }
 }
