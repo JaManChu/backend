@@ -12,6 +12,7 @@ import com.recipe.jamanchu.model.type.LevelType;
 import com.recipe.jamanchu.repository.TenThousandRecipeRepository;
 import java.util.Arrays;
 import java.util.List;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -28,19 +29,20 @@ class ScrapTenThousandRecipeServiceImplTest {
   private ScrapTenThousandRecipeServiceImpl scrapTenThousandRecipeService;
 
   @Test
+  @DisplayName("스크래핑 데이터 저장 성공")
   void saveCrawlRecipe_Success() {
 
     // given
     ScrapResult scrapResult1 = new ScrapResult(
         "Recipe 1", "Author 1", "Delicious recipe 1",
         LevelType.LOW, CookingTimeType.FIFTEEN_MINUTES, "recipe1.jpg",
-        4.5, "Eggs, Butter", "Step 1, Step 2",
+        4.5, 14, "Eggs, Butter", "Step 1, Step 2",
         "step1.jpg, step2.jpg");
 
     ScrapResult scrapResult2 = new ScrapResult(
         "Recipe 2", "Author 2", "Delicious recipe 2",
         LevelType.MEDIUM, CookingTimeType.THIRTY_MINUTES, "recipe2.jpg",
-        4.7, "Chicken, Garlic", "Step 1, Step 2",
+        4.7, 5,"Chicken, Garlic", "Step 1, Step 2",
         "step1.jpg, step2.jpg");
 
     List<ScrapResult> scrapResults = Arrays.asList(scrapResult1, scrapResult2);
