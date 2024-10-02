@@ -74,33 +74,28 @@ public class ScrapTenThousandRecipe {
       Document recipeDoc = Jsoup.connect(url).get();
 
       // title 추출
-      Element titleElement = recipeDoc.selectFirst(".view2_summary h3");
-      String title = (titleElement != null) ? titleElement.text() : null;
+      String title = getText(recipeDoc, ".view2_summary h3");
+      if (title == null) return null;
 
       // authorName 추출
-      Element authorElement = recipeDoc.selectFirst(".user_info2_name");
-      String authorName = (authorElement != null) ? authorElement.text() : null;
+      String authorName = getText(recipeDoc, ".user_info2_name");
 
       // description 추출
-      Element descriptionElement = recipeDoc.selectFirst(".view2_summary_in");
-      String description = (descriptionElement != null) ? descriptionElement.text() : null;
+      String description = getText(recipeDoc, ".view2_summary_in");
 
       // level 추출
-      Element levelElement = recipeDoc.selectFirst(".view2_summary_info3");
-      String level = (levelElement != null) ? levelElement.text() : null;
+      String level = getText(recipeDoc, ".view2_summary_info3");
       LevelType levelType = LevelType.fromString(level);
 
       // cookTime 추출
-      Element cookTimeElement = recipeDoc.selectFirst(".view2_summary_info2");
-      String cookTime = (cookTimeElement != null) ? cookTimeElement.text() : null;
+      String cookTime = getText(recipeDoc, ".view2_summary_info2");
       CookingTimeType cookingTimeType = CookingTimeType.fromString(cookTime);
 
       // thumbnail 추출
-      Element thumbnailElement = recipeDoc.selectFirst(".centeredcrop img");
-      String thumbnail = (thumbnailElement != null) ? thumbnailElement.attr("src") : null;
+      String thumbnail = getAttr(recipeDoc, ".centeredcrop img", "src");
 
       // averageRating 계산
-      List<Integer> reviewsRating = scrapeReviews(recipeDoc);
+      List<Integer> reviewsRating = scrapeReviewsRating(recipeDoc);
 
       double averageRating = reviewsRating.stream()
           .mapToInt(Integer::intValue)
@@ -151,7 +146,17 @@ public class ScrapTenThousandRecipe {
     return null;  // 에러 발생 시 null 반환
   }
 
-  public List<Integer> scrapeReviews(Document document) throws IOException {
+  private String getText(Document doc, String cssQuery) {
+    Element element = doc.selectFirst(cssQuery);
+    return (element != null) ? element.text() : null;
+  }
+
+  private String getAttr(Document doc, String cssQuery, String attribute) {
+    Element element = doc.selectFirst(cssQuery);
+    return (element != null) ? element.attr(attribute) : null;
+  }
+
+  private List<Integer> scrapeReviewsRating(Document document) throws IOException {
     List<Integer> ratings = new ArrayList<>();
     Elements reviewElements = document.select(".media.reply_list");
 
