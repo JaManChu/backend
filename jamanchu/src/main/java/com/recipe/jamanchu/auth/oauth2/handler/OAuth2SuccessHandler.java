@@ -55,11 +55,12 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
     log.info("OAuth 로그인 성공");
     String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:8080/api/v1/user/test")
-//        .queryParam("access", access)
-//        .queryParam("refresh", refresh)
+        .queryParam("access", access)
+        .queryParam("refresh", refresh)
         .build()
         .toUriString();
 
+    log.info("redirect -> http://localhost:8080/api/v1/user/test");
     getRedirectStrategy().sendRedirect(request, response, targetUrl);
   }
 
