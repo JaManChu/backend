@@ -38,7 +38,7 @@ public class JwtFilter extends OncePerRequestFilter {
       return;
     }
 
-    String authorizationHeader = request.getHeader("Authorization");
+    String authorizationHeader = request.getHeader("access-token");
 
     // Bearer 토큰이 헤더에 있는지 확인
     if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
@@ -105,7 +105,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
     UserEntity user = UserEntity.builder()
         .userId(userId)
-        .role(UserRole.USER)
+        .role(role)
         .build();
 
     UserDetailsDTO userDetails = new UserDetailsDTO(user);
