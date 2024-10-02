@@ -31,6 +31,7 @@ public class ScrapTenThousandRecipeServiceImpl implements ScrapTenThousandRecipe
             .ingredients(scrapResult.getIngredients())
             .thumbnail(scrapResult.getThumbnail())
             .rating(scrapResult.getRating())
+            .crReviewCount(scrapResult.getReviewCount())
             .crManualContent(scrapResult.getManualContents())
             .crManualPicture(scrapResult.getManualPictures())
             .build())
