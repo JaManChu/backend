@@ -38,13 +38,16 @@ public class JwtFilter extends OncePerRequestFilter {
       return;
     }
 
-    String accessToken = request.getHeader("access-token");
+    String authorizationHeader = request.getHeader("access-token");
 
-    if (accessToken == null) {
-      logger.info("Access token is null");
+    // Bearer 토큰이 헤더에 있는지 확인
+    if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+      logger.info("Authorization header is missing or doesn't start with Bearer");
       filterChain.doFilter(request, response);
       return;
     }
+
+    String accessToken = authorizationHeader.substring(7);
 
     try {
       // access 토큰이 만료가 되지 않은 경우
@@ -60,7 +63,7 @@ public class JwtFilter extends OncePerRequestFilter {
   }
 
   private void setAuthenticationFromToken(HttpServletResponse response, String token) {
-    response.addHeader("access-token", token);
+    response.addHeader("access-token", "Bearer " + token);
 
     Authentication authToken = getAuthToken(token);
     SecurityContextHolder.getContext().setAuthentication(authToken);
@@ -102,7 +105,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
     UserEntity user = UserEntity.builder()
         .userId(userId)
-        .role(UserRole.USER)
+        .role(role)
         .build();
 
     UserDetailsDTO userDetails = new UserDetailsDTO(user);
@@ -127,10 +130,9 @@ public class JwtFilter extends OncePerRequestFilter {
 
   private boolean isExcludedPath(String requestURI) {
     return requestURI.equals("/")
-        || requestURI.equals("/login")
-        || requestURI.equals("/api/v1/user/signup")
-        || requestURI.equals("/oauth2/authorization/kakao")
-        || requestURI.equals("/login/oauth2/code/kakao");
+        || requestURI.equals("/api/v1/user/login")
+        || requestURI.equals("/api/v1/user/signup");
   }
 }
+
 
