@@ -87,7 +87,7 @@ class LoginFilterTest {
     loginFilter.successfulAuthentication(request, response, chain, authentication);
 
     // then
-    verify(response).addHeader("access", accessToken);
+    verify(response).addHeader("access-token", "Bearer " + accessToken);
     verify(response).addCookie(any(Cookie.class));
     verify(response).setStatus(HttpServletResponse.SC_OK);
     verify(response).setContentType("application/json");
@@ -152,4 +152,5 @@ class LoginFilterTest {
     verify(writer).write("비밀번호를 다시 입력해주세요");
   }
 }
+
 
