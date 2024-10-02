@@ -53,7 +53,7 @@ public class SecurityConfig {
         .authorizeHttpRequests(auth -> auth
             //swagger ui 허용
             .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-            .requestMatchers("/v3/api-docs/**",
+            .requestMatchers("/v3/api-docs/**", "/scrape-recipes",
                 "/swagger-ui/**",
                 "/swagger-ui.html",
                 "/swagger-resources/**").permitAll()
