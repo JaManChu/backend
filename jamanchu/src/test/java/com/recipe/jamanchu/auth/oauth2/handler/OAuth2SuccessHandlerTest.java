@@ -2,6 +2,7 @@ package com.recipe.jamanchu.auth.oauth2.handler;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -27,6 +28,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.web.RedirectStrategy;
 
 @ExtendWith(MockitoExtension.class)
 class OAuth2SuccessHandlerTest {
@@ -51,6 +53,9 @@ class OAuth2SuccessHandlerTest {
 
   @Mock
   private OAuth2User oAuth2User;
+
+  @Mock
+  private RedirectStrategy redirectStrategy;
 
   @InjectMocks
   private OAuth2SuccessHandler oAuth2SuccessHandler;
@@ -98,19 +103,15 @@ class OAuth2SuccessHandlerTest {
     when(jwtUtil.createJwt("access", user.getUserId(), user.getRole())).thenReturn(accessToken);
     when(jwtUtil.createJwt("refresh", user.getUserId(), user.getRole())).thenReturn(refreshToken);
 
-    PrintWriter writer = mock(PrintWriter.class);
-    when(response.getWriter()).thenReturn(writer);
+    oAuth2SuccessHandler.setRedirectStrategy(redirectStrategy);
 
     // when
     oAuth2SuccessHandler.onAuthenticationSuccess(request, response, authentication);
 
     // then
-    verify(response).addHeader("access-token", accessToken);
+    verify(response).addHeader("access-token", "Bearer " + accessToken);
     verify(response).addCookie(any(Cookie.class));
-    verify(response).setStatus(HttpServletResponse.SC_OK);
-    verify(response).setContentType("application/json");
-    verify(response).setCharacterEncoding("UTF-8");
-    verify(writer).write("로그인 성공");
+    verify(redirectStrategy).sendRedirect(eq(request), eq(response), anyString());
   }
 
   @Test
@@ -152,18 +153,14 @@ class OAuth2SuccessHandlerTest {
     when(jwtUtil.createJwt("access", user.getUserId(), user.getRole())).thenReturn(accessToken);
     when(jwtUtil.createJwt("refresh", user.getUserId(), user.getRole())).thenReturn(refreshToken);
 
-    PrintWriter writer = mock(PrintWriter.class);
-    when(response.getWriter()).thenReturn(writer);
+    oAuth2SuccessHandler.setRedirectStrategy(redirectStrategy);
 
     // when
     oAuth2SuccessHandler.onAuthenticationSuccess(request, response, authentication);
 
     // then
-    verify(response).addHeader("access-token", accessToken);
+    verify(response).addHeader("access-token", "Bearer " + accessToken);
     verify(response).addCookie(any(Cookie.class));
-    verify(response).setStatus(HttpServletResponse.SC_OK);
-    verify(response).setContentType("application/json");
-    verify(response).setCharacterEncoding("UTF-8");
-    verify(writer).write("로그인 성공");
+    verify(redirectStrategy).sendRedirect(eq(request), eq(response), anyString());
   }
 }
