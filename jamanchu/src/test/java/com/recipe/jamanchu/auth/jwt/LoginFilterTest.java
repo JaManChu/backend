@@ -87,7 +87,7 @@ class LoginFilterTest {
     loginFilter.successfulAuthentication(request, response, chain, authentication);
 
     // then
-    verify(response).addHeader("access", accessToken);
+    verify(response).addHeader("access-token", "Bearer " + accessToken);
     verify(response).addCookie(any(Cookie.class));
     verify(response).setStatus(HttpServletResponse.SC_OK);
     verify(response).setContentType("application/json");
