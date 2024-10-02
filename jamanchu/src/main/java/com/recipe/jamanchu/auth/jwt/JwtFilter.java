@@ -34,6 +34,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
     // 인증이 필요 없는 경로
     if (isExcludedPath(requestURI)) {
+      logger.info("requestURI -> {}", requestURI);
       filterChain.doFilter(request, response);
       return;
     }
@@ -131,7 +132,8 @@ public class JwtFilter extends OncePerRequestFilter {
   private boolean isExcludedPath(String requestURI) {
     return requestURI.equals("/")
         || requestURI.equals("/api/v1/user/login")
-        || requestURI.equals("/api/v1/user/signup");
+        || requestURI.equals("/api/v1/user/signup")
+        || requestURI.equals("/api/v1/user/test");
   }
 }
 
