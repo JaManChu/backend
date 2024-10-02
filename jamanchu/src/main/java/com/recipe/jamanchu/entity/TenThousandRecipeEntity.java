@@ -49,6 +49,9 @@ public class TenThousandRecipeEntity {
   @Column(name = "cr_rating")
   private Double rating;
 
+  @Column(name = "cr_review_count")
+  private Integer crReviewCount;
+
   @Column(name = "cr_thumbnail")
   private String thumbnail;
 

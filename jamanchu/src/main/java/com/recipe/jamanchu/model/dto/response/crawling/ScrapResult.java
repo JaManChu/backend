@@ -16,6 +16,7 @@ public class ScrapResult {
   private CookingTimeType cookTime;
   private String thumbnail;
   private Double rating;
+  private Integer reviewCount;
   private String ingredients;
   private String manualContents;
   private String manualPictures;

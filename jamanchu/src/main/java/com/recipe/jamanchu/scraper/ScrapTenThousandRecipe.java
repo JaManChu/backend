@@ -48,7 +48,7 @@ public class ScrapTenThousandRecipe {
             recipeBatch.add(result);
           }
 
-          if (recipeBatch.size() >= 40) {  // 레시피 40개씩 저장
+          if (recipeBatch.size() >= 1000) {  // 레시피 1000개씩 저장
             scrapRecipeService.saveCrawlRecipe(recipeBatch);
             recipeBatch.clear();
           }
@@ -96,7 +96,7 @@ public class ScrapTenThousandRecipe {
 
       // averageRating 계산
       List<Integer> reviewsRating = scrapeReviewsRating(recipeDoc);
-
+      int reviewCount = reviewsRating.size();
       double averageRating = reviewsRating.stream()
           .mapToInt(Integer::intValue)
           .average()
@@ -136,7 +136,7 @@ public class ScrapTenThousandRecipe {
       }
 
       // ScrapResult 객체 반환
-      return new ScrapResult(title, authorName, description, levelType, cookingTimeType, thumbnail, averageRating, ingredients.toString(),
+      return new ScrapResult(title, authorName, description, levelType, cookingTimeType, thumbnail, averageRating, reviewCount, ingredients.toString(),
           manualContents.toString(), manualPictures.toString());
 
     } catch (IOException e) {
