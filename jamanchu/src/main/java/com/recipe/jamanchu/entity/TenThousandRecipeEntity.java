@@ -56,9 +56,9 @@ public class TenThousandRecipeEntity {
   private String ingredients;
 
   @NotNull
-  @Column(name = "tr_mn_content", columnDefinition = "TEXT")
-  private String crManualContent;
+  @Column(name = "tr_mn_contents", columnDefinition = "TEXT")
+  private String crManualContents;
 
-  @Column(name = "tr_mn_picture", columnDefinition = "TEXT")
-  private String crManualPicture;
+  @Column(name = "tr_mn_pictures", columnDefinition = "TEXT")
+  private String crManualPictures;
 }

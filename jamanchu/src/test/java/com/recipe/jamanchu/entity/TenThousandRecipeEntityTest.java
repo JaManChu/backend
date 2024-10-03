@@ -53,7 +53,7 @@ class TenThousandRecipeEntityTest {
     assertEquals(4.50, savedRecipe.getRating());
     assertEquals("thumbnail", savedRecipe.getThumbnail());
     assertEquals("ingredients", savedRecipe.getIngredients());
-    assertEquals("contents", savedRecipe.getCrManualContent());
-    assertEquals("pictures", savedRecipe.getCrManualPicture());
+    assertEquals("contents", savedRecipe.getCrManualContents());
+    assertEquals("pictures", savedRecipe.getCrManualPictures());
   }
 }
