@@ -8,6 +8,7 @@ import com.recipe.jamanchu.entity.UserEntity;
 import com.recipe.jamanchu.exceptions.exception.DuplicatedEmailException;
 import com.recipe.jamanchu.exceptions.exception.DuplicatedNicknameException;
 import com.recipe.jamanchu.exceptions.exception.SocialAccountException;
+import com.recipe.jamanchu.exceptions.exception.UserNotFoundException;
 import com.recipe.jamanchu.model.dto.request.auth.SignupDTO;
 import com.recipe.jamanchu.model.dto.request.auth.UserUpdateDTO;
 import com.recipe.jamanchu.model.type.ResultCode;
@@ -57,7 +58,6 @@ class UserServiceImplTest {
 
     // given
     SignupDTO signup = new SignupDTO("dlrkdhsoff@gmail.com", "1234", "nickname");
-    ResultCode result = userServiceimpl.signup(signup);
 
     SignupDTO newUser = new SignupDTO("dlrkdhsoff@gmail.com", "1234", "nickname");
     when(userRepository.existsByEmail(signup.getEmail())).thenReturn(true);
@@ -125,5 +125,17 @@ class UserServiceImplTest {
 
     // when then
     assertThrows(SocialAccountException.class, () -> userServiceimpl.updateUserInfo(userUpdateDTO));
+  }
+
+  @Test
+  @DisplayName("회원정보 수정 실패 : userId가 존재하지 않은 경우")
+  void updateUserInfo_NotFoundUser() {
+    // given
+    UserUpdateDTO userUpdateDTO = new UserUpdateDTO(1L, "newPassword", "newNickName");
+
+    when(userRepository.findByUserId(1L)).thenReturn(Optional.empty());
+
+    // when then
+    assertThrows(UserNotFoundException.class, () -> userServiceimpl.updateUserInfo(userUpdateDTO));
   }
 }
