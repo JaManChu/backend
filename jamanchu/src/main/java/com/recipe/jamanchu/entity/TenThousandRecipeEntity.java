@@ -35,9 +35,6 @@ public class TenThousandRecipeEntity {
   @Column(name = "cr_author")
   private String authorName;
 
-  @Column(name = "cr_description", columnDefinition = "TEXT")
-  private String description;
-
   @Enumerated(EnumType.STRING)
   @Column(name = "cr_level")
   private LevelType levelType;

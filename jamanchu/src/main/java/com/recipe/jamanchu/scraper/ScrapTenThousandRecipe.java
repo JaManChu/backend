@@ -80,9 +80,6 @@ public class ScrapTenThousandRecipe {
       // authorName 추출
       String authorName = getText(recipeDoc, ".user_info2_name");
 
-      // description 추출
-      String description = getText(recipeDoc, ".view2_summary_in");
-
       // level 추출
       String level = getText(recipeDoc, ".view2_summary_info3");
       LevelType levelType = LevelType.fromString(level);
@@ -136,7 +133,7 @@ public class ScrapTenThousandRecipe {
       }
 
       // ScrapResult 객체 반환
-      return new ScrapResult(title, authorName, description, levelType, cookingTimeType, thumbnail, averageRating, reviewCount, ingredients.toString(),
+      return new ScrapResult(title, authorName, levelType, cookingTimeType, thumbnail, averageRating, reviewCount, ingredients.toString(),
           manualContents.toString(), manualPictures.toString());
 
     } catch (IOException e) {
