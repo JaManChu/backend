@@ -1,6 +1,7 @@
 package com.recipe.jamanchu.controller;
 
 import com.recipe.jamanchu.model.dto.request.auth.SignupDTO;
+import com.recipe.jamanchu.model.dto.request.auth.UserUpdateDTO;
 import com.recipe.jamanchu.model.type.ResultCode;
 import com.recipe.jamanchu.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -24,7 +26,7 @@ public class UserController {
   @PostMapping("/signup")
   public ResponseEntity<ResultCode> signup(SignupDTO signupDTO) {
 
-    return ResponseEntity.ok(userService.signup(signupDTO));
+    return ResponseEntity.ok().body(userService.signup(signupDTO));
   }
 
   @GetMapping("/test")
@@ -37,5 +39,11 @@ public class UserController {
     log.info("refresh : {}", refresh);
 
     return ResponseEntity.ok().body("로그인 성공");
+  }
+
+  @PutMapping
+  public ResponseEntity<ResultCode> updateUser(UserUpdateDTO userUpdateDTO) {
+
+    return ResponseEntity.ok().body(userService.updateUserInfo(userUpdateDTO));
   }
 }
