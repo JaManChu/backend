@@ -9,6 +9,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,12 +28,15 @@ public class UserEntity extends BaseTimeEntity {
   @Column(name = "usr_id")
   private Long userId;
 
+  @NotNull
   @Column(name = "usr_email")
   private String email;
 
+  @NotNull
   @Column(name = "usr_password")
   private String password;
 
+  @NotNull
   @Column(name = "usr_nickname")
   private String nickname;
 
@@ -42,6 +46,7 @@ public class UserEntity extends BaseTimeEntity {
   @Column(name = "usr_provider_sub")
   private String providerId;
 
+  @NotNull
   @Enumerated(EnumType.STRING)
   private UserRole role;
 }
