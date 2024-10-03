@@ -2,9 +2,7 @@ package com.recipe.jamanchu.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
 
 import com.recipe.jamanchu.entity.UserEntity;
 import com.recipe.jamanchu.exceptions.exception.DuplicatedEmailException;
@@ -15,14 +13,12 @@ import com.recipe.jamanchu.model.dto.request.auth.UserUpdateDTO;
 import com.recipe.jamanchu.model.type.ResultCode;
 import com.recipe.jamanchu.model.type.UserRole;
 import com.recipe.jamanchu.repository.UserRepository;
-import com.recipe.jamanchu.validator.ValidateUser;
-import org.junit.jupiter.api.BeforeEach;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
@@ -37,9 +33,6 @@ class UserServiceImplTest {
 
   @InjectMocks
   private UserServiceImpl userServiceimpl;
-
-  @Mock
-  private ValidateUser validateUser;
 
   @Test
   @DisplayName("회원가입 성공")
@@ -103,7 +96,7 @@ class UserServiceImplTest {
         .provider(null)
         .build();
 
-    when(validateUser.validateUserId(1L)).thenReturn(userEntity);
+    when(userRepository.findByUserId(1L)).thenReturn(Optional.of(userEntity));
     when(passwordEncoder.encode("newPassword")).thenReturn("encodedNewPassword");
 
     // 테스트 실행
@@ -128,7 +121,7 @@ class UserServiceImplTest {
         .provider("KAKAO")
         .build();
 
-    when(validateUser.validateUserId(1L)).thenReturn(userEntity);
+    when(userRepository.findByUserId(1L)).thenReturn(Optional.of(userEntity));
 
     // when then
     assertThrows(SocialAccountException.class, () -> userServiceimpl.updateUserInfo(userUpdateDTO));
