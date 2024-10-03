@@ -1,8 +1,7 @@
 package com.recipe.jamanchu.service.impl;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import com.recipe.jamanchu.auth.jwt.JwtUtil;
@@ -17,11 +16,9 @@ import com.recipe.jamanchu.model.type.UserRole;
 import com.recipe.jamanchu.repository.CommentRepository;
 import com.recipe.jamanchu.repository.RecipeRepository;
 import com.recipe.jamanchu.repository.UserRepository;
-import com.recipe.jamanchu.service.CommentsService;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Optional;
-import org.apache.catalina.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -73,12 +70,6 @@ class CommentsServiceImplTest {
         .id(recipeId)
         .build();
     CommentsDTO requestDTO = new CommentsDTO(recipeId, "댓글 내용", 5.0);
-    CommentEntity userComment = CommentEntity.builder()
-        .user(user)
-        .recipe(recipe)
-        .commentContent("댓글 내용")
-        .commentLike(5.0)
-        .build();
 
     // when
     when(jwtUtil.getUserId(request.getHeader("Authorization"))).thenReturn(userId);
@@ -87,6 +78,7 @@ class CommentsServiceImplTest {
 
     // then
     assertEquals("댓글 작성 성공!", commentService.writeComment(request, requestDTO).getMessage());
+
   }
 
   @DisplayName("댓글 수정 테스트")
