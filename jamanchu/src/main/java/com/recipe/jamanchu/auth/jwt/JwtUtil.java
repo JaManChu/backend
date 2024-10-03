@@ -29,11 +29,11 @@ public class JwtUtil {
         .get("userId", Long.class);
   }
 
-  public UserRole getRole(String token) {
+  public String getRole(String token) {
     return Jwts.parser().verifyWith(secretKey).build()
         .parseSignedClaims(token)
         .getPayload()
-        .get("role", UserRole.class);
+        .get("role", String.class);
   }
 
   public String getType(String token) {
@@ -59,7 +59,7 @@ public class JwtUtil {
     return Jwts.builder()
         .claim("type", type)
         .claim("userId", userId)
-        .claim("role", role)
+        .claim("role", role.name())
         .notBefore(new Date(System.currentTimeMillis()))
         .expiration(new Date(System.currentTimeMillis() + expirationTime))
         .signWith(secretKey)
