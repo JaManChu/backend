@@ -8,9 +8,11 @@ import com.recipe.jamanchu.exceptions.exception.SocialAccountException;
 import com.recipe.jamanchu.exceptions.exception.UserNotFoundException;
 import com.recipe.jamanchu.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class UserAccessHandler {
@@ -21,12 +23,16 @@ public class UserAccessHandler {
 
   // userId 값과 일치하는 회원 정보 반환
   public UserEntity findByUserId(Long userId) {
+
+    log.info("userId : {}", userId);
     return userRepository.findByUserId(userId)
         .orElseThrow(UserNotFoundException::new);
   }
 
   // email 값과 일치하는 회원 정보 반환
   public UserEntity findByEmail(String email) {
+
+    log.info("email : {}", email);
     return userRepository.findByEmail(email)
         .orElseThrow(UserNotFoundException::new);
   }
@@ -48,6 +54,8 @@ public class UserAccessHandler {
   public void existsByEmail(String email){
 
     if (userRepository.existsByEmail(email)) {
+
+      log.info("DuplicatedEmail -> email : {}", email);
       throw new DuplicatedEmailException();
     }
   }
@@ -56,6 +64,8 @@ public class UserAccessHandler {
   public void existsByNickname(String nickname){
 
     if (userRepository.existsByNickname(nickname)) {
+
+      log.info("DuplicatedNickname -> nickname : {}", nickname);
       throw new DuplicatedNicknameException();
     }
   }
@@ -63,6 +73,8 @@ public class UserAccessHandler {
   // 소셜 계정 정보 체크
   public void isSocialUser(String provider) {
     if (provider != null) {
+
+      log.info("SocialAccount : {}", provider);
       throw new SocialAccountException();
     }
   }
@@ -70,5 +82,6 @@ public class UserAccessHandler {
   // 회원 정보 저장
   public void saveUser(UserEntity user) {
     userRepository.save(user);
+    log.info("저장 성공");
   }
 }

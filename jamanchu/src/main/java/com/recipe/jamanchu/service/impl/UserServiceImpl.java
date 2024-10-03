@@ -14,6 +14,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -24,6 +25,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
   private final UserAccessHandler userAccessHandler;
 
   @Override
+  @Transactional
   public ResultCode signup(SignupDTO signupDTO) {
     // 이메일 중복 체크
     userAccessHandler.existsByEmail(signupDTO.getEmail());
@@ -51,6 +53,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
   }
 
   @Override
+  @Transactional
   public ResultCode updateUserInfo(UserUpdateDTO userUpdateDTO) {
     UserEntity user = userAccessHandler.findByUserId(userUpdateDTO.getUserId());
 
