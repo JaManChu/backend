@@ -1,6 +1,7 @@
 package com.recipe.jamanchu.service.impl;
 
 import com.recipe.jamanchu.auth.jwt.JwtUtil;
+import com.recipe.jamanchu.component.UserAccessHandler;
 import com.recipe.jamanchu.entity.CommentEntity;
 import com.recipe.jamanchu.entity.RecipeEntity;
 import com.recipe.jamanchu.entity.UserEntity;
@@ -32,7 +33,7 @@ public class CommentsServiceImpl implements CommentsService {
 
   private final CommentRepository commentRepository;
   private final RecipeRepository recipeRepository;
-  private final UserRepository userRepository;
+  private final UserAccessHandler userAccessHandler;
 
   private final JwtUtil jwtUtil;
 
@@ -41,11 +42,10 @@ public class CommentsServiceImpl implements CommentsService {
   public ResultResponse writeComment(HttpServletRequest request, CommentsDTO commentsDTO) {
 
     // Token 검사
-    Long userId = jwtUtil.getUserId(request.getHeader("Authorization"));
+    Long userId = jwtUtil.getUserId(request.getHeader("access-token"));
 
     // 유저 존재 검사
-    UserEntity user = userRepository.findById(userId)
-        .orElseThrow(UserNotFoundException::new);
+    UserEntity user = userAccessHandler.findByUserId(userId);
 
     Long recipeId = commentsDTO.getRecipeId();
 
@@ -70,11 +70,10 @@ public class CommentsServiceImpl implements CommentsService {
   public ResultResponse updateComment(HttpServletRequest request, CommentsUpdateDTO commentsUpdateDTO) {
 
     // Token 검사
-    Long userId = jwtUtil.getUserId(request.getHeader("Authorization"));
+    Long userId = jwtUtil.getUserId(request.getHeader("access-token"));
 
     // 유저 존재 검사
-    UserEntity user = userRepository.findById(userId)
-        .orElseThrow(UserNotFoundException::new);
+    UserEntity user = userAccessHandler.findByUserId(userId);
 
     // 댓글 존재 검사
     Long commentId = commentsUpdateDTO.getCommentsId();
@@ -97,11 +96,10 @@ public class CommentsServiceImpl implements CommentsService {
   public ResultResponse deleteComment(HttpServletRequest request, CommentsDeleteDTO commentsDeleteDTO) {
 
     // Token 검사
-    Long userId = jwtUtil.getUserId(request.getHeader("Authorization"));
+    Long userId = jwtUtil.getUserId(request.getHeader("access-token"));
 
     // 유저 존재 검사
-    UserEntity user = userRepository.findById(userId)
-        .orElseThrow(UserNotFoundException::new);
+    UserEntity user = userAccessHandler.findByUserId(userId);
 
     // 댓글 존재 검사
     Long commentId = commentsDeleteDTO.getCommentId();
