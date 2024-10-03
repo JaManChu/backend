@@ -102,7 +102,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
   private Authentication getAuthToken(String token) {
     Long userId = jwtUtil.getUserId(token);
-    UserRole role = jwtUtil.getRole(token);
+    UserRole role = UserRole.valueOf(jwtUtil.getRole(token));
 
     UserEntity user = UserEntity.builder()
         .userId(userId)
@@ -116,7 +116,7 @@ public class JwtFilter extends OncePerRequestFilter {
   // access 토큰 재발급
   private String createNewAccessToken(String refreshToken) {
     Long userId = jwtUtil.getUserId(refreshToken);
-    UserRole role = jwtUtil.getRole(refreshToken);
+    UserRole role = UserRole.valueOf(jwtUtil.getRole(refreshToken));
 
     return jwtUtil.createJwt("access", userId, role);
   }
