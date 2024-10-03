@@ -2,7 +2,7 @@ package com.recipe.jamanchu.controller;
 
 import com.recipe.jamanchu.model.dto.request.auth.SignupDTO;
 import com.recipe.jamanchu.model.dto.request.auth.UserUpdateDTO;
-import com.recipe.jamanchu.model.type.ResultCode;
+import com.recipe.jamanchu.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -24,9 +24,10 @@ public class UserController {
   private final UserService userService;
 
   @PostMapping("/signup")
-  public ResponseEntity<ResultCode> signup(SignupDTO signupDTO) {
+  public ResponseEntity<ResultResponse> signup(SignupDTO signupDTO) {
 
-    return ResponseEntity.ok().body(userService.signup(signupDTO));
+    return ResponseEntity.ok()
+        .body(ResultResponse.of(userService.signup(signupDTO)));
   }
 
   @GetMapping("/test")
@@ -42,8 +43,9 @@ public class UserController {
   }
 
   @PutMapping
-  public ResponseEntity<ResultCode> updateUser(UserUpdateDTO userUpdateDTO) {
+  public ResponseEntity<ResultResponse> updateUser(UserUpdateDTO userUpdateDTO) {
 
-    return ResponseEntity.ok().body(userService.updateUserInfo(userUpdateDTO));
+    return ResponseEntity.ok()
+        .body(ResultResponse.of(userService.updateUserInfo(userUpdateDTO)));
   }
 }
