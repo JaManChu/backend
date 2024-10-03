@@ -2,8 +2,11 @@ package com.recipe.jamanchu.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
+import com.recipe.jamanchu.component.UserAccessHandler;
 import com.recipe.jamanchu.entity.UserEntity;
 import com.recipe.jamanchu.exceptions.exception.DuplicatedEmailException;
 import com.recipe.jamanchu.exceptions.exception.DuplicatedNicknameException;
@@ -13,8 +16,7 @@ import com.recipe.jamanchu.model.dto.request.auth.SignupDTO;
 import com.recipe.jamanchu.model.dto.request.auth.UserUpdateDTO;
 import com.recipe.jamanchu.model.type.ResultCode;
 import com.recipe.jamanchu.model.type.UserRole;
-import com.recipe.jamanchu.repository.UserRepository;
-import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,7 +29,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 class UserServiceImplTest {
 
   @Mock
-  private UserRepository userRepository;
+  private UserAccessHandler userAccessHandler;
 
   @Mock
   private BCryptPasswordEncoder passwordEncoder;
@@ -35,107 +37,123 @@ class UserServiceImplTest {
   @InjectMocks
   private UserServiceImpl userServiceimpl;
 
+  private static final String EMAIL = "test@email.com";
+  private static final String NICKNAME = "nickname";
+  private static final String PASSWORD = "1234";
+  private static final String PROVIDER = "kakao";
+  private static final String NEW_PASSWORD = "newPassword";
+  private static final String NEW_NICKNAME = "newNickName";
+
+  private SignupDTO signup;
+  private UserUpdateDTO userUpdateDTO;
+  private UserEntity user;
+  private UserEntity kakaoUser;
+
+  @BeforeEach
+  void setUp() {
+    signup = new SignupDTO(EMAIL, PASSWORD, NICKNAME);
+    userUpdateDTO = new UserUpdateDTO(1L, NEW_PASSWORD, NEW_NICKNAME);
+
+    // 일반 회원
+    user = UserEntity.builder()
+        .userId(1L)
+        .email(EMAIL)
+        .nickname(NICKNAME)
+        .role(UserRole.USER)
+        .password(PASSWORD)
+        .provider(null)
+        .build();
+
+    // 카카오로 로그인한 회원
+    kakaoUser = UserEntity.builder()
+        .userId(1L)
+        .email(EMAIL)
+        .nickname(NICKNAME)
+        .role(UserRole.USER)
+        .password(PASSWORD)
+        .provider(PROVIDER)
+        .build();
+  }
+
   @Test
   @DisplayName("회원가입 성공")
-  void signup() {
-
+  void signup_Success() {
     // given
-    SignupDTO signup = new SignupDTO("dlrkdhsoff@gmail.com", "1234", "nickname");
-
-    when(userRepository.existsByEmail(signup.getEmail())).thenReturn(false);
-    when(userRepository.existsByNickname(signup.getNickname())).thenReturn(false);
+    doNothing().when(userAccessHandler).existsByEmail(signup.getEmail());
+    doNothing().when(userAccessHandler).existsByNickname(signup.getNickname());
 
     // when
     ResultCode result = userServiceimpl.signup(signup);
 
     // then
-    assertEquals(result, ResultCode.SUCCESS_SIGNUP);
+    assertEquals(ResultCode.SUCCESS_SIGNUP, result);
   }
 
   @Test
   @DisplayName("회원가입 실패 : 중복된 이메일")
-  void signupDuplicationEmail() {
-
+  void signup_DuplicationEmail() {
     // given
-    SignupDTO signup = new SignupDTO("dlrkdhsoff@gmail.com", "1234", "nickname");
-
-    SignupDTO newUser = new SignupDTO("dlrkdhsoff@gmail.com", "1234", "nickname");
-    when(userRepository.existsByEmail(signup.getEmail())).thenReturn(true);
+    doThrow(new DuplicatedEmailException()).when(userAccessHandler).existsByEmail(signup.getEmail());
 
     // when then
-    assertThrows(DuplicatedEmailException.class, () -> userServiceimpl.signup(newUser));
+    assertThrows(DuplicatedEmailException.class, () -> userServiceimpl.signup(signup));
   }
 
   @Test
   @DisplayName("회원가입 실패 : 중복된 닉네임")
-  void signupDuplicationNickname() {
-
+  void signup_DuplicationNickname() {
     // given
-    SignupDTO signup = new SignupDTO("dlrkdhsoff@gmail.com", "1234", "nickname");
-    ResultCode result = userServiceimpl.signup(signup);
-
-    SignupDTO newUser = new SignupDTO("newEmail@gmail.com", "1234", "nickname");
-    when(userRepository.existsByNickname(signup.getNickname())).thenReturn(true);
+    doThrow(new DuplicatedNicknameException()).when(userAccessHandler).existsByNickname(signup.getNickname());
 
     // when then
-    assertThrows(DuplicatedNicknameException.class, () -> userServiceimpl.signup(newUser));
+    assertThrows(DuplicatedNicknameException.class, () -> userServiceimpl.signup(signup));
   }
 
   @Test
   @DisplayName("회원정보 수정 성공")
   void updateUserInfo_Success() {
     // given
-    UserUpdateDTO userUpdateDTO = new UserUpdateDTO(1L, "newPassword", "newNickName");
+    when(userAccessHandler.findByUserId(1L)).thenReturn(user);
+    doNothing().when(userAccessHandler).isSocialUser(user.getProvider());
+    doNothing().when(userAccessHandler).existsByNickname(userUpdateDTO.getNickname());
 
-    UserEntity userEntity = UserEntity.builder()
-        .userId(1L)
-        .email("test@example.com")
-        .nickname("TestUser")
-        .role(UserRole.USER)
-        .password("password")
-        .provider(null)
-        .build();
-
-    when(userRepository.findByUserId(1L)).thenReturn(Optional.of(userEntity));
-    when(passwordEncoder.encode("newPassword")).thenReturn("encodedNewPassword");
-
-    // 테스트 실행
+    // when
     ResultCode result = userServiceimpl.updateUserInfo(userUpdateDTO);
 
-    // 검증
+    // then
     assertEquals(ResultCode.SUCCESS_UPDATE_USER_INFO, result);
-  }
-
-  @Test
-  @DisplayName("회원정보 수정 실패 : OAuth 회원가입을 한 회원")
-  void updateUserInfo_SocialAccountException() {
-    // given
-    UserUpdateDTO userUpdateDTO = new UserUpdateDTO(1L, "newPassword", "newNickName");
-
-    UserEntity userEntity = UserEntity.builder()
-        .userId(1L)
-        .email("test@example.com")
-        .nickname("TestUser")
-        .role(UserRole.USER)
-        .password("password")
-        .provider("KAKAO")
-        .build();
-
-    when(userRepository.findByUserId(1L)).thenReturn(Optional.of(userEntity));
-
-    // when then
-    assertThrows(SocialAccountException.class, () -> userServiceimpl.updateUserInfo(userUpdateDTO));
   }
 
   @Test
   @DisplayName("회원정보 수정 실패 : userId가 존재하지 않은 경우")
   void updateUserInfo_NotFoundUser() {
     // given
-    UserUpdateDTO userUpdateDTO = new UserUpdateDTO(1L, "newPassword", "newNickName");
-
-    when(userRepository.findByUserId(1L)).thenReturn(Optional.empty());
+    when(userAccessHandler.findByUserId(1L)).thenThrow(new UserNotFoundException());
 
     // when then
     assertThrows(UserNotFoundException.class, () -> userServiceimpl.updateUserInfo(userUpdateDTO));
+  }
+
+  @Test
+  @DisplayName("회원정보 수정 실패 : 카카오로 로그인을 한 회원")
+  void updateUserInfo_SocialAccountException() {
+    // given
+    when(userAccessHandler.findByUserId(1L)).thenReturn(kakaoUser);
+    doThrow(new SocialAccountException()).when(userAccessHandler).isSocialUser(kakaoUser.getProvider());
+
+    // when then
+    assertThrows(SocialAccountException.class, () -> userServiceimpl.updateUserInfo(userUpdateDTO));
+  }
+
+  @Test
+  @DisplayName("회원정보 수정 실패 : 닉네임이 중복인 경우")
+  void updateUserInfo_DuplicationNickname() {
+    // given
+    when(userAccessHandler.findByUserId(1L)).thenReturn(user);
+    doNothing().when(userAccessHandler).isSocialUser(user.getProvider());
+    doThrow(new DuplicatedNicknameException()).when(userAccessHandler).existsByNickname(userUpdateDTO.getNickname());
+
+    // when then
+    assertThrows(DuplicatedNicknameException.class, () -> userServiceimpl.updateUserInfo(userUpdateDTO));
   }
 }
