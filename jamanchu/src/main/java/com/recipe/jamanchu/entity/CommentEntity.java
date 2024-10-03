@@ -44,4 +44,9 @@ public class CommentEntity extends BaseTimeEntity{
   @NotNull
   @Column(name = "cmt_like", columnDefinition = "double default 1.0")
   private Double commentLike;
+
+  public void updateComment(String commentContent, Double commentLike) {
+    this.commentContent = commentContent;
+    this.commentLike = commentLike;
+  }
 }
