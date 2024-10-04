@@ -65,7 +65,6 @@ public class RecipeDivideServiceImpl implements RecipeDivideService {
     }
   }
 
-  @Transactional
   public RecipeEntity saveRecipeData(TenThousandRecipeEntity scrapedRecipe) {
     // 임의의 관리자 이메일을 가져오도록 설정
     UserEntity user = userRepository.findByEmail("user@example.com")
@@ -84,7 +83,6 @@ public class RecipeDivideServiceImpl implements RecipeDivideService {
     return recipe;
   }
 
-  @Transactional
   public void saveRecipeRatingData(RecipeEntity recipe, TenThousandRecipeEntity scrapedRecipe) {
     RecipeRatingEntity rating = RecipeRatingEntity.builder()
         .recipe(recipe)
@@ -95,7 +93,6 @@ public class RecipeDivideServiceImpl implements RecipeDivideService {
     recipeRatingRepository.save(rating);
   }
 
-  @Transactional
   public void saveManualData(RecipeEntity recipe, TenThousandRecipeEntity scrapedRecipe) {
     String[] contents = scrapedRecipe.getCrManualContents().split("\\$%\\^");
     String[] pictures;
@@ -115,7 +112,6 @@ public class RecipeDivideServiceImpl implements RecipeDivideService {
     }
   }
 
-  @Transactional
   public void saveIngredientDetails(RecipeEntity recipe, TenThousandRecipeEntity scrapedRecipe) {
     String[] ingredients = scrapedRecipe.getIngredients().split(",");  // 재료 분리 로직
     for (String ingredient : ingredients) {
