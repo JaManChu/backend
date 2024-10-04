@@ -42,14 +42,14 @@ class TenThousandRecipeEntityTest {
     TenThousandRecipeEntity savedRecipe = tenThousandRecipeRepository.save(recipeEntity);
 
     // then
-    assertEquals(1, savedRecipe.getCrawledRecipeId());
-    assertEquals("TenThousandRecipeName", savedRecipe.getName());
-    assertEquals(LevelType.LOW, savedRecipe.getLevelType());
-    assertEquals(CookingTimeType.TEN_MINUTES, savedRecipe.getCookingTimeType());
-    assertEquals(4.50, savedRecipe.getRating());
-    assertEquals("thumbnail", savedRecipe.getThumbnail());
-    assertEquals("ingredients", savedRecipe.getIngredients());
-    assertEquals("contents", savedRecipe.getCrManualContents());
-    assertEquals("pictures", savedRecipe.getCrManualPictures());
+    assertEquals(recipeEntity.getCrawledRecipeId(), savedRecipe.getCrawledRecipeId());
+    assertEquals(recipeEntity.getName(), savedRecipe.getName());
+    assertEquals(recipeEntity.getLevelType(), savedRecipe.getLevelType());
+    assertEquals(recipeEntity.getCookingTimeType(), savedRecipe.getCookingTimeType());
+    assertEquals(recipeEntity.getRating(), savedRecipe.getRating());
+    assertEquals(recipeEntity.getThumbnail(), savedRecipe.getThumbnail());
+    assertEquals(recipeEntity.getIngredients(), savedRecipe.getIngredients());
+    assertEquals(recipeEntity.getCrManualContents(), savedRecipe.getCrManualContents());
+    assertEquals(recipeEntity.getCrManualPictures(), savedRecipe.getCrManualPictures());
   }
 }
