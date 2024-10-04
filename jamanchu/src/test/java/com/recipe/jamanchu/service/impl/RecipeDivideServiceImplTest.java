@@ -13,6 +13,7 @@ import com.recipe.jamanchu.entity.RecipeEntity;
 import com.recipe.jamanchu.entity.RecipeRatingEntity;
 import com.recipe.jamanchu.entity.TenThousandRecipeEntity;
 import com.recipe.jamanchu.entity.UserEntity;
+import com.recipe.jamanchu.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.model.type.CookingTimeType;
 import com.recipe.jamanchu.model.type.LevelType;
 import com.recipe.jamanchu.model.type.RecipeProvider;
@@ -107,7 +108,10 @@ class RecipeDivideServiceImplTest {
     when(recipeRepository.save(any(RecipeEntity.class))).thenReturn(mockRecipe);
 
     // when
-    recipeDivideService.processAndSaveAllData(1L, 1L);
+    ResultResponse resultResponse = recipeDivideService.processAndSaveAllData(1L, 1L);
+
+    // then
+    assertEquals("데이터 분산 저장 성공!", resultResponse.getMessage());
 
     // verify
     verify(recipeRepository, times(1)).save(any(RecipeEntity.class));
