@@ -21,14 +21,13 @@ public class ScrapTenThousandRecipe {
   private static final String url = "https://www.10000recipe.com/recipe/list.html";
   private final ScrapTenThousandRecipeService scrapRecipeService;
 
-  public void scrap() {
-    int pageNumber = 1; // 시작 페이지
+  public void scrap(int startPage, int stopPage) {
     List<ScrapResult> recipeBatch = new ArrayList<>();
 
-    while (true) {
+    while (stopPage >= startPage) {
       try {
         // 현재 페이지 URL 구성
-        String pageUrl = url + "?page=" + pageNumber;
+        String pageUrl = url + "?page=" + startPage;
         // 웹페이지를 Jsoup으로 파싱
         Document document = Jsoup.connect(pageUrl).get();
 
@@ -54,15 +53,15 @@ public class ScrapTenThousandRecipe {
           }
         }
 
-        pageNumber++; // 다음 페이지로 이동
-        System.out.println("===================="+pageNumber+"==================");
+        startPage++; // 다음 페이지로 이동
+        System.out.println("====================" + startPage + "==================");
       } catch (IOException e) {
         e.printStackTrace();
         break; // 오류 발생 시 반복 종료
       }
     }
 
-    // 남은 레시피 저장 (40개 미만일 경우)
+    // 남은 레시피 저장 (1000개 미만일 경우)
     if (!recipeBatch.isEmpty()) {
       scrapRecipeService.saveCrawlRecipe(recipeBatch);
     }
