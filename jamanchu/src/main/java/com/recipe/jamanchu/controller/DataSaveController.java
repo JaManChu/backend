@@ -1,6 +1,5 @@
 package com.recipe.jamanchu.controller;
 
-import com.recipe.jamanchu.repository.TenThousandRecipeRepository;
 import com.recipe.jamanchu.service.RecipeDivideService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class DataSaveController {
 
   final RecipeDivideService recipeDivideService;
-  final TenThousandRecipeRepository tenThousandRecipeRepository;
 
   @GetMapping("/divide")
   public ResponseEntity<String> processAndSaveRecipes(

@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @Entity
 @Table(name = "manuals")
-public class ManualEntity extends BaseTimeEntity{
+public class ManualEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
