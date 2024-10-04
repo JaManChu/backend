@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum RecipeProvider {
-  SCRAP("스크랩"),
+  SCRAP("만개의 레시피"),
   USER("사용자");
 
   private final String provider;
