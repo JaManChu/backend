@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import com.recipe.jamanchu.auth.jwt.JwtUtil;
+import com.recipe.jamanchu.component.UserAccessHandler;
 import com.recipe.jamanchu.entity.CommentEntity;
 import com.recipe.jamanchu.entity.RecipeEntity;
 import com.recipe.jamanchu.entity.UserEntity;
@@ -36,7 +37,7 @@ class CommentsServiceImplTest {
   private RecipeRepository recipeRepository;
 
   @Mock
-  private UserRepository userRepository;
+  private UserAccessHandler userAccessHandler;
 
   @Mock
   private JwtUtil jwtUtil;
@@ -72,8 +73,8 @@ class CommentsServiceImplTest {
     CommentsDTO requestDTO = new CommentsDTO(recipeId, "댓글 내용", 5.0);
 
     // when
-    when(jwtUtil.getUserId(request.getHeader("Authorization"))).thenReturn(userId);
-    when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(userId);
+    when(userAccessHandler.findByUserId(userId)).thenReturn(user);
     when(recipeRepository.findById(recipeId)).thenReturn(Optional.of(recipe));
 
     // then
@@ -109,8 +110,8 @@ class CommentsServiceImplTest {
     CommentsUpdateDTO requestDTO = new CommentsUpdateDTO(commentId, "새로운 댓글 내용", 4.0);
 
     // when
-    when(jwtUtil.getUserId(request.getHeader("Authorization"))).thenReturn(userId);
-    when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(userId);
+    when(userAccessHandler.findByUserId(userId)).thenReturn(user);
     when(commentRepository.findById(commentId)).thenReturn(Optional.of(oldComment));
 
     // then
@@ -143,8 +144,8 @@ class CommentsServiceImplTest {
 
     CommentsDeleteDTO requestDTO = new CommentsDeleteDTO(commentId);
     // when
-    when(jwtUtil.getUserId(request.getHeader("Authorization"))).thenReturn(userId);
-    when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(userId);
+    when(userAccessHandler.findByUserId(userId)).thenReturn(user);
     when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
 
     // then
