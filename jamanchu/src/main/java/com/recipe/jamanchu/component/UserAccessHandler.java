@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Component
@@ -85,6 +86,7 @@ public class UserAccessHandler {
   }
 
   // 회원 정보 저장
+  @Transactional
   public void saveUser(UserEntity user) {
     userRepository.save(user);
     log.info("saveUser -> Success");
