@@ -24,16 +24,14 @@ public class ScrapTenThousandRecipeServiceImpl implements ScrapTenThousandRecipe
     crawledRecipeRepository.saveAll(scrapResults.stream()
         .map(scrapResult -> TenThousandRecipeEntity.builder()
             .name(scrapResult.getTitle())
-            .authorName(scrapResult.getAuthorName())
-            .description(scrapResult.getDescription())
             .levelType(scrapResult.getLevelType())
             .cookingTimeType(scrapResult.getCookTime())
             .ingredients(scrapResult.getIngredients())
             .thumbnail(scrapResult.getThumbnail())
             .rating(scrapResult.getRating())
             .crReviewCount(scrapResult.getReviewCount())
-            .crManualContent(scrapResult.getManualContents())
-            .crManualPicture(scrapResult.getManualPictures())
+            .crManualContents(scrapResult.getManualContents())
+            .crManualPictures(scrapResult.getManualPictures())
             .build())
         .collect(Collectors.toList()));
 

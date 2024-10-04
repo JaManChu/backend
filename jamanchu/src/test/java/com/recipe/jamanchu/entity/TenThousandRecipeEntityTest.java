@@ -26,15 +26,13 @@ class TenThousandRecipeEntityTest {
     TenThousandRecipeEntity recipeEntity = TenThousandRecipeEntity.builder()
         .crawledRecipeId(1L)
         .name("TenThousandRecipeName")
-        .authorName("authorName")
-        .description("description")
         .levelType(LevelType.LOW)
         .cookingTimeType(CookingTimeType.TEN_MINUTES)
         .rating(4.50)
         .thumbnail("thumbnail")
         .ingredients("ingredients")
-        .crManualContent("contents")
-        .crManualPicture("pictures")
+        .crManualContents("contents")
+        .crManualPictures("pictures")
         .build();
 
     // when
@@ -46,8 +44,6 @@ class TenThousandRecipeEntityTest {
     // then
     assertEquals(1, savedRecipe.getCrawledRecipeId());
     assertEquals("TenThousandRecipeName", savedRecipe.getName());
-    assertEquals("authorName", savedRecipe.getAuthorName());
-    assertEquals("description", savedRecipe.getDescription());
     assertEquals(LevelType.LOW, savedRecipe.getLevelType());
     assertEquals(CookingTimeType.TEN_MINUTES, savedRecipe.getCookingTimeType());
     assertEquals(4.50, savedRecipe.getRating());
