@@ -1,12 +1,12 @@
 package com.recipe.jamanchu.service.impl;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.recipe.jamanchu.component.UserAccessHandler;
 import com.recipe.jamanchu.entity.IngredientEntity;
 import com.recipe.jamanchu.entity.ManualEntity;
 import com.recipe.jamanchu.entity.RecipeEntity;
@@ -23,25 +23,20 @@ import com.recipe.jamanchu.repository.ManualRepository;
 import com.recipe.jamanchu.repository.RecipeRatingRepository;
 import com.recipe.jamanchu.repository.RecipeRepository;
 import com.recipe.jamanchu.repository.TenThousandRecipeRepository;
-import com.recipe.jamanchu.repository.UserRepository;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+
 
 @ExtendWith(MockitoExtension.class)
 class RecipeDivideServiceImplTest {
   @Mock
-  private UserRepository userRepository;
+  private UserAccessHandler userAccessHandler;
 
   @Mock
   private RecipeRepository recipeRepository;
@@ -91,7 +86,7 @@ class RecipeDivideServiceImplTest {
   @Test
   void testProcessAndSaveAllData() {
     // given
-    when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(user));
+    when(userAccessHandler.findByEmail("user@example.com")).thenReturn(user);
 
     List<TenThousandRecipeEntity> recipeList = Collections.singletonList(scrapRecipe);
 
@@ -123,7 +118,7 @@ class RecipeDivideServiceImplTest {
   @Test
   void testSaveRecipeData() {
     // given
-    when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(user));
+    when(userAccessHandler.findByEmail("user@example.com")).thenReturn(user);
 
     RecipeEntity recipe = RecipeEntity.builder()
         .user(user)

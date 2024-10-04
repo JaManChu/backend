@@ -1,28 +1,23 @@
 package com.recipe.jamanchu.service.impl;
 
+import com.recipe.jamanchu.component.UserAccessHandler;
 import com.recipe.jamanchu.entity.IngredientEntity;
 import com.recipe.jamanchu.entity.ManualEntity;
 import com.recipe.jamanchu.entity.RecipeEntity;
 import com.recipe.jamanchu.entity.RecipeRatingEntity;
 import com.recipe.jamanchu.entity.TenThousandRecipeEntity;
 import com.recipe.jamanchu.entity.UserEntity;
-import com.recipe.jamanchu.exceptions.exception.UserNotFoundException;
 import com.recipe.jamanchu.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.model.type.RecipeProvider;
 import com.recipe.jamanchu.model.type.ResultCode;
-import com.recipe.jamanchu.model.type.UserRole;
 import com.recipe.jamanchu.repository.IngredientRepository;
 import com.recipe.jamanchu.repository.ManualRepository;
 import com.recipe.jamanchu.repository.RecipeRatingRepository;
 import com.recipe.jamanchu.repository.RecipeRepository;
 import com.recipe.jamanchu.repository.TenThousandRecipeRepository;
-import com.recipe.jamanchu.repository.UserRepository;
 import com.recipe.jamanchu.service.RecipeDivideService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class RecipeDivideServiceImpl implements RecipeDivideService {
 
-  private final UserRepository userRepository;
+  private final UserAccessHandler userAccessHandler;
   private final RecipeRepository recipeRepository;
   private final RecipeRatingRepository recipeRatingRepository;
   private final ManualRepository manualRepository;
@@ -71,8 +66,7 @@ public class RecipeDivideServiceImpl implements RecipeDivideService {
 
   public RecipeEntity saveRecipeData(TenThousandRecipeEntity scrapedRecipe) {
     // 임의의 관리자 이메일을 가져오도록 설정
-    UserEntity user = userRepository.findByEmail("user@example.com")
-        .orElseThrow(UserNotFoundException::new);
+    UserEntity user = userAccessHandler.findByEmail("user@example.com");
 
     RecipeEntity recipe = RecipeEntity.builder()
         .user(user)
