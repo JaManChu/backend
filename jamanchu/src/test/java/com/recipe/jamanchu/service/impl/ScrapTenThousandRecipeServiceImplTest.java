@@ -34,14 +34,12 @@ class ScrapTenThousandRecipeServiceImplTest {
 
     // given
     ScrapResult scrapResult1 = new ScrapResult(
-        "Recipe 1", "Author 1", "Delicious recipe 1",
-        LevelType.LOW, CookingTimeType.FIFTEEN_MINUTES, "recipe1.jpg",
+        "Recipe 1", LevelType.LOW, CookingTimeType.FIFTEEN_MINUTES, "recipe1.jpg",
         4.5, 14, "Eggs, Butter", "Step 1, Step 2",
         "step1.jpg, step2.jpg");
 
     ScrapResult scrapResult2 = new ScrapResult(
-        "Recipe 2", "Author 2", "Delicious recipe 2",
-        LevelType.MEDIUM, CookingTimeType.THIRTY_MINUTES, "recipe2.jpg",
+        "Recipe 2", LevelType.MEDIUM, CookingTimeType.THIRTY_MINUTES, "recipe2.jpg",
         4.7, 5,"Chicken, Garlic", "Step 1, Step 2",
         "step1.jpg, step2.jpg");
 

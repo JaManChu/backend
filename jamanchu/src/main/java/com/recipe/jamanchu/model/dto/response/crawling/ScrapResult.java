@@ -10,8 +10,6 @@ import lombok.Getter;
 public class ScrapResult {
 
   private String title;
-  private String authorName;
-  private String description;
   private LevelType levelType;
   private CookingTimeType cookTime;
   private String thumbnail;

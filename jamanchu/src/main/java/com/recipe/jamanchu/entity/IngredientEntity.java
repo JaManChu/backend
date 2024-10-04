@@ -5,6 +5,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -17,7 +19,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "ingredient")
+@Table(name = "rcp_ing")
 public class IngredientEntity {
 
   @Id
@@ -26,6 +28,14 @@ public class IngredientEntity {
   private Long ingredientId;
 
   @NotNull
+  @ManyToOne
+  @JoinColumn(name = "rcp_id")
+  private RecipeEntity recipe;
+
+  @NotNull
   @Column(name = "ing_name", length = 30)
   private String name;
+
+  @Column(name = "quantity")
+  private String quantity;
 }

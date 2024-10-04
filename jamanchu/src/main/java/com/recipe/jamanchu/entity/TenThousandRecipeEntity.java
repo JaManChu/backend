@@ -26,42 +26,36 @@ public class TenThousandRecipeEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "cr_id")
+  @Column(name = "tr_id")
   private Long crawledRecipeId;
 
-  @Column(name = "cr_name")
+  @Column(name = "tr_name")
   private String name;
 
-  @Column(name = "cr_author")
-  private String authorName;
-
-  @Column(name = "cr_description", columnDefinition = "TEXT")
-  private String description;
-
   @Enumerated(EnumType.STRING)
-  @Column(name = "cr_level")
+  @Column(name = "tr_level")
   private LevelType levelType;
 
   @Enumerated(EnumType.STRING)
-  @Column(name = "cr_cook_time")
+  @Column(name = "tr_cook_time")
   private CookingTimeType cookingTimeType;
 
-  @Column(name = "cr_rating")
+  @Column(name = "tr_rating")
   private Double rating;
 
-  @Column(name = "cr_review_count")
+  @Column(name = "tr_review_count")
   private Integer crReviewCount;
 
-  @Column(name = "cr_thumbnail")
+  @Column(name = "tr_thumbnail")
   private String thumbnail;
 
-  @Column(name = "cr_ingredients")
+  @Column(name = "tr_ingredients")
   private String ingredients;
 
   @NotNull
-  @Column(name = "cr_mn_content", columnDefinition = "TEXT")
-  private String crManualContent;
+  @Column(name = "tr_mn_contents", columnDefinition = "TEXT")
+  private String crManualContents;
 
-  @Column(name = "cr_mn_picture", columnDefinition = "TEXT")
-  private String crManualPicture;
+  @Column(name = "tr_mn_pictures", columnDefinition = "TEXT")
+  private String crManualPictures;
 }

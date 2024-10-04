@@ -1,10 +1,10 @@
 package com.recipe.jamanchu.entity;
 
+import static com.recipe.jamanchu.model.type.CookingTimeType.*;
+import static com.recipe.jamanchu.model.type.LevelType.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
-import com.recipe.jamanchu.model.type.CookingTimeType;
-import com.recipe.jamanchu.model.type.LevelType;
 import com.recipe.jamanchu.repository.TenThousandRecipeRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,15 +26,13 @@ class TenThousandRecipeEntityTest {
     TenThousandRecipeEntity recipeEntity = TenThousandRecipeEntity.builder()
         .crawledRecipeId(1L)
         .name("TenThousandRecipeName")
-        .authorName("authorName")
-        .description("description")
-        .levelType(LevelType.LOW)
-        .cookingTimeType(CookingTimeType.TEN_MINUTES)
+        .levelType(LOW)
+        .cookingTimeType(TEN_MINUTES)
         .rating(4.50)
         .thumbnail("thumbnail")
         .ingredients("ingredients")
-        .crManualContent("contents")
-        .crManualPicture("pictures")
+        .crManualContents("contents")
+        .crManualPictures("pictures")
         .build();
 
     // when
@@ -44,16 +42,14 @@ class TenThousandRecipeEntityTest {
     TenThousandRecipeEntity savedRecipe = tenThousandRecipeRepository.save(recipeEntity);
 
     // then
-    assertEquals(1, savedRecipe.getCrawledRecipeId());
-    assertEquals("TenThousandRecipeName", savedRecipe.getName());
-    assertEquals("authorName", savedRecipe.getAuthorName());
-    assertEquals("description", savedRecipe.getDescription());
-    assertEquals(LevelType.LOW, savedRecipe.getLevelType());
-    assertEquals(CookingTimeType.TEN_MINUTES, savedRecipe.getCookingTimeType());
-    assertEquals(4.50, savedRecipe.getRating());
-    assertEquals("thumbnail", savedRecipe.getThumbnail());
-    assertEquals("ingredients", savedRecipe.getIngredients());
-    assertEquals("contents", savedRecipe.getCrManualContent());
-    assertEquals("pictures", savedRecipe.getCrManualPicture());
+    assertEquals(recipeEntity.getCrawledRecipeId(), savedRecipe.getCrawledRecipeId());
+    assertEquals(recipeEntity.getName(), savedRecipe.getName());
+    assertEquals(recipeEntity.getLevelType(), savedRecipe.getLevelType());
+    assertEquals(recipeEntity.getCookingTimeType(), savedRecipe.getCookingTimeType());
+    assertEquals(recipeEntity.getRating(), savedRecipe.getRating());
+    assertEquals(recipeEntity.getThumbnail(), savedRecipe.getThumbnail());
+    assertEquals(recipeEntity.getIngredients(), savedRecipe.getIngredients());
+    assertEquals(recipeEntity.getCrManualContents(), savedRecipe.getCrManualContents());
+    assertEquals(recipeEntity.getCrManualPictures(), savedRecipe.getCrManualPictures());
   }
 }

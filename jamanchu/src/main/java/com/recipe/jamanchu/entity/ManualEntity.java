@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @Entity
 @Table(name = "manuals")
-public class ManualEntity extends BaseTimeEntity{
+public class ManualEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,7 +33,7 @@ public class ManualEntity extends BaseTimeEntity{
   private RecipeEntity recipe;
 
   @NotNull
-  @Column(name = "mn_content", length = 300)
+  @Column(name = "mn_content", columnDefinition = "TEXT")
   private String manualContent;
 
   @Column(name = "mn_picture")
