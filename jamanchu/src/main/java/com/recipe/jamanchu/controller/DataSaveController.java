@@ -1,5 +1,6 @@
 package com.recipe.jamanchu.controller;
 
+import com.recipe.jamanchu.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.service.RecipeDivideService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,12 +17,12 @@ public class DataSaveController {
   final RecipeDivideService recipeDivideService;
 
   @GetMapping("/divide")
-  public ResponseEntity<String> processAndSaveRecipes(
+  public ResponseEntity<ResultResponse> processAndSaveRecipes(
       @RequestParam Long startId,
       @RequestParam Long endId) {
 
     recipeDivideService.processAndSaveAllData(startId, endId);
 
-    return ResponseEntity.ok("Recipes save complete " + endId);
+    return ResponseEntity.ok(recipeDivideService.processAndSaveAllData(startId, endId));
   }
 }

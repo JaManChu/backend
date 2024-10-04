@@ -7,7 +7,9 @@ import com.recipe.jamanchu.entity.RecipeRatingEntity;
 import com.recipe.jamanchu.entity.TenThousandRecipeEntity;
 import com.recipe.jamanchu.entity.UserEntity;
 import com.recipe.jamanchu.exceptions.exception.UserNotFoundException;
+import com.recipe.jamanchu.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.model.type.RecipeProvider;
+import com.recipe.jamanchu.model.type.ResultCode;
 import com.recipe.jamanchu.model.type.UserRole;
 import com.recipe.jamanchu.repository.IngredientRepository;
 import com.recipe.jamanchu.repository.ManualRepository;
@@ -37,12 +39,12 @@ public class RecipeDivideServiceImpl implements RecipeDivideService {
 
   @Override
   @Transactional
-  public void processAndSaveAllData(Long startId, Long endId) {
+  public ResultResponse processAndSaveAllData(Long startId, Long endId) {
     List<TenThousandRecipeEntity> scrapedRecipes = tenThousandRecipeRepository.findByCrawledRecipeIdBetween(startId, endId);
 
     // 데이터가 없으면 종료
     if (scrapedRecipes.isEmpty()) {
-      return;
+      return null;
     }
 
     // 각 레시피 데이터를 처리
@@ -63,6 +65,8 @@ public class RecipeDivideServiceImpl implements RecipeDivideService {
         saveIngredientDetails(recipe, scrapedRecipe);  // 재료 상세 저장
       }
     }
+
+    return ResultResponse.of(ResultCode.SUCCESS_INSERT_CR_DATA);
   }
 
   public RecipeEntity saveRecipeData(TenThousandRecipeEntity scrapedRecipe) {
