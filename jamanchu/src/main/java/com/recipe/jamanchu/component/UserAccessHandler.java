@@ -24,7 +24,7 @@ public class UserAccessHandler {
   // userId 값과 일치하는 회원 정보 반환
   public UserEntity findByUserId(Long userId) {
 
-    log.info("userId : {}", userId);
+    log.info("findByUserId -> userId : {}", userId);
     return userRepository.findByUserId(userId)
         .orElseThrow(UserNotFoundException::new);
   }
@@ -32,7 +32,7 @@ public class UserAccessHandler {
   // email 값과 일치하는 회원 정보 반환
   public UserEntity findByEmail(String email) {
 
-    log.info("email : {}", email);
+    log.info("findByEmail -> email : {}", email);
     return userRepository.findByEmail(email)
         .orElseThrow(UserNotFoundException::new);
   }
@@ -40,6 +40,7 @@ public class UserAccessHandler {
   // 카카오로부터 받은 email 값과 일치하는 회원이 있을 경우 해당 회원 정보 반환
   // 없을 경우 전달 받은 email, nickname, providerId으로 회원 정보 저장 후 반환
   public UserEntity findOrCreateUser(KakaoUserDetails kakaoUserDetails) {
+    log.info("findOrCreateUser -> email : {}", kakaoUserDetails.getEmail());
     return userRepository.findByEmail(kakaoUserDetails.getEmail())
         .orElseGet(() -> userRepository.save(UserEntity.builder()
             .email(kakaoUserDetails.getEmail())
@@ -53,9 +54,10 @@ public class UserAccessHandler {
   // 이메일 중복 체크
   public void existsByEmail(String email){
 
+    log.info("existsByEmail -> email : {}", email);
     if (userRepository.existsByEmail(email)) {
 
-      log.info("DuplicatedEmail -> email : {}", email);
+      log.info("Email is Duplicated!!");
       throw new DuplicatedEmailException();
     }
   }
@@ -63,18 +65,21 @@ public class UserAccessHandler {
   // 닉네임 중복 체크
   public void existsByNickname(String nickname){
 
+    log.info("existsByNickname -> nickname : {}", nickname);
     if (userRepository.existsByNickname(nickname)) {
 
-      log.info("DuplicatedNickname -> nickname : {}", nickname);
+      log.info("Nickname is Duplicated!");
       throw new DuplicatedNicknameException();
     }
   }
 
   // 소셜 계정 정보 체크
   public void isSocialUser(String provider) {
+
+    log.info("isSocialUser -> provider : {}", provider);
     if (provider != null) {
 
-      log.info("SocialAccount : {}", provider);
+      log.info("is Social User!");
       throw new SocialAccountException();
     }
   }
@@ -82,6 +87,6 @@ public class UserAccessHandler {
   // 회원 정보 저장
   public void saveUser(UserEntity user) {
     userRepository.save(user);
-    log.info("저장 성공");
+    log.info("saveUser -> Success");
   }
 }
