@@ -1,6 +1,7 @@
 package com.recipe.jamanchu.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -9,6 +10,7 @@ import com.recipe.jamanchu.component.UserAccessHandler;
 import com.recipe.jamanchu.entity.CommentEntity;
 import com.recipe.jamanchu.entity.RecipeEntity;
 import com.recipe.jamanchu.entity.UserEntity;
+import com.recipe.jamanchu.exceptions.exception.UnmatchedUserException;
 import com.recipe.jamanchu.model.dto.request.comments.CommentsDTO;
 import com.recipe.jamanchu.model.dto.request.comments.CommentsDeleteDTO;
 import com.recipe.jamanchu.model.dto.request.comments.CommentsUpdateDTO;
@@ -16,7 +18,6 @@ import com.recipe.jamanchu.model.dto.response.comments.Comments;
 import com.recipe.jamanchu.model.type.UserRole;
 import com.recipe.jamanchu.repository.CommentRepository;
 import com.recipe.jamanchu.repository.RecipeRepository;
-import com.recipe.jamanchu.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Optional;
@@ -121,6 +122,54 @@ class CommentsServiceImplTest {
 
   }
 
+  @DisplayName("댓글 수정 테스트 - 유저가 달라서 실패하는 경우")
+  @Test
+  void failToUpdateCommentByUnmatchedUser() {
+
+    // given
+
+    Long commentUserId = 1L;
+    UserEntity commentUser = UserEntity.builder()
+        .userId(commentUserId)
+        .nickname("heesang")
+        .email("test@gmail.com")
+        .password("1234")
+        .role(UserRole.USER)
+        .provider(null)
+        .providerId(null)
+        .build();
+
+    Long requestUserId = 2L;
+    UserEntity requestUser = UserEntity.builder()
+        .userId(requestUserId)
+        .nickname("heesang")
+        .email("test@gmail.com")
+        .password("1234")
+        .role(UserRole.USER)
+        .provider(null)
+        .providerId(null)
+        .build();
+
+    CommentEntity oldComment = CommentEntity.builder()
+        .user(commentUser)
+        .recipe(any())
+        .commentContent("댓글 내용")
+        .commentLike(5.0)
+        .build();
+
+    Long commentId = 1L;
+    CommentsUpdateDTO requestDTO = new CommentsUpdateDTO(commentId, "새로운 댓글 내용", 4.0);
+
+    //when
+    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(requestUserId);
+    when(userAccessHandler.findByUserId(requestUserId)).thenReturn(requestUser);
+    when(commentRepository.findById(commentId)).thenReturn(Optional.of(oldComment));
+
+    //then
+    assertThrows(
+        UnmatchedUserException.class, () -> commentService.updateComment(request, requestDTO));
+  }
+
   @DisplayName("댓글 삭제 테스트")
   @Test
   void deleteComment() {
@@ -166,8 +215,8 @@ class CommentsServiceImplTest {
         CommentEntity.builder()
             .user(
                 UserEntity.builder()
-                  .userId(1L)
-                  .build()
+                    .userId(1L)
+                    .build()
             )
             .recipe(recipe)
             .commentContent("댓글 내용1")
@@ -210,7 +259,7 @@ class CommentsServiceImplTest {
     when(commentRepository.findAllByRecipe(recipe)).thenReturn(allByRecipe);
 
     // then
-    Comments data = (Comments)commentService.getCommentsList(recipeId).getData();
+    Comments data = (Comments) commentService.getCommentsList(recipeId).getData();
     assertEquals(4, data.getComments().size());
     assertEquals("댓글 내용1", data.getComments().get(0).getContent());
     assertEquals(5.0, data.getComments().get(0).getRating());
