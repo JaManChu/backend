@@ -1,11 +1,11 @@
 package com.recipe.jamanchu.entity;
 
+import static com.recipe.jamanchu.model.type.CookingTimeType.*;
+import static com.recipe.jamanchu.model.type.LevelType.LOW;
+import static com.recipe.jamanchu.model.type.RecipeProvider.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
-import com.recipe.jamanchu.model.type.CookingTimeType;
-import com.recipe.jamanchu.model.type.LevelType;
-import com.recipe.jamanchu.model.type.RecipeProvider;
 import com.recipe.jamanchu.repository.RecipeRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,10 +32,10 @@ class RecipeEntityTest {
         .id(1L)
         .user(user)
         .name("Recipe1")
-        .level(LevelType.LOW)
-        .time(CookingTimeType.TEN_MINUTES)
+        .level(LOW)
+        .time(TEN_MINUTES)
         .thumbnail("thumbnail1")
-        .provider(RecipeProvider.USER)
+        .provider(USER)
         .build();
 
     // when

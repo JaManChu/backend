@@ -1,9 +1,9 @@
 package com.recipe.jamanchu.entity;
 
+import static com.recipe.jamanchu.model.type.UserRole.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
-import com.recipe.jamanchu.model.type.UserRole;
 import com.recipe.jamanchu.repository.ScrapedRecipeRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,7 +31,7 @@ class ScrapedRecipeEntityTest {
         .nickname("user")
         .email("user@gmail.com")
         .password("1234")
-        .role(UserRole.USER)
+        .role(USER)
         .build();
 
     ScrapedRecipeEntity scrapedRecipeEntity = ScrapedRecipeEntity.builder()

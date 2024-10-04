@@ -1,10 +1,10 @@
 package com.recipe.jamanchu.entity;
 
+import static com.recipe.jamanchu.model.type.CookingTimeType.*;
+import static com.recipe.jamanchu.model.type.LevelType.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
-import com.recipe.jamanchu.model.type.CookingTimeType;
-import com.recipe.jamanchu.model.type.LevelType;
 import com.recipe.jamanchu.repository.TenThousandRecipeRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,8 +26,8 @@ class TenThousandRecipeEntityTest {
     TenThousandRecipeEntity recipeEntity = TenThousandRecipeEntity.builder()
         .crawledRecipeId(1L)
         .name("TenThousandRecipeName")
-        .levelType(LevelType.LOW)
-        .cookingTimeType(CookingTimeType.TEN_MINUTES)
+        .levelType(LOW)
+        .cookingTimeType(TEN_MINUTES)
         .rating(4.50)
         .thumbnail("thumbnail")
         .ingredients("ingredients")
