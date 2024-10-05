@@ -58,9 +58,9 @@ public class SecurityConfig {
                 "/swagger-ui.html",
                 "/swagger-resources/**").permitAll()
             .requestMatchers("/",
-                "/api/v1/user/signup",
-                "/api/v1/user/login",
-                "/api/v1/user/test").permitAll()
+                "/api/v1/users/signup",
+                "/api/v1/users/login",
+                "/api/v1/users/test").permitAll()
             .anyRequest().authenticated());
 
     http
@@ -83,7 +83,7 @@ public class SecurityConfig {
 
   private LoginFilter customLoginFilter() throws Exception {
     LoginFilter loginFilter = new LoginFilter(authenticationManager(), passwordEncoder, jwtUtil, userRepository);
-    loginFilter.setFilterProcessesUrl("/api/v1/user/login");
+    loginFilter.setFilterProcessesUrl("/api/v1/users/login");
     return loginFilter;
   }
 }
