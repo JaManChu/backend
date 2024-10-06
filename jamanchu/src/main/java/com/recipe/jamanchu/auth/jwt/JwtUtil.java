@@ -23,6 +23,9 @@ public class JwtUtil {
   }
 
   public Long getUserId(String token) {
+    if(token.startsWith("Bearer ")) {
+      token = token.substring(7);
+    }
     return Jwts.parser().verifyWith(secretKey).build()
         .parseSignedClaims(token)
         .getPayload()
