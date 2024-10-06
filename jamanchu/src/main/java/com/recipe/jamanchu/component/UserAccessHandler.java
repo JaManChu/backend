@@ -6,6 +6,7 @@ import com.recipe.jamanchu.exceptions.exception.DuplicatedEmailException;
 import com.recipe.jamanchu.exceptions.exception.DuplicatedNicknameException;
 import com.recipe.jamanchu.exceptions.exception.SocialAccountException;
 import com.recipe.jamanchu.exceptions.exception.UserNotFoundException;
+import com.recipe.jamanchu.model.type.UserRole;
 import com.recipe.jamanchu.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,6 +50,7 @@ public class UserAccessHandler {
             .nickname(kakaoUserDetails.getNickname())
             .provider("kakao")
             .providerId(kakaoUserDetails.getProviderId())
+            .role(UserRole.USER)
             .build()));
   }
 
