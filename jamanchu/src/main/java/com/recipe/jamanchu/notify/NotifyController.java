@@ -21,11 +21,7 @@ public class NotifyController {
   private final NotifyServiceImpl notifyService;
 
   @GetMapping(value = "/notify/{recipeId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-  public Flux<Notify> getNotifications(HttpServletRequest request,
-      @PathVariable("recipeId") Long recipeId) {
-    log.info("getNotifications recipeId: {}", recipeId);
-    return Flux.create(sink -> {
-      notifyService.subscribe(recipeId, sink);
-    });
+  public Flux<Notify> getNotifications(@PathVariable("recipeId") Long recipeId) {
+    return Flux.create(sink -> notifyService.subscribe(recipeId, sink));
   }
 }
