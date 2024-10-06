@@ -2,7 +2,6 @@ package com.recipe.jamanchu.notify;
 
 import com.recipe.jamanchu.model.dto.response.notify.Notify;
 import com.recipe.jamanchu.service.impl.NotifyServiceImpl;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
