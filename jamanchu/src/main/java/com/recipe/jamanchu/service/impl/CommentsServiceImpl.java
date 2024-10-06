@@ -13,6 +13,8 @@ import com.recipe.jamanchu.model.dto.request.comments.CommentsUpdateDTO;
 import com.recipe.jamanchu.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.model.dto.response.comments.Comment;
 import com.recipe.jamanchu.model.dto.response.comments.Comments;
+import com.recipe.jamanchu.model.dto.response.notify.Notify;
+import com.recipe.jamanchu.model.type.RecipeProvider;
 import com.recipe.jamanchu.model.type.ResultCode;
 import com.recipe.jamanchu.repository.CommentRepository;
 import com.recipe.jamanchu.repository.RecipeRepository;
@@ -32,6 +34,8 @@ public class CommentsServiceImpl implements CommentsService {
   private final CommentRepository commentRepository;
   private final RecipeRepository recipeRepository;
   private final UserAccessHandler userAccessHandler;
+
+  private final NotifyServiceImpl notifyService;
 
   private final JwtUtil jwtUtil;
 
@@ -59,6 +63,11 @@ public class CommentsServiceImpl implements CommentsService {
         .build();
 
     commentRepository.save(userComment);
+
+    if(!recipe.getUser().getNickname().equals(RecipeProvider.SCRAP.getProvider())){
+      Notify notify = Notify.of(recipe.getName(),commentsDTO.getComment(),commentsDTO.getRating(), user.getNickname());
+      notifyService.notifyUser(recipe.getUser().getUserId(), notify);
+    }
 
     return ResultResponse.of(ResultCode.SUCCESS_COMMENTS);
   }
