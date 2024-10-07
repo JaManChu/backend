@@ -16,10 +16,11 @@ import com.recipe.jamanchu.repository.RecipeRatingRepository;
 import com.recipe.jamanchu.repository.RecipeRepository;
 import com.recipe.jamanchu.repository.TenThousandRecipeRepository;
 import com.recipe.jamanchu.service.RecipeDivideService;
+import com.recipe.jamanchu.util.LastRecipeIdUtil;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -31,11 +32,11 @@ public class RecipeDivideServiceImpl implements RecipeDivideService {
   private final ManualRepository manualRepository;
   private final IngredientRepository ingredientRepository;
   private final TenThousandRecipeRepository tenThousandRecipeRepository;
+  private final LastRecipeIdUtil lastRecipeIdUtil;
 
   @Override
-  @Transactional
   public ResultResponse processAndSaveAllData(Long startId, Long endId) {
-    List<TenThousandRecipeEntity> scrapedRecipes = tenThousandRecipeRepository.findByCrawledRecipeIdBetween(startId, endId);
+    List<TenThousandRecipeEntity> scrapedRecipes = tenThousandRecipeRepository.findByRecipeIdBetween(startId, endId);
 
     // 데이터가 없으면 종료
     if (scrapedRecipes.isEmpty()) {
@@ -54,14 +55,18 @@ public class RecipeDivideServiceImpl implements RecipeDivideService {
       if (contents.length != pictures.length) continue;
 
       RecipeEntity recipe = saveRecipeData(scrapedRecipe);  // 레시피 저장
-      if (recipe != null) {
-        saveRecipeRatingData(recipe, scrapedRecipe);  // 평점 저장
-        saveManualData(recipe, scrapedRecipe);  // 메뉴얼 저장
-        saveIngredientDetails(recipe, scrapedRecipe);  // 재료 상세 저장
-      }
+      saveRecipeRatingData(recipe, scrapedRecipe);  // 평점 저장
+      saveManualData(recipe, scrapedRecipe);  // 메뉴얼 저장
+      saveIngredientDetails(recipe, scrapedRecipe);  // 재료 상세 저장
     }
 
     return ResultResponse.of(ResultCode.SUCCESS_INSERT_CR_DATA);
+  }
+
+  @Scheduled(cron = "0 30 0 * * SUN")
+  public void weeklyRecipeDivide() {
+    Long lastRecipeId = lastRecipeIdUtil.getLastRecipeId();
+    processAndSaveAllData(lastRecipeId + 1, lastRecipeId + 200);
   }
 
   public RecipeEntity saveRecipeData(TenThousandRecipeEntity scrapedRecipe) {
@@ -113,7 +118,8 @@ public class RecipeDivideServiceImpl implements RecipeDivideService {
   public void saveIngredientDetails(RecipeEntity recipe, TenThousandRecipeEntity scrapedRecipe) {
     String[] ingredients = scrapedRecipe.getIngredients().split(",");  // 재료 분리 로직
     for (String ingredient : ingredients) {
-      if (ingredient.trim().isEmpty()) {
+      ingredient = ingredient.trim();
+      if (ingredient.isEmpty()) {
         continue;  // 비어있는 재료는 무시
       }
 
