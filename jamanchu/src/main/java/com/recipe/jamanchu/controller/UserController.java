@@ -1,13 +1,16 @@
 package com.recipe.jamanchu.controller;
 
+import com.recipe.jamanchu.model.dto.request.auth.DeleteUserDTO;
 import com.recipe.jamanchu.model.dto.request.auth.SignupDTO;
 import com.recipe.jamanchu.model.dto.request.auth.UserUpdateDTO;
 import com.recipe.jamanchu.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -43,9 +46,19 @@ public class UserController {
   }
 
   @PutMapping
-  public ResponseEntity<ResultResponse> updateUser(UserUpdateDTO userUpdateDTO) {
+  public ResponseEntity<ResultResponse> updateUser(HttpServletRequest request,
+      UserUpdateDTO userUpdateDTO) {
 
     return ResponseEntity.ok()
-        .body(ResultResponse.of(userService.updateUserInfo(userUpdateDTO)));
+        .body(ResultResponse.of(userService.updateUserInfo(request, userUpdateDTO)));
+  }
+
+  @DeleteMapping
+  public ResponseEntity<ResultResponse> deleteUser(HttpServletRequest request,
+      DeleteUserDTO deleteUserDTO) {
+
+    return ResponseEntity.ok()
+        .body(ResultResponse.of(userService.deleteUser(request, deleteUserDTO)));
   }
 }
+
