@@ -1,5 +1,7 @@
 package com.recipe.jamanchu.service.impl;
 
+import static com.recipe.jamanchu.model.type.RecipeProvider.SCRAP;
+
 import com.recipe.jamanchu.auth.jwt.JwtUtil;
 import com.recipe.jamanchu.component.UserAccessHandler;
 import com.recipe.jamanchu.entity.CommentEntity;
@@ -64,7 +66,7 @@ public class CommentsServiceImpl implements CommentsService {
 
     commentRepository.save(userComment);
 
-    if(!recipe.getUser().getNickname().equals(RecipeProvider.SCRAP.getProvider())){
+    if(recipe.getProvider() != SCRAP){
       Notify notify = Notify.of(recipe.getName(),commentsDTO.getComment(),commentsDTO.getRating(), user.getNickname());
       notifyService.notifyUser(recipe.getUser().getUserId(), notify);
     }
