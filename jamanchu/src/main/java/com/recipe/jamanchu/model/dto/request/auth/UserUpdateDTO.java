@@ -7,8 +7,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public class UserUpdateDTO {
 
-  private Long userId;
-  private String password;
   private String nickname;
-
+  private String beforePassword;
+  private String afterPassword;
 }
