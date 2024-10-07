@@ -1,7 +1,9 @@
 package com.recipe.jamanchu.controller;
 
+import com.recipe.jamanchu.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.scraper.ScrapTenThousandRecipe;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -15,12 +17,12 @@ public class ScrapTenThousandRecipeController {
   private final ScrapTenThousandRecipe recipeScrap;
 
   @GetMapping("/scrape-recipes")
-  public String scrapeRecipes(
-      @RequestParam(defaultValue = "1") int startPage,
-      @RequestParam(defaultValue = "50") int stopPage
+  public ResponseEntity<ResultResponse> scrapeRecipes(
+      @RequestParam Long startRecipeId,
+      @RequestParam Long stopRecipeId
   ) {
-    recipeScrap.scrap(startPage, stopPage);
-    return "Scraping completed!";
+    recipeScrap.scrap(startRecipeId, stopRecipeId);
+    return ResponseEntity.ok(recipeScrap.scrap(startRecipeId, stopRecipeId));
   }
 
 }

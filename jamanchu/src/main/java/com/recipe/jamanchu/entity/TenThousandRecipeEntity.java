@@ -32,6 +32,9 @@ public class TenThousandRecipeEntity {
   @Column(name = "tr_name")
   private String name;
 
+  @Column(name = "recipe_id")
+  private Long recipeId;
+
   @Enumerated(EnumType.STRING)
   @Column(name = "tr_level")
   private LevelType levelType;

@@ -26,6 +26,7 @@ class TenThousandRecipeEntityTest {
     TenThousandRecipeEntity recipeEntity = TenThousandRecipeEntity.builder()
         .crawledRecipeId(1L)
         .name("TenThousandRecipeName")
+        .recipeId(1L)
         .levelType(LOW)
         .cookingTimeType(TEN_MINUTES)
         .rating(4.50)
@@ -44,6 +45,7 @@ class TenThousandRecipeEntityTest {
     // then
     assertEquals(recipeEntity.getCrawledRecipeId(), savedRecipe.getCrawledRecipeId());
     assertEquals(recipeEntity.getName(), savedRecipe.getName());
+    assertEquals(recipeEntity.getRecipeId(), savedRecipe.getRecipeId());
     assertEquals(recipeEntity.getLevelType(), savedRecipe.getLevelType());
     assertEquals(recipeEntity.getCookingTimeType(), savedRecipe.getCookingTimeType());
     assertEquals(recipeEntity.getRating(), savedRecipe.getRating());
