@@ -85,7 +85,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     UserEntity user = userAccessHandler
         .findByUserId(jwtUtil.getUserId(request.getHeader("access-token")));
 
-    userAccessHandler.validatePassword(user.getPassword(), deleteUserDTO.getPassword());
+    if (user.getProvider() == null) {
+      userAccessHandler.validatePassword(user.getPassword(), deleteUserDTO.getPassword());
+    }
 
     userAccessHandler.deleteUser(user);
     return ResultCode.SUCCESS_DELETE_USER;
