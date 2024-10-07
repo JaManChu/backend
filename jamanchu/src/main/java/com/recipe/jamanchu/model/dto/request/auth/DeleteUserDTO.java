@@ -1,0 +1,10 @@
+package com.recipe.jamanchu.model.dto.request.auth;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
+public class DeleteUserDTO {
+  private String password;
+}
