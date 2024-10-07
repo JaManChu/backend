@@ -1,13 +1,16 @@
 package com.recipe.jamanchu.service.impl;
 
+import com.recipe.jamanchu.auth.jwt.JwtUtil;
 import com.recipe.jamanchu.component.UserAccessHandler;
 import com.recipe.jamanchu.entity.UserEntity;
+import com.recipe.jamanchu.model.dto.request.auth.DeleteUserDTO;
 import com.recipe.jamanchu.model.dto.request.auth.SignupDTO;
 import com.recipe.jamanchu.model.dto.request.auth.UserDetailsDTO;
 import com.recipe.jamanchu.model.dto.request.auth.UserUpdateDTO;
 import com.recipe.jamanchu.model.type.ResultCode;
 import com.recipe.jamanchu.model.type.UserRole;
 import com.recipe.jamanchu.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,6 +25,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
   private final BCryptPasswordEncoder passwordEncoder;
   private final UserAccessHandler userAccessHandler;
+  private final JwtUtil jwtUtil;
 
   @Override
   public ResultCode signup(SignupDTO signupDTO) {
@@ -51,8 +55,12 @@ public class UserServiceImpl implements UserService, UserDetailsService {
   }
 
   @Override
-  public ResultCode updateUserInfo(UserUpdateDTO userUpdateDTO) {
-    UserEntity user = userAccessHandler.findByUserId(userUpdateDTO.getUserId());
+  public ResultCode updateUserInfo(HttpServletRequest request, UserUpdateDTO userUpdateDTO) {
+    UserEntity user = userAccessHandler
+        .findByUserId(jwtUtil.getUserId(request.getHeader("access-token")));
+
+    // 비밀번호 중복 체크
+    userAccessHandler.validatePassword(user.getPassword(), userUpdateDTO.getBeforePassword());
 
     // 소셜 계정 체크
     userAccessHandler.isSocialUser(user.getProvider());
@@ -64,11 +72,23 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     userAccessHandler.saveUser(UserEntity.builder()
         .userId(user.getUserId())
         .email(user.getEmail())
-        .password(passwordEncoder.encode(userUpdateDTO.getPassword()))
+        .password(passwordEncoder.encode(userUpdateDTO.getAfterPassword()))
         .nickname(userUpdateDTO.getNickname())
         .role(user.getRole())
         .build());
 
     return ResultCode.SUCCESS_UPDATE_USER_INFO;
   }
+
+  @Override
+  public ResultCode deleteUser(HttpServletRequest request, DeleteUserDTO deleteUserDTO) {
+    UserEntity user = userAccessHandler
+        .findByUserId(jwtUtil.getUserId(request.getHeader("access-token")));
+
+    userAccessHandler.validatePassword(user.getPassword(), deleteUserDTO.getPassword());
+
+    userAccessHandler.deleteUser(user);
+    return ResultCode.SUCCESS_DELETE_USER;
+  }
 }
+
