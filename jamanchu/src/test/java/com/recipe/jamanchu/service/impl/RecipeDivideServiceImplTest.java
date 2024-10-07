@@ -1,6 +1,8 @@
 package com.recipe.jamanchu.service.impl;
 
+import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -23,11 +25,16 @@ import com.recipe.jamanchu.repository.ManualRepository;
 import com.recipe.jamanchu.repository.RecipeRatingRepository;
 import com.recipe.jamanchu.repository.RecipeRepository;
 import com.recipe.jamanchu.repository.TenThousandRecipeRepository;
+import com.recipe.jamanchu.util.LastRecipeIdUtil;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -35,6 +42,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class RecipeDivideServiceImplTest {
+  @Mock
+  private LastRecipeIdUtil lastRecipeIdUtil;
+
   @Mock
   private UserAccessHandler userAccessHandler;
 
@@ -90,7 +100,7 @@ class RecipeDivideServiceImplTest {
 
     List<TenThousandRecipeEntity> recipeList = Collections.singletonList(scrapRecipe);
 
-    when(tenThousandRecipeRepository.findByCrawledRecipeIdBetween(1L, 1L)).thenReturn(recipeList);
+    when(tenThousandRecipeRepository.findByRecipeIdBetween(1L, 1L)).thenReturn(recipeList);
 
     RecipeEntity mockRecipe = RecipeEntity.builder()
         .user(user)
@@ -116,6 +126,149 @@ class RecipeDivideServiceImplTest {
   }
 
   @Test
+  @DisplayName("데이터 없을 때 null 반환")
+  void testProcessAndSaveAllDataEmptyRecipes() {
+    // given
+    when(tenThousandRecipeRepository.findByRecipeIdBetween(1L, 1L)).thenReturn(Collections.emptyList());
+
+    // when
+    ResultResponse resultResponse = recipeDivideService.processAndSaveAllData(1L, 1L);
+
+    // then
+    assertEquals(null, resultResponse);
+  }
+
+  @Test
+  @DisplayName("메뉴얼이 없는 경우 건너뛰고 다른 레시피는 처리")
+  void testProcessAndSaveAllDataWithoutManualContents() {
+    // given
+    TenThousandRecipeEntity recipeWithManual = TenThousandRecipeEntity.builder()
+        .name("Recipe With Manual")
+        .levelType(LevelType.LOW)
+        .cookingTimeType(CookingTimeType.TEN_MINUTES)
+        .thumbnail("thumbnail.jpg")
+        .crManualContents("Step 1$%^Step 2")  // 메뉴얼이 있는 경우
+        .crManualPictures("pic1.jpg,pic2.jpg")
+        .ingredients("Ingredient 1, Ingredient 2")
+        .rating(4.5)
+        .build();
+    TenThousandRecipeEntity emptyManualRecipe = TenThousandRecipeEntity.builder()
+        .name("Sample Recipe")
+        .levelType(LevelType.LOW)
+        .cookingTimeType(CookingTimeType.TEN_MINUTES)
+        .thumbnail("thumbnail.jpg")
+        .crManualContents("") // 메뉴얼이 없는 경우
+        .crManualPictures("pic1.jpg,pic2.jpg")
+        .ingredients("ingredient1 100g,ingredient2 200ml")
+        .rating(4.5)
+        .build();
+    // 여러 레시피를 반환하도록 설정
+    when(tenThousandRecipeRepository.findByRecipeIdBetween(1L, 2L))
+        .thenReturn(Arrays.asList(recipeWithManual, emptyManualRecipe));
+
+    // when
+    ResultResponse resultResponse = recipeDivideService.processAndSaveAllData(1L, 2L);
+
+    // then
+    assertNotNull(resultResponse); // 최소한 하나의 레시피가 처리되어야 하므로 null이 아니어야 함
+    assertEquals("데이터 분산 저장 성공!", resultResponse.getMessage()); // 성공 코드 확인
+  }
+
+  @Test
+  @DisplayName("재료가 없는 경우 건너뛰고 다른 레시피는 처리")
+  void testProcessAndSaveAllDataWithSkippingWithoutIngredients() {
+    // given
+    TenThousandRecipeEntity recipeWithIngredients = TenThousandRecipeEntity.builder()
+        .name("Recipe With Ingredients")
+        .levelType(LevelType.LOW)
+        .cookingTimeType(CookingTimeType.TEN_MINUTES)
+        .thumbnail("thumbnail.jpg")
+        .crManualContents("Step 1$%^Step 2")
+        .crManualPictures("pic1.jpg,pic2.jpg")
+        .ingredients("Ingredient 1, Ingredient 2") // 재료가 있는 경우
+        .rating(4.5)
+        .build();
+
+    TenThousandRecipeEntity emptyIngredientsRecipe = TenThousandRecipeEntity.builder()
+        .name("Recipe Without Ingredients")
+        .levelType(LevelType.LOW)
+        .cookingTimeType(CookingTimeType.TEN_MINUTES)
+        .thumbnail("thumbnail.jpg")
+        .crManualContents("Step 1$%^Step 2")
+        .crManualPictures("pic1.jpg,pic2.jpg")
+        .ingredients("") // 재료가 없는 경우
+        .rating(4.5)
+        .build();
+
+    // 여러 레시피를 반환하도록 설정
+    when(tenThousandRecipeRepository.findByRecipeIdBetween(1L, 2L))
+        .thenReturn(Arrays.asList(recipeWithIngredients, emptyIngredientsRecipe));
+
+    // when
+    ResultResponse resultResponse = recipeDivideService.processAndSaveAllData(1L, 2L);
+
+    // then
+    assertNotNull(resultResponse); // 최소한 하나의 레시피가 처리되어야 하므로 null이 아니어야 함
+    assertEquals("데이터 분산 저장 성공!", resultResponse.getMessage()); // 성공 코드 확인
+  }
+
+  @Test
+  @DisplayName("메뉴얼 길이와 사진의 길이가 같지 않을 경우 건너뛰고 다른 레시피만 저장")
+  void testProcessAndSaveAllDataWithDifferentManualContentsAndPicturesLength() {
+    // given
+    TenThousandRecipeEntity manualWithSameLength = TenThousandRecipeEntity.builder()
+        .name("Recipe With Ingredients")
+        .levelType(LevelType.LOW)
+        .cookingTimeType(CookingTimeType.TEN_MINUTES)
+        .thumbnail("thumbnail.jpg")
+        .crManualContents("Step 1$%^Step 2")
+        .crManualPictures("pic1.jpg,pic2.jpg")
+        .ingredients("Ingredient 1, Ingredient 2")
+        .rating(4.5)
+        .build();
+    TenThousandRecipeEntity differentLengthRecipe = TenThousandRecipeEntity.builder()
+        .name("Sample Recipe")
+        .levelType(LevelType.LOW)
+        .cookingTimeType(CookingTimeType.TEN_MINUTES)
+        .thumbnail("thumbnail.jpg")
+        .crManualContents("Step 1$%^Step 2") // 메뉴얼 내용
+        .crManualPictures("pic1.jpg") // 메뉴얼 사진이 하나만 있음
+        .ingredients("ingredient1 100g,ingredient2 200ml")
+        .rating(4.5)
+        .build();
+
+    // 여러 레시피를 반환하도록 설정
+    when(tenThousandRecipeRepository.findByRecipeIdBetween(1L, 2L))
+        .thenReturn(Arrays.asList(manualWithSameLength, differentLengthRecipe));
+
+    // when
+    ResultResponse resultResponse = recipeDivideService.processAndSaveAllData(1L, 2L);
+
+    // then
+    assertNotNull(resultResponse); // 최소한 하나의 레시피가 처리되어야 하므로 null이 아니어야 함
+    assertEquals("데이터 분산 저장 성공!", resultResponse.getMessage()); // 성공 코드 확인
+  }
+
+  @Test
+  @DisplayName("스케쥴링 함수 정상 동작")
+  void testWeeklyRecipeDivide() {
+    // given
+    when(lastRecipeIdUtil.getLastRecipeId()).thenReturn(100L);
+
+    List<TenThousandRecipeEntity> mockedRecipes = new ArrayList<>();
+    mockedRecipes.add(scrapRecipe);
+    when(tenThousandRecipeRepository.findByRecipeIdBetween(101L, 300L)).thenReturn(mockedRecipes);
+
+    // when
+    recipeDivideService.weeklyRecipeDivide();
+
+    // then
+    // processAndSaveAllData 메서드가 lastRecipeId + 1과 lastRecipeId + 200로 호출되는지 확인
+    verify(tenThousandRecipeRepository).findByRecipeIdBetween(101L, 300L);
+  }
+
+  @Test
+  @DisplayName("레시피 테이블 데이터 저장")
   void testSaveRecipeData() {
     // given
     when(userAccessHandler.findByEmail("user@example.com")).thenReturn(user);
@@ -146,6 +299,7 @@ class RecipeDivideServiceImplTest {
   }
 
   @Test
+  @DisplayName("평점 테이블 데이터 저장")
   void testSaveRecipeRatingData() {
     // given
     RecipeEntity recipe = RecipeEntity.builder().build();
@@ -161,6 +315,7 @@ class RecipeDivideServiceImplTest {
   }
 
   @Test
+  @DisplayName("메뉴얼 테이블 데이터 저장")
   void testSaveManualData() {
     // given
     RecipeEntity recipe = RecipeEntity.builder().build();
@@ -177,6 +332,67 @@ class RecipeDivideServiceImplTest {
   }
 
   @Test
+  @DisplayName("manualContents가 존재하고 manualPictures가 없는 경우")
+  void testSaveManualDataWithPicturesEmpty() {
+    // given
+    RecipeEntity recipe = RecipeEntity.builder()
+        .id(1L)
+        .name("Sample Recipe")
+        .build();
+    TenThousandRecipeEntity scrapedRecipe = TenThousandRecipeEntity.builder()
+        .crManualContents("Step 1$%^Step 2") // 메뉴얼 내용
+        .crManualPictures("") // 메뉴얼 사진 없음
+        .build();
+
+    // when
+    recipeDivideService.saveManualData(recipe, scrapedRecipe);
+
+    // then
+    verify(manualRepository, times(2)).save(any(ManualEntity.class));
+
+    // 저장된 메뉴얼 내용 검증
+    ArgumentCaptor<ManualEntity> manualCaptor = forClass(ManualEntity.class);
+    verify(manualRepository, times(2)).save(manualCaptor.capture());
+
+    List<ManualEntity> savedManuals = manualCaptor.getAllValues();
+    assertEquals("Step 1", savedManuals.get(0).getManualContent());
+    assertEquals("", savedManuals.get(0).getManualPicture());
+    assertEquals("Step 2", savedManuals.get(1).getManualContent());
+    assertEquals("", savedManuals.get(1).getManualPicture());
+  }
+
+  @Test
+  @DisplayName("manualContents가 존재하고 manualPictures가 없는 경우")
+  void testSaveManualDataWithPicturesNull() {
+    // given
+    RecipeEntity recipe = RecipeEntity.builder()
+        .id(1L)
+        .name("Sample Recipe")
+        .build();
+    TenThousandRecipeEntity scrapedRecipe = TenThousandRecipeEntity.builder()
+        .crManualContents("Step 1$%^Step 2") // 메뉴얼 내용
+        .crManualPictures(null) // 메뉴얼 사진 없음
+        .build();
+
+    // when
+    recipeDivideService.saveManualData(recipe, scrapedRecipe);
+
+    // then
+    verify(manualRepository, times(2)).save(any(ManualEntity.class));
+
+    // 저장된 메뉴얼 내용 검증
+    ArgumentCaptor<ManualEntity> manualCaptor = forClass(ManualEntity.class);
+    verify(manualRepository, times(2)).save(manualCaptor.capture());
+
+    List<ManualEntity> savedManuals = manualCaptor.getAllValues();
+    assertEquals("Step 1", savedManuals.get(0).getManualContent());
+    assertEquals("", savedManuals.get(0).getManualPicture());
+    assertEquals("Step 2", savedManuals.get(1).getManualContent());
+    assertEquals("", savedManuals.get(1).getManualPicture());
+  }
+
+  @Test
+  @DisplayName("재료 정보 정상적으로 저장")
   void testSaveIngredientDetails() {
     // given
     RecipeEntity recipe = RecipeEntity.builder().build();
@@ -189,6 +405,76 @@ class RecipeDivideServiceImplTest {
 
     // verify
     verify(ingredientRepository, times(2)).save(any(IngredientEntity.class));
+  }
+
+  @Test
+  @DisplayName("비어있는 재료 항목은 무시하고 다른 재료는 저장")
+  void testSaveIngredientDetailsWithEmptyIngredient() {
+    // given
+    RecipeEntity recipe = RecipeEntity.builder()
+        .id(1L)
+        .name("Sample Recipe")
+        .build();
+
+    // 재료 목록에 빈 문자열이 포함된 경우
+    TenThousandRecipeEntity scrapedRecipe = TenThousandRecipeEntity.builder()
+        .ingredients("Tomato 2, , Onion 1") // 빈 재료 항목 포함
+        .build();
+
+    // when
+    recipeDivideService.saveIngredientDetails(recipe, scrapedRecipe);
+
+    // then
+    // save 메소드가 2번 호출되었는지 확인 (Tomato와 Onion만 저장됨)
+    verify(ingredientRepository, times(2)).save(any(IngredientEntity.class));
+
+    // 추가로 저장된 재료의 내용 검증
+    ArgumentCaptor<IngredientEntity> ingredientCaptor = forClass(IngredientEntity.class);
+    verify(ingredientRepository, times(2)).save(ingredientCaptor.capture());
+
+    List<IngredientEntity> savedIngredients = ingredientCaptor.getAllValues();
+
+    // Tomato와 Onion이 올바르게 저장되었는지 확인
+    assertEquals("Tomato", savedIngredients.get(0).getName());
+    assertEquals("2", savedIngredients.get(0).getQuantity());
+    assertEquals("Onion", savedIngredients.get(1).getName());
+    assertEquals("1", savedIngredients.get(1).getQuantity());
+  }
+
+  @Test
+  @DisplayName("비어있는 재료의 수량은 무시하고 저장")
+  void testSaveIngredientDetailsWithEmptyIngredientQuantity() {
+    // given
+    RecipeEntity recipe = RecipeEntity.builder()
+        .id(1L)
+        .name("Sample Recipe")
+        .build();
+
+    // 재료 목록에 빈 문자열이 포함된 경우
+    TenThousandRecipeEntity scrapedRecipe = TenThousandRecipeEntity.builder()
+        .ingredients("Tomato 2, Potato, Onion 1") // 빈 재료 항목 포함
+        .build();
+
+    // when
+    recipeDivideService.saveIngredientDetails(recipe, scrapedRecipe);
+
+    // then
+    // save 메소드가 2번 호출되었는지 확인 (Tomato와 Onion만 저장됨)
+    verify(ingredientRepository, times(3)).save(any(IngredientEntity.class));
+
+    // 추가로 저장된 재료의 내용 검증
+    ArgumentCaptor<IngredientEntity> ingredientCaptor = forClass(IngredientEntity.class);
+    verify(ingredientRepository, times(3)).save(ingredientCaptor.capture());
+
+    List<IngredientEntity> savedIngredients = ingredientCaptor.getAllValues();
+
+    // Tomato와 Onion이 올바르게 저장되었는지 확인
+    assertEquals("Tomato", savedIngredients.get(0).getName());
+    assertEquals("2", savedIngredients.get(0).getQuantity());
+    assertEquals("Potato", savedIngredients.get(1).getName());
+    assertEquals("", savedIngredients.get(1).getQuantity());
+    assertEquals("Onion", savedIngredients.get(2).getName());
+    assertEquals("1", savedIngredients.get(2).getQuantity());
   }
 
 }
