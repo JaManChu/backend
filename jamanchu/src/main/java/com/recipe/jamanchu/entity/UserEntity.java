@@ -14,12 +14,20 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @Entity
+@SQLRestriction("deleted_at IS NULL")
+@SQLDelete(sql = "UPDATE user "
+    + "SET deleted_at = now(), "
+    + "usr_nickname = CONCAT('delete_', usr_id), "
+    + "usr_password = CONCAT('delete_', usr_id) "
+    + "WHERE usr_id = ?")
 @Table(name = "user")
 public class UserEntity extends BaseTimeEntity {
 
@@ -50,3 +58,4 @@ public class UserEntity extends BaseTimeEntity {
   @Enumerated(EnumType.STRING)
   private UserRole role;
 }
+
