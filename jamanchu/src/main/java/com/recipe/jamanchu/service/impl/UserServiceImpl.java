@@ -1,5 +1,7 @@
 package com.recipe.jamanchu.service.impl;
 
+import static com.recipe.jamanchu.model.type.ResultCode.SUCCESS_GET_USER_INFO;
+
 import com.recipe.jamanchu.auth.jwt.JwtUtil;
 import com.recipe.jamanchu.component.UserAccessHandler;
 import com.recipe.jamanchu.entity.UserEntity;
@@ -7,6 +9,8 @@ import com.recipe.jamanchu.model.dto.request.auth.DeleteUserDTO;
 import com.recipe.jamanchu.model.dto.request.auth.SignupDTO;
 import com.recipe.jamanchu.model.dto.request.auth.UserDetailsDTO;
 import com.recipe.jamanchu.model.dto.request.auth.UserUpdateDTO;
+import com.recipe.jamanchu.model.dto.response.ResultResponse;
+import com.recipe.jamanchu.model.dto.response.auth.UserInfoDTO;
 import com.recipe.jamanchu.model.type.ResultCode;
 import com.recipe.jamanchu.model.type.UserRole;
 import com.recipe.jamanchu.service.UserService;
@@ -91,6 +95,16 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     userAccessHandler.deleteUser(user);
     return ResultCode.SUCCESS_DELETE_USER;
+  }
+
+
+  @Override
+  public ResultResponse getUserInfo(HttpServletRequest request) {
+    UserEntity user = userAccessHandler
+        .findByUserId(jwtUtil.getUserId(request.getHeader("access-token")));
+
+    return new ResultResponse(SUCCESS_GET_USER_INFO,
+        new UserInfoDTO(user.getEmail(), user.getNickname()));
   }
 }
 
