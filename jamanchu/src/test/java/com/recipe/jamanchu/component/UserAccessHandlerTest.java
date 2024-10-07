@@ -9,6 +9,7 @@ import com.recipe.jamanchu.auth.oauth2.KakaoUserDetails;
 import com.recipe.jamanchu.entity.UserEntity;
 import com.recipe.jamanchu.exceptions.exception.DuplicatedEmailException;
 import com.recipe.jamanchu.exceptions.exception.DuplicatedNicknameException;
+import com.recipe.jamanchu.exceptions.exception.PasswordMismatchException;
 import com.recipe.jamanchu.exceptions.exception.SocialAccountException;
 import com.recipe.jamanchu.exceptions.exception.UserNotFoundException;
 import com.recipe.jamanchu.repository.UserRepository;
@@ -216,6 +217,30 @@ class UserAccessHandlerTest {
 
     // when & then
     assertDoesNotThrow(() -> userAccessHandler.isSocialUser(provider));
+  }
+
+  @Test
+  @DisplayName("validatePassword - 실패 : 비밀번호 불일치")
+  void validatePassword_PasswordMisMatch() {
+    // given
+    String otherPassword = "otherPassword";
+    String userPassword = passwordEncoder.encode("userPassword");
+
+    // when & then
+    assertThrows(PasswordMismatchException.class,
+        () -> userAccessHandler.validatePassword(userPassword, otherPassword));
+  }
+
+  @Test
+  @DisplayName("validatePassword - 성공 : 비밀번호 일치")
+  void validatePassword_PasswordMatch() {
+    // given
+    String rawPassword = "password";
+    String encodedPassword = passwordEncoder.encode("password");
+    when(passwordEncoder.matches(rawPassword, encodedPassword)).thenReturn(true);
+
+    // when & then
+    assertDoesNotThrow(() -> userAccessHandler.validatePassword(encodedPassword, rawPassword));
   }
 
   @Test

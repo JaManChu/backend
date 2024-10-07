@@ -4,6 +4,7 @@ import com.recipe.jamanchu.auth.oauth2.KakaoUserDetails;
 import com.recipe.jamanchu.entity.UserEntity;
 import com.recipe.jamanchu.exceptions.exception.DuplicatedEmailException;
 import com.recipe.jamanchu.exceptions.exception.DuplicatedNicknameException;
+import com.recipe.jamanchu.exceptions.exception.PasswordMismatchException;
 import com.recipe.jamanchu.exceptions.exception.SocialAccountException;
 import com.recipe.jamanchu.exceptions.exception.UserNotFoundException;
 import com.recipe.jamanchu.model.type.UserRole;
@@ -87,10 +88,24 @@ public class UserAccessHandler {
     }
   }
 
+  // 비밀번호 일치 여부 체크
+  public void validatePassword(String enPassword, String password) {
+    if (!passwordEncoder.matches(password, enPassword)) {
+      throw new PasswordMismatchException();
+    }
+  }
+
   // 회원 정보 저장
   @Transactional
   public void saveUser(UserEntity user) {
     userRepository.save(user);
     log.info("saveUser -> Success");
   }
+
+  // 회원정보 삭제
+  @Transactional
+  public void deleteUser(UserEntity user) {
+    userRepository.delete(user);
+  }
 }
+

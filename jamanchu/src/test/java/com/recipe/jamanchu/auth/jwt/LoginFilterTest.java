@@ -103,7 +103,6 @@ class LoginFilterTest {
     String password = "password";
 
     when(request.getParameter("email")).thenReturn(email);
-    when(request.getParameter("password")).thenReturn(password);
     when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
     PrintWriter writer = mock(PrintWriter.class);
@@ -116,7 +115,7 @@ class LoginFilterTest {
     verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
     verify(response).setContentType("application/json");
     verify(response).setCharacterEncoding("UTF-8");
-    verify(writer).write("이미 존재하는 아이디 입니다.");
+    verify(writer).write("해당 사용자를 찾을 수 없습니다.");
   }
 
   @Test
@@ -124,20 +123,20 @@ class LoginFilterTest {
   void loginValidatePassword() throws IOException {
     // given
     String email = "test@example.com";
-    String password = "1234";
+    String password = "password";
     String encodedPassword = "encodedWrongPassword";
 
     UserEntity user = UserEntity.builder()
         .userId(1L)
         .email(email)
-        .password(passwordEncoder.encode(password))
+        .password(encodedPassword)
         .role(UserRole.USER)
         .build();
 
     when(request.getParameter("email")).thenReturn(email);
-    when(request.getParameter("password")).thenReturn(password);
     when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
-    when(passwordEncoder.encode(password)).thenReturn(encodedPassword);
+    when(request.getParameter("password")).thenReturn(password);
+    when(passwordEncoder.matches(password, user.getPassword())).thenReturn(false);
 
     PrintWriter writer = mock(PrintWriter.class);
     when(response.getWriter()).thenReturn(writer);

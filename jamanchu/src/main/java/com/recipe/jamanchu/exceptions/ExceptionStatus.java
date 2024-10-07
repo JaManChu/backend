@@ -14,6 +14,7 @@ public enum ExceptionStatus {
   SOCIAL_ACCOUNT(HttpStatus.BAD_REQUEST, "소셜 계정은 해당 소셜 계정에서 변경 가능합니다."),
   RECIPE_NOT_FOUND(HttpStatus.BAD_REQUEST, "해당 레시피를 찾을 수 없습니다."),
   UNMATCHED_USER(HttpStatus.UNAUTHORIZED, "일치하는 사용자가 없습니다."),
+  PASSWORD_MISMATCH(HttpStatus.BAD_REQUEST, "비밀번호가 일치하지 않습니다."),
   ;
 
   private final HttpStatus statusCode;

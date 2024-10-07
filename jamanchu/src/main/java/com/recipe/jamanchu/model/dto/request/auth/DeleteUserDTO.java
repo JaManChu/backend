@@ -5,9 +5,6 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class UserUpdateDTO {
-
-  private String nickname;
-  private String beforePassword;
-  private String afterPassword;
+public class DeleteUserDTO {
+  private String password;
 }
