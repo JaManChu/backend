@@ -206,15 +206,29 @@ class UserServiceImplTest {
   }
 
   @Test
-  @DisplayName("회원 탈퇴 성공")
+  @DisplayName("회원 탈퇴 성공 : 일반 회원")
   void deleteUser_Success() {
 
     // given
     when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(USERID);
     when(userAccessHandler.findByUserId(USERID)).thenReturn(user);
-
     doNothing().when(userAccessHandler)
         .validatePassword(user.getPassword(), deleteUserDTO.getPassword());
+
+    // when
+    ResultCode result = userServiceimpl.deleteUser(request, deleteUserDTO);
+
+    // then
+    assertEquals(ResultCode.SUCCESS_DELETE_USER, result);
+  }
+
+  @Test
+  @DisplayName("회원 탈퇴 성공 : 소셜 가입을 한 회원")
+  void deleteUser_Success_SocialAccount() {
+
+    // given
+    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(USERID);
+    when(userAccessHandler.findByUserId(USERID)).thenReturn(kakaoUser);
 
     // when
     ResultCode result = userServiceimpl.deleteUser(request, deleteUserDTO);
@@ -251,4 +265,3 @@ class UserServiceImplTest {
         () -> userServiceimpl.deleteUser(request, deleteUserDTO));
   }
 }
-
