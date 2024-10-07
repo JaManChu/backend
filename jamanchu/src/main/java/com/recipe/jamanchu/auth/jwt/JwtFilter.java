@@ -75,6 +75,8 @@ public class JwtFilter extends OncePerRequestFilter {
   // access 토큰이 만료되었을 경우 refresh 토큰 검증 후 재 발급
   private void expiredAccessToken(HttpServletRequest request, HttpServletResponse response)
       throws IOException {
+
+    logger.info("Access-Token is Expired!!");
     String refreshToken = getRefreshTokenFromCookies(request);
 
     if (refreshToken == null) {
@@ -116,6 +118,9 @@ public class JwtFilter extends OncePerRequestFilter {
 
   // access 토큰 재발급
   private String createNewAccessToken(String refreshToken) {
+
+    logger.info("Create New Access-Token!");
+
     Long userId = jwtUtil.getUserId(refreshToken);
     UserRole role = UserRole.valueOf(jwtUtil.getRole(refreshToken));
 
