@@ -22,7 +22,7 @@ public class NotifyServiceImpl implements NotifyService {
   @Override
   public void subscribe(Long recipeId, FluxSink<Notify> sink) {
     if(!recipeRepository.existsById(recipeId)){
-      sink.error(new IllegalArgumentException("Recipe not found"));
+      sink.error(new RecipeNotFoundException());
       throw new RecipeNotFoundException();
     }else{
       subscribers.put(recipeId, sink);
