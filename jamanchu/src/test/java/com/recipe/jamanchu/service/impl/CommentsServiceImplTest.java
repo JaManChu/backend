@@ -97,6 +97,42 @@ class CommentsServiceImplTest {
     verify(notifyService,times(1)).notifyUser(any(),any());
   }
 
+  @DisplayName("댓글 작성 테스트 - 크롤링된 데이터인 경우")
+  @Test
+  void writeCommentForCrawlingRecipe() {
+
+    // given
+    Long userId = 1L;
+
+    UserEntity user = UserEntity.builder()
+        .userId(userId)
+        .nickname("heesang")
+        .email("test@gmail.com")
+        .password("1234")
+        .role(UserRole.USER)
+        .provider(null)
+        .providerId(null)
+        .build();
+
+    Long recipeId = 1L;
+
+    RecipeEntity recipe = RecipeEntity.builder()
+        .user(user)
+        .id(recipeId)
+        .provider(RecipeProvider.SCRAP)
+        .build();
+    CommentsDTO requestDTO = new CommentsDTO(recipeId, "댓글 내용", 5.0);
+
+    // when
+    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(userId);
+    when(userAccessHandler.findByUserId(userId)).thenReturn(user);
+    when(recipeRepository.findById(recipeId)).thenReturn(Optional.of(recipe));
+
+    // then
+    assertEquals("댓글 작성 성공!", commentService.writeComment(request, requestDTO).getMessage());
+    verify(notifyService,times(0)).notifyUser(any(),any());
+  }
+
   @DisplayName("댓글 수정 테스트")
   @Test
   void updateComment() {
