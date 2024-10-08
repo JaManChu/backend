@@ -3,6 +3,8 @@ package com.recipe.jamanchu.service.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.recipe.jamanchu.auth.jwt.JwtUtil;
@@ -15,6 +17,7 @@ import com.recipe.jamanchu.model.dto.request.comments.CommentsDTO;
 import com.recipe.jamanchu.model.dto.request.comments.CommentsDeleteDTO;
 import com.recipe.jamanchu.model.dto.request.comments.CommentsUpdateDTO;
 import com.recipe.jamanchu.model.dto.response.comments.Comments;
+import com.recipe.jamanchu.model.dto.response.notify.Notify;
 import com.recipe.jamanchu.model.type.UserRole;
 import com.recipe.jamanchu.repository.CommentRepository;
 import com.recipe.jamanchu.repository.RecipeRepository;
@@ -39,6 +42,9 @@ class CommentsServiceImplTest {
 
   @Mock
   private UserAccessHandler userAccessHandler;
+
+  @Mock
+  private NotifyServiceImpl notifyService;
 
   @Mock
   private JwtUtil jwtUtil;
@@ -69,9 +75,17 @@ class CommentsServiceImplTest {
     Long recipeId = 1L;
 
     RecipeEntity recipe = RecipeEntity.builder()
+        .user(user)
         .id(recipeId)
         .build();
     CommentsDTO requestDTO = new CommentsDTO(recipeId, "댓글 내용", 5.0);
+
+    Notify notify = Notify.of(
+        recipe.getName(),
+        requestDTO.getComment(),
+        requestDTO.getRating(),
+        user.getNickname()
+    );
 
     // when
     when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(userId);
@@ -80,7 +94,7 @@ class CommentsServiceImplTest {
 
     // then
     assertEquals("댓글 작성 성공!", commentService.writeComment(request, requestDTO).getMessage());
-
+    verify(notifyService,times(1)).notifyUser(any(),any());
   }
 
   @DisplayName("댓글 수정 테스트")
