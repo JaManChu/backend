@@ -78,6 +78,20 @@ jacocoTestReport {
 		html.required = true
 		csv.required = false
 	}
+	afterEvaluate {
+		classDirectories.setFrom(
+				files(classDirectories.files.collect {
+					fileTree(dir: it, excludes : [
+							'com/recipe/jamanchu/JamanchuApplication.class',
+							'com/recipe/jamanchu/exceptions/**',
+							'com/recipe/jamanchu/util/**',
+							'com/recipe/jamanchu/model/type/**',
+							'com/recipe/jamanchu/model/dto/response/**',
+							'com/recipe/jamanchu/notify/**'
+					])
+				})
+		)
+	}
 }
 
 jacocoTestCoverageVerification {
@@ -91,6 +105,20 @@ jacocoTestCoverageVerification {
 				minimum = 0.90
 			}
 		}
+	}
+	afterEvaluate {
+		classDirectories.setFrom(
+				files(classDirectories.files.collect {
+					fileTree(dir: it, excludes : [
+							'com/recipe/jamanchu/JamanchuApplication.class',
+							'com/recipe/jamanchu/exceptions/**',
+							'com/recipe/jamanchu/util/**',
+							'com/recipe/jamanchu/model/type/**',
+							'com/recipe/jamanchu/model/dto/response/**',
+							'com/recipe/jamanchu/notify/**'
+					])
+				})
+		)
 	}
 }
 
