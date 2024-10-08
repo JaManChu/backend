@@ -55,6 +55,14 @@ public class UserAccessHandler {
             .build()));
   }
 
+  public void existsById(Long userId) {
+    log.info("existsById -> userId : {}", userId);
+    if (!userRepository.existsById(userId)) {
+      log.info("User Not Found!");
+      throw new UserNotFoundException();
+    }
+  }
+
   // 이메일 중복 체크
   public void existsByEmail(String email){
 
