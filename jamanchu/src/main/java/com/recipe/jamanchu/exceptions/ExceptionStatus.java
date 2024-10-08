@@ -15,6 +15,7 @@ public enum ExceptionStatus {
   RECIPE_NOT_FOUND(HttpStatus.BAD_REQUEST, "해당 레시피를 찾을 수 없습니다."),
   UNMATCHED_USER(HttpStatus.UNAUTHORIZED, "일치하는 사용자가 없습니다."),
   PASSWORD_MISMATCH(HttpStatus.BAD_REQUEST, "비밀번호가 일치하지 않습니다."),
+  BAD_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
   ;
 
   private final HttpStatus statusCode;
