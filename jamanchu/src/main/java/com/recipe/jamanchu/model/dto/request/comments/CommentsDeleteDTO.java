@@ -1,13 +1,19 @@
 package com.recipe.jamanchu.model.dto.request.comments;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Min;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
-@AllArgsConstructor
 public class CommentsDeleteDTO {
 
-    @Min(value = 1, message = "잘못된 입력입니다.")
-    private final Long commentId;
+  @Min(value = 1, message = "잘못된 입력입니다.")
+  @JsonProperty("commentId")
+  private final Long commentId;
+
+  @JsonCreator
+  public CommentsDeleteDTO(Long commentId) {
+    this.commentId = commentId;
+  }
 }
