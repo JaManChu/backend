@@ -26,6 +26,7 @@ public class UserController {
   private static final Logger log = LoggerFactory.getLogger(UserController.class);
   private final UserService userService;
 
+  // 회원 가입
   @PostMapping("/signup")
   public ResponseEntity<ResultResponse> signup(SignupDTO signupDTO) {
 
@@ -33,6 +34,7 @@ public class UserController {
         .body(ResultResponse.of(userService.signup(signupDTO)));
   }
 
+  // OAuth signup & login from Kakao
   @GetMapping("/test")
   public ResponseEntity<?> test(@RequestParam("access") String access,
       @RequestParam("refresh") String refresh) {
@@ -45,6 +47,7 @@ public class UserController {
     return ResponseEntity.ok().body("로그인 성공");
   }
 
+  // 회원 정보 수정
   @PutMapping
   public ResponseEntity<ResultResponse> updateUser(HttpServletRequest request,
       UserUpdateDTO userUpdateDTO) {
@@ -53,12 +56,21 @@ public class UserController {
         .body(ResultResponse.of(userService.updateUserInfo(request, userUpdateDTO)));
   }
 
+  // 회원 탈퇴
   @DeleteMapping
   public ResponseEntity<ResultResponse> deleteUser(HttpServletRequest request,
       DeleteUserDTO deleteUserDTO) {
 
     return ResponseEntity.ok()
         .body(ResultResponse.of(userService.deleteUser(request, deleteUserDTO)));
+  }
+
+  // 회원 정보 조회
+  @GetMapping
+  public ResponseEntity<ResultResponse> getUserInfo(HttpServletRequest request) {
+
+    return ResponseEntity.ok()
+        .body(userService.getUserInfo(request));
   }
 }
 

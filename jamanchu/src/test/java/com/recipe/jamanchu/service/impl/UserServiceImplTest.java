@@ -17,6 +17,8 @@ import com.recipe.jamanchu.exceptions.exception.UserNotFoundException;
 import com.recipe.jamanchu.model.dto.request.auth.DeleteUserDTO;
 import com.recipe.jamanchu.model.dto.request.auth.SignupDTO;
 import com.recipe.jamanchu.model.dto.request.auth.UserUpdateDTO;
+import com.recipe.jamanchu.model.dto.response.ResultResponse;
+import com.recipe.jamanchu.model.dto.response.auth.UserInfoDTO;
 import com.recipe.jamanchu.model.type.ResultCode;
 import com.recipe.jamanchu.model.type.UserRole;
 import jakarta.servlet.http.HttpServletRequest;
@@ -61,12 +63,14 @@ class UserServiceImplTest {
   private UserEntity user;
   private UserEntity kakaoUser;
   private DeleteUserDTO deleteUserDTO;
+  private UserInfoDTO userInfoDTO;
 
   @BeforeEach
   void setUp() {
     signup = new SignupDTO(EMAIL, PASSWORD, NICKNAME);
     userUpdateDTO = new UserUpdateDTO(BEFORE_PASSWORD, AFTER_PASSWORD, NEW_NICKNAME);
     deleteUserDTO = new DeleteUserDTO(PASSWORD);
+    userInfoDTO = new UserInfoDTO(EMAIL, NICKNAME);
 
 
     // 일반 회원
@@ -263,5 +267,33 @@ class UserServiceImplTest {
     // when then
     assertThrows(PasswordMismatchException.class,
         () -> userServiceimpl.deleteUser(request, deleteUserDTO));
+  }
+
+  @Test
+  @DisplayName("회원 정보 조회 성공")
+  void getUserInfo_Success() {
+    // given
+    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(USERID);
+    when(userAccessHandler.findByUserId(USERID)).thenReturn(user);
+
+    // when
+    ResultResponse response = userServiceimpl.getUserInfo(request);
+
+    // then
+    assertEquals(ResultCode.SUCCESS_GET_USER_INFO.getStatusCode(), response.getCode());
+    assertEquals(userInfoDTO.getEmail(), ((UserInfoDTO)response.getData()).getEmail());
+    assertEquals(userInfoDTO.getNickname(), ((UserInfoDTO)response.getData()).getNickname());
+  }
+
+  @Test
+  @DisplayName("회원 정보 조회 실패 : 존재하지 않은 사용자")
+  void getUserInfo_NotFoundUser() {
+    // given
+    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(USERID);
+    when(userAccessHandler.findByUserId(USERID)).thenThrow(new UserNotFoundException());
+
+    // when then
+    assertThrows(UserNotFoundException.class,
+        () -> userServiceimpl.getUserInfo(request));
   }
 }
