@@ -54,7 +54,7 @@ class UserServiceImplTest {
   private static final String NICKNAME = "nickname";
   private static final String PASSWORD = "1234";
   private static final String PROVIDER = "kakao";
-  private static final String BEFORE_PASSWORD = "newPassword";
+  private static final String BEFORE_PASSWORD = "oldPassword";
   private static final String AFTER_PASSWORD = "newPassword";
   private static final String NEW_NICKNAME = "newNickName";
 
@@ -68,7 +68,7 @@ class UserServiceImplTest {
   @BeforeEach
   void setUp() {
     signup = new SignupDTO(EMAIL, PASSWORD, NICKNAME);
-    userUpdateDTO = new UserUpdateDTO(BEFORE_PASSWORD, AFTER_PASSWORD, NEW_NICKNAME);
+    userUpdateDTO = new UserUpdateDTO(NEW_NICKNAME, BEFORE_PASSWORD, AFTER_PASSWORD);
     deleteUserDTO = new DeleteUserDTO(PASSWORD);
     userInfoDTO = new UserInfoDTO(EMAIL, NICKNAME);
 
@@ -131,8 +131,8 @@ class UserServiceImplTest {
   }
 
   @Test
-  @DisplayName("회원정보 수정 성공")
-  void updateUserInfo_Success() {
+  @DisplayName("회원정보 수정 성공 - 닉네임, 패스워드 모두 변경")
+  void updateUserInfo_SuccessForPasswordAndNickname() {
     // given
     when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(USERID);
     when(userAccessHandler.findByUserId(USERID)).thenReturn(user);
@@ -141,6 +141,24 @@ class UserServiceImplTest {
     doNothing().when(userAccessHandler).isSocialUser(user.getProvider());
     doNothing().when(userAccessHandler).existsByNickname(userUpdateDTO.getNickname());
 
+    // when
+    ResultCode result = userServiceimpl.updateUserInfo(request, userUpdateDTO);
+
+    // then
+    assertEquals(ResultCode.SUCCESS_UPDATE_USER_INFO, result);
+  }
+
+  @Test
+  @DisplayName("회원정보 수정 성공 - 패스워드만 변경")
+  void updateUserInfo_SuccessForPassword() {
+    // given
+    UserUpdateDTO userUpdateDTO = new UserUpdateDTO("nickname", BEFORE_PASSWORD, AFTER_PASSWORD);
+
+    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(USERID);
+    when(userAccessHandler.findByUserId(USERID)).thenReturn(user);
+
+    doNothing().when(userAccessHandler).validatePassword(user.getPassword(), BEFORE_PASSWORD);
+    doNothing().when(userAccessHandler).isSocialUser(user.getProvider());
     // when
     ResultCode result = userServiceimpl.updateUserInfo(request, userUpdateDTO);
 
@@ -295,5 +313,28 @@ class UserServiceImplTest {
     // when then
     assertThrows(UserNotFoundException.class,
         () -> userServiceimpl.getUserInfo(request));
+  }
+
+  @DisplayName("유저 객체를 DTO로 변환")
+  @Test
+  void UserEntityToUserDetailDTO() {
+    //given
+    String email = "test@gmail.com";
+
+    UserEntity user = UserEntity.builder()
+        .email(email)
+        .nickname("nickname")
+        .role(UserRole.USER)
+        .password("password")
+        .provider(null)
+        .build();
+    //when
+    when(userAccessHandler.findByEmail(email)).thenReturn(user);
+
+    //then
+    assertEquals(
+        user.getEmail(),
+        userServiceimpl.loadUserByUsername(email).getUsername()
+    );
   }
 }
