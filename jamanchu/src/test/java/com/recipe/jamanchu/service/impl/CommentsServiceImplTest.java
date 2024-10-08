@@ -41,6 +41,9 @@ class CommentsServiceImplTest {
   private UserAccessHandler userAccessHandler;
 
   @Mock
+  private NotifyServiceImpl notifyService;
+
+  @Mock
   private JwtUtil jwtUtil;
 
   @Mock
@@ -70,6 +73,7 @@ class CommentsServiceImplTest {
 
     RecipeEntity recipe = RecipeEntity.builder()
         .id(recipeId)
+        .user(user)
         .build();
     CommentsDTO requestDTO = new CommentsDTO(recipeId, "댓글 내용", 5.0);
 
