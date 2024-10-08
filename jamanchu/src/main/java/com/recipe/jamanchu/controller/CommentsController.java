@@ -6,6 +6,7 @@ import com.recipe.jamanchu.model.dto.request.comments.CommentsUpdateDTO;
 import com.recipe.jamanchu.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.service.CommentsService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -33,21 +34,21 @@ public class CommentsController {
   @PostMapping
   public ResponseEntity<ResultResponse> writeComment(
       HttpServletRequest request,
-      @RequestBody CommentsDTO commentsDTO) {
+      @Valid @RequestBody CommentsDTO commentsDTO) {
     return ResponseEntity.ok(commentsService.writeComment(request, commentsDTO));
   }
 
   @PutMapping
   public ResponseEntity<ResultResponse> updateComment(
       HttpServletRequest request,
-      @RequestBody CommentsUpdateDTO commentsUpdateDTO) {
+      @Valid @RequestBody CommentsUpdateDTO commentsUpdateDTO) {
     return ResponseEntity.ok(commentsService.updateComment(request, commentsUpdateDTO));
   }
 
   @DeleteMapping
   public ResponseEntity<ResultResponse> deleteComment(
       HttpServletRequest request,
-      @RequestBody CommentsDeleteDTO commentsDeleteDTO) {
+      @Valid @RequestBody CommentsDeleteDTO commentsDeleteDTO) {
     return ResponseEntity.ok(commentsService.deleteComment(request, commentsDeleteDTO));
   }
 }
