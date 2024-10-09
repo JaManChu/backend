@@ -32,8 +32,8 @@ public class UserController {
   @PostMapping("/signup")
   public ResponseEntity<ResultResponse> signup(@Valid @RequestBody SignupDTO signupDTO) {
 
-    return ResponseEntity.ok()
-        .body(ResultResponse.of(userService.signup(signupDTO)));
+    ResultResponse response = ResultResponse.of(userService.signup(signupDTO));
+    return ResponseEntity.status(response.getCode()).body(response);
   }
 
   // OAuth signup & login from Kakao
