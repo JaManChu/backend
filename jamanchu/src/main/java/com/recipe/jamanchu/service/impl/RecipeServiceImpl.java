@@ -7,6 +7,7 @@ import com.recipe.jamanchu.component.UserAccessHandler;
 import com.recipe.jamanchu.entity.IngredientEntity;
 import com.recipe.jamanchu.entity.ManualEntity;
 import com.recipe.jamanchu.entity.RecipeEntity;
+import com.recipe.jamanchu.entity.ScrapedRecipeEntity;
 import com.recipe.jamanchu.entity.UserEntity;
 import com.recipe.jamanchu.exceptions.exception.RecipeNotFoundException;
 import com.recipe.jamanchu.exceptions.exception.UnmatchedUserException;
@@ -26,6 +27,7 @@ import com.recipe.jamanchu.model.type.ResultCode;
 import com.recipe.jamanchu.repository.IngredientRepository;
 import com.recipe.jamanchu.repository.ManualRepository;
 import com.recipe.jamanchu.repository.RecipeRepository;
+import com.recipe.jamanchu.repository.ScrapedRecipeRepository;
 import com.recipe.jamanchu.service.RecipeService;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
@@ -46,14 +48,15 @@ public class RecipeServiceImpl implements RecipeService {
   private final RecipeRepository recipeRepository;
   private final IngredientRepository ingredientRepository;
   private final ManualRepository manualRepository;
+  private final ScrapedRecipeRepository scrapedRecipeRepository;
   private final UserAccessHandler userAccessHandler;
   private final JwtUtil jwtUtil;
 
   @Override
   @Transactional
   public ResultResponse registerRecipe(HttpServletRequest request, RecipesDTO recipesDTO) {
-
     Long userId = jwtUtil.getUserId(request.getHeader("access-token"));
+
     UserEntity user = userAccessHandler.findByUserId(userId);
 
     RecipeEntity recipe = RecipeEntity.builder()
@@ -304,5 +307,24 @@ public class RecipeServiceImpl implements RecipeService {
         )).toList();
 
     return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_ALL_RECIPES_BY_RATING, recipesSummaries);
+  }
+
+  @Override
+  public ResultResponse scrapedRecipe(HttpServletRequest request, Long recipeId) {
+    Long userId = jwtUtil.getUserId(request.getHeader("access-token"));
+
+    UserEntity user = userAccessHandler.findByUserId(userId);
+
+    RecipeEntity recipe = recipeRepository.findById(recipeId)
+        .orElseThrow(RecipeNotFoundException::new);
+
+    ScrapedRecipeEntity scrapedRecipe = ScrapedRecipeEntity.builder()
+        .user(user)
+        .recipe(recipe)
+        .build();
+
+    scrapedRecipeRepository.save(scrapedRecipe);
+
+    return ResultResponse.of(ResultCode.SUCCESS_SCRAPED_RECIPE);
   }
 }

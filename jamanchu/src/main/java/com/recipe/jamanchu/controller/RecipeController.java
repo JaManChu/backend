@@ -66,6 +66,13 @@ public class RecipeController {
     return ResponseEntity.ok(recipeService.registerRecipe(request, recipesDTO));
   }
 
+  @PostMapping("/{recipeId}/scrap")
+  public ResponseEntity<ResultResponse> scrapedRecipe(
+      HttpServletRequest request,
+      @PathVariable("recipeId") Long recipeId) {
+    return ResponseEntity.ok(recipeService.scrapedRecipe(request, recipeId));
+  }
+
   @PutMapping
   public ResponseEntity<ResultResponse> updateRecipe(
       HttpServletRequest request,

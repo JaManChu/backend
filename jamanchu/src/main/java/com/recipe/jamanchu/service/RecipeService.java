@@ -26,7 +26,9 @@ public interface RecipeService {
 
   // 인기 레시피 리스트 API
   ResultResponse getRecipesByRating(int page, int size);
+
   // 레시피 스크랩 API
+  ResultResponse scrapedRecipe(HttpServletRequest request, Long recipeId);
 
   // 레시피 삭제 API
   ResultResponse deleteRecipe(HttpServletRequest request, RecipesDeleteDTO recipesDeleteDTO);
