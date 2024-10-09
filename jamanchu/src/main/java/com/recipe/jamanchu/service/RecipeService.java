@@ -12,6 +12,9 @@ public interface RecipeService {
   // 레시피 작성 API
   ResultResponse registerRecipe(HttpServletRequest request, RecipesDTO recipesDTO);
 
+  // 레시피 수정 API
+  ResultResponse updateRecipe(HttpServletRequest request, RecipesUpdateDTO recipesUpdateDTO);
+
   // 레시피 삭제 API
   ResultResponse deleteRecipe(HttpServletRequest request, RecipesDeleteDTO recipesDeleteDTO);
 }

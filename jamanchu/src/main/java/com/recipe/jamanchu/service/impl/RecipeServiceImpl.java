@@ -97,6 +97,67 @@ public class RecipeServiceImpl implements RecipeService {
   }
 
   @Override
+  @Transactional
+  public ResultResponse updateRecipe(HttpServletRequest request,
+      RecipesUpdateDTO recipesUpdateDTO) {
+    Long userId = jwtUtil.getUserId(request.getHeader("access-token"));
+
+    UserEntity user = userAccessHandler.findByUserId(userId);
+
+    Long recipeId = recipesUpdateDTO.getRecipeId();
+
+    RecipeEntity recipe = recipeRepository.findById(recipeId)
+        .orElseThrow(RecipeNotFoundException::new);
+
+    if (!Objects.equals(user.getUserId(), recipe.getUser().getUserId())) {
+      throw new UnmatchedUserException();
+    }
+
+    recipe.updateRecipe(recipesUpdateDTO.getRecipeName(),
+        recipesUpdateDTO.getLevel(), recipesUpdateDTO.getCookingTime(),
+        recipesUpdateDTO.getRecipeImage());
+
+    // 기존 recipeId로 저장된 재료 확인
+    ingredientRepository.findAllByRecipeId(recipeId)
+        .orElseThrow(RecipeNotFoundException::new);
+    // 기존 recipeId로 저장된 재료 리스트 삭제
+    ingredientRepository.deleteAllByRecipeId(recipeId);
+
+    List<IngredientEntity> ingredients = new ArrayList<>();
+    for (int i = 0; i < recipesUpdateDTO.getIngredients().size(); i++) {
+      IngredientEntity ingredient = IngredientEntity.builder()
+          .recipe(recipe)
+          .name(recipesUpdateDTO.getIngredients().get(i).getName())
+          .quantity(recipesUpdateDTO.getIngredients().get(i).getQuantity())
+          .build();
+
+      ingredients.add(ingredient);
+    }
+
+    ingredientRepository.saveAll(ingredients);
+
+    manualRepository.findAllByRecipeId(recipeId)
+        .orElseThrow(RecipeNotFoundException::new);
+
+    manualRepository.deleteAllByRecipeId(recipeId);
+
+    List<ManualEntity> manuals = new ArrayList<>();
+    for (int i = 0; i < recipesUpdateDTO.getManuals().size(); i++) {
+      ManualEntity manual = ManualEntity.builder()
+          .recipe(recipe)
+          .manualContent(recipesUpdateDTO.getManuals().get(i).getManualContent())
+          .manualPicture(recipesUpdateDTO.getManuals().get(i).getManualPicture())
+          .build();
+
+      manuals.add(manual);
+    }
+
+    manualRepository.saveAll(manuals);
+
+    return ResultResponse.of(ResultCode.SUCCESS_UPDATE_RECIPE);
+  }
+
+  @Override
   public ResultResponse deleteRecipe(HttpServletRequest request,
       RecipesDeleteDTO recipesDeleteDTO) {
     Long userId = jwtUtil.getUserId(request.getHeader("access-token"));
