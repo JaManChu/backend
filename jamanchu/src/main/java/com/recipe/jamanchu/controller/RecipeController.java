@@ -27,6 +27,13 @@ public class RecipeController {
     return ResponseEntity.ok(recipeService.registerRecipe(request, recipesDTO));
   }
 
+  @PutMapping
+  public ResponseEntity<ResultResponse> updateRecipe(
+      HttpServletRequest request,
+      @RequestBody RecipesUpdateDTO recipesUpdateDTO) {
+    return ResponseEntity.ok(recipeService.updateRecipe(request, recipesUpdateDTO));
+  }
+
   @DeleteMapping
   public ResponseEntity<ResultResponse> deleteRecipe(
       HttpServletRequest request,
