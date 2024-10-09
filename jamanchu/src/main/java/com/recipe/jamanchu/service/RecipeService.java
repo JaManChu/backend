@@ -15,6 +15,12 @@ public interface RecipeService {
   // 레시피 수정 API
   ResultResponse updateRecipe(HttpServletRequest request, RecipesUpdateDTO recipesUpdateDTO);
 
+  // 모든 레시피 조회 API
+  ResultResponse getRecipes(int page, int size);
+
+  // 특정 조건 레시피 조회 API
+  ResultResponse searchRecipes(RecipesSearchDTO recipesSearchDTO, int page, int size);
+
   // 레시피 삭제 API
   ResultResponse deleteRecipe(HttpServletRequest request, RecipesDeleteDTO recipesDeleteDTO);
 }

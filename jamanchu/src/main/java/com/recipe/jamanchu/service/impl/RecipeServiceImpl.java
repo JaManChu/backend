@@ -15,12 +15,7 @@ import com.recipe.jamanchu.model.dto.request.recipe.RecipesDeleteDTO;
 import com.recipe.jamanchu.model.dto.request.recipe.RecipesSearchDTO;
 import com.recipe.jamanchu.model.dto.request.recipe.RecipesUpdateDTO;
 import com.recipe.jamanchu.model.dto.response.ResultResponse;
-import com.recipe.jamanchu.model.dto.response.comments.Comment;
-import com.recipe.jamanchu.model.dto.response.comments.Comments;
-import com.recipe.jamanchu.model.dto.response.ingredients.Ingredient;
-import com.recipe.jamanchu.model.dto.response.ingredients.Ingredients;
-import com.recipe.jamanchu.model.dto.response.recipes.RecipesInfo;
-import com.recipe.jamanchu.model.dto.response.recipes.RecipesManual;
+import com.recipe.jamanchu.model.dto.response.recipes.RecipesSummary;
 import com.recipe.jamanchu.model.type.ResultCode;
 import com.recipe.jamanchu.repository.IngredientRepository;
 import com.recipe.jamanchu.repository.ManualRepository;
@@ -30,7 +25,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -176,5 +170,65 @@ public class RecipeServiceImpl implements RecipeService {
     recipeRepository.deleteById(recipeId);
 
     return ResultResponse.of(ResultCode.SUCCESS_DELETE_RECIPE);
+  }
+
+  @Override
+  public ResultResponse getRecipes(int page, int size) {
+    Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+
+    Page<RecipeEntity> recipes = recipeRepository.findAll(pageable);
+
+    if (recipes.isEmpty()) {
+      throw new RecipeNotFoundException();
+    }
+
+    List<RecipesSummary> recipesSummaries = recipes.stream().map(
+        recipeEntity -> new RecipesSummary(
+        recipeEntity.getId(),
+        recipeEntity.getName(),
+        recipeEntity.getUser().getNickname(),
+        recipeEntity.getLevel(),
+        recipeEntity.getTime(),
+        recipeEntity.getThumbnail()
+    )).toList();
+
+    return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_ALL_RECIPES, recipesSummaries);
+  }
+
+  @Override
+  public ResultResponse searchRecipes(RecipesSearchDTO recipesSearchDTO, int page, int size) {
+    Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+
+    Page<RecipeEntity> recipes = recipeRepository.searchAndRecipes(
+        recipesSearchDTO.getLevel(),
+        recipesSearchDTO.getCookingTime(),
+        recipesSearchDTO.getIngredients(),
+        (long) recipesSearchDTO.getIngredients().size(),
+        pageable
+    );
+
+    if (recipes.isEmpty()) {
+      recipes = recipeRepository.searchOrRecipes(
+          recipesSearchDTO.getLevel(),
+          recipesSearchDTO.getCookingTime(),
+          recipesSearchDTO.getIngredients(),
+          pageable);
+    }
+
+    if (recipes.isEmpty()) {
+      throw new RecipeNotFoundException();
+    }
+
+    List<RecipesSummary> recipesSummaries = recipes.stream().map(
+        recipeEntity -> new RecipesSummary(
+            recipeEntity.getId(),
+            recipeEntity.getName(),
+            recipeEntity.getUser().getNickname(),
+            recipeEntity.getLevel(),
+            recipeEntity.getTime(),
+            recipeEntity.getThumbnail()
+        )).toList();
+
+    return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_RECIPES, recipesSummaries);
   }
 }
