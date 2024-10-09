@@ -25,6 +25,7 @@ public interface RecipeService {
   ResultResponse getRecipeDetail(Long recipesId);
 
   // 인기 레시피 리스트 API
+  ResultResponse getRecipesByRating(int page, int size);
   // 레시피 스크랩 API
 
   // 레시피 삭제 API

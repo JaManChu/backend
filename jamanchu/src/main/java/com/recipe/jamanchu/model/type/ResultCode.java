@@ -22,7 +22,9 @@ public enum ResultCode {
   SUCCESS_UPDATE_RECIPE(HttpStatus.OK, "레시피 수정 성공!"),
   SUCCESS_DELETE_RECIPE(HttpStatus.OK, "레시피를 정상적으로 삭제하였습니다."),
   SUCCESS_RETRIEVE_ALL_RECIPES(HttpStatus.OK, "전체 레시피 조회 성공!"),
-  SUCCESS_RETRIEVE_RECIPES(HttpStatus.OK, "레시피 조회 성공!")
+  SUCCESS_RETRIEVE_RECIPES(HttpStatus.OK, "레시피 조회 성공!"),
+  SUCCESS_RETRIEVE_RECIPES_DETAILS(HttpStatus.OK, "레시피 상세 조회 성공"),
+  SUCCESS_RETRIEVE_ALL_RECIPES_BY_RATING(HttpStatus.OK, "인기 레시피 조회 성공"),
   ;
 
   private final HttpStatus statusCode;

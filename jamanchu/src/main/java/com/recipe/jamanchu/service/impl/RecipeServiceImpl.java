@@ -280,6 +280,29 @@ public class RecipeServiceImpl implements RecipeService {
         comments
     );
 
-    return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_RECIPES, recipesInfo);
+    return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_RECIPES_DETAILS, recipesInfo);
+  }
+
+  @Override
+  public ResultResponse getRecipesByRating(int page, int size) {
+    Pageable pageable = PageRequest.of(page, size);
+
+    Page<RecipeEntity> recipes = recipeRepository.findAllOrderByRating(pageable);
+
+    if (recipes.isEmpty()) {
+      throw new RecipeNotFoundException();
+    }
+
+    List<RecipesSummary> recipesSummaries = recipes.stream().map(
+        recipeEntity -> new RecipesSummary(
+            recipeEntity.getId(),
+            recipeEntity.getName(),
+            recipeEntity.getUser().getNickname(),
+            recipeEntity.getLevel(),
+            recipeEntity.getTime(),
+            recipeEntity.getThumbnail()
+        )).toList();
+
+    return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_ALL_RECIPES_BY_RATING, recipesSummaries);
   }
 }

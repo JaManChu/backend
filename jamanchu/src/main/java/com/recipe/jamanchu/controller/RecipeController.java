@@ -51,6 +51,14 @@ public class RecipeController {
     return ResponseEntity.ok(recipeService.getRecipeDetail(recipeId));
   }
 
+  @GetMapping("/popular")
+  public ResponseEntity<ResultResponse> getRecipesByRating(
+      @RequestParam(value = "page", defaultValue = "0") int page,
+      @RequestParam(value = "size", defaultValue = "15") int size
+  ) {
+    return ResponseEntity.ok(recipeService.getRecipesByRating(page, size));
+  }
+
   @PostMapping
   public ResponseEntity<ResultResponse> registerRecipe(
       HttpServletRequest request,

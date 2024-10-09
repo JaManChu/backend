@@ -35,4 +35,10 @@ public interface RecipeRepository extends JpaRepository<RecipeEntity, Long> {
       @Param("cookingTime") CookingTimeType cookingTime,
       @Param("ingredients") List<String> ingredients,
       Pageable pageable);
+
+  @Query("SELECT r FROM RecipeEntity r " +
+      "LEFT JOIN r.rating rat " +
+      "GROUP BY r.id " +
+      "ORDER BY AVG(rat.rating) DESC")
+  Page<RecipeEntity> findAllOrderByRating(Pageable pageable);
 }
