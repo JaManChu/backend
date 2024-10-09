@@ -15,6 +15,12 @@ import com.recipe.jamanchu.model.dto.request.recipe.RecipesDeleteDTO;
 import com.recipe.jamanchu.model.dto.request.recipe.RecipesSearchDTO;
 import com.recipe.jamanchu.model.dto.request.recipe.RecipesUpdateDTO;
 import com.recipe.jamanchu.model.dto.response.ResultResponse;
+import com.recipe.jamanchu.model.dto.response.comments.Comment;
+import com.recipe.jamanchu.model.dto.response.comments.Comments;
+import com.recipe.jamanchu.model.dto.response.ingredients.IngredientCoupang;
+import com.recipe.jamanchu.model.dto.response.recipes.RecipesInfo;
+import com.recipe.jamanchu.model.dto.response.recipes.RecipesManual;
+import com.recipe.jamanchu.model.dto.response.recipes.RecipesManuals;
 import com.recipe.jamanchu.model.dto.response.recipes.RecipesSummary;
 import com.recipe.jamanchu.model.type.ResultCode;
 import com.recipe.jamanchu.repository.IngredientRepository;
@@ -230,5 +236,50 @@ public class RecipeServiceImpl implements RecipeService {
         )).toList();
 
     return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_RECIPES, recipesSummaries);
+  }
+
+  @Override
+  public ResultResponse getRecipeDetail(Long recipeId) {
+    RecipeEntity recipe = recipeRepository.findById(recipeId)
+        .orElseThrow(RecipeNotFoundException::new);
+
+    // 추후에 이 부분 추가 개발 필요
+    String tempCoupangLink = "Coupang Link";
+
+    List<IngredientCoupang> ingredientCoupangList = recipe.getIngredients().stream()
+        .map(ingredient -> new IngredientCoupang(
+            ingredient.getName(),
+            ingredient.getQuantity(),
+            tempCoupangLink))
+        .toList();
+
+    RecipesManuals recipesManuals = new RecipesManuals(
+        recipe.getManuals().stream()
+            .map(manual -> new RecipesManual(
+                manual.getManualContent(),
+                manual.getManualPicture()
+            ))
+            .toList()
+    );
+
+    Comments comments = new Comments(
+        recipe.getComments().stream()
+            .map(Comment::new)
+            .toList()
+    );
+
+    RecipesInfo recipesInfo = new RecipesInfo(
+        recipe.getId(),
+        recipe.getUser().getNickname(),
+        recipe.getName(),
+        recipe.getLevel(),
+        recipe.getTime(),
+        recipe.getThumbnail(),
+        ingredientCoupangList,
+        recipesManuals,
+        comments
+    );
+
+    return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_RECIPES, recipesInfo);
   }
 }

@@ -21,6 +21,12 @@ public interface RecipeService {
   // 특정 조건 레시피 조회 API
   ResultResponse searchRecipes(RecipesSearchDTO recipesSearchDTO, int page, int size);
 
+  // 레시피 상세 페이지 조회 API
+  ResultResponse getRecipeDetail(Long recipesId);
+
+  // 인기 레시피 리스트 API
+  // 레시피 스크랩 API
+
   // 레시피 삭제 API
   ResultResponse deleteRecipe(HttpServletRequest request, RecipesDeleteDTO recipesDeleteDTO);
 }

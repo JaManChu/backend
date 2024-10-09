@@ -12,9 +12,6 @@ import lombok.Getter;
 @AllArgsConstructor
 public class RecipesManual {
 
-  @Min(value = 1, message = "조리 순서는 1이상이어야 합니다.")
-  private final Long recipeOrder;
-
   @NotEmpty(message = "조리 과정을 설명해주세요.")
   private final String recipeOrderContent;
 

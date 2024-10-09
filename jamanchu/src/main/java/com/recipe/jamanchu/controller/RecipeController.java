@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -41,6 +42,13 @@ public class RecipeController {
       @RequestParam(value = "size", defaultValue = "15") int size
   ) {
     return ResponseEntity.ok(recipeService.searchRecipes(recipesSearchDTO, page, size));
+  }
+
+  @GetMapping("/{recipeId}")
+  public ResponseEntity<ResultResponse> getRecipeDetails(
+      @PathVariable("recipeId") Long recipeId
+  ) {
+    return ResponseEntity.ok(recipeService.getRecipeDetail(recipeId));
   }
 
   @PostMapping
