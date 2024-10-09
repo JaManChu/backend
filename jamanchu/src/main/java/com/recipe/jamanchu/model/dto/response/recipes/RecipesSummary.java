@@ -1,5 +1,7 @@
 package com.recipe.jamanchu.model.dto.response.recipes;
 
+import com.recipe.jamanchu.model.type.CookingTimeType;
+import com.recipe.jamanchu.model.type.LevelType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -15,6 +17,10 @@ public class RecipesSummary {
   private final String recipeName;
 
   private final String recipeAuthor;
+
+  private final LevelType level;
+
+  private final CookingTimeType time;
 
   private final String recipeThumbnail;
 

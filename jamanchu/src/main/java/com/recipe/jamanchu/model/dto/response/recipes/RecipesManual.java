@@ -4,7 +4,6 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 단일 레시피 조리 순서
@@ -19,6 +18,6 @@ public class RecipesManual {
   @NotEmpty(message = "조리 과정을 설명해주세요.")
   private final String recipeOrderContent;
 
-  private final MultipartFile recipeOrderImage;
+  private final String recipeOrderImage;
 
 }
