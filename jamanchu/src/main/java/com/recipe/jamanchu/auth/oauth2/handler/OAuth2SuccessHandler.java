@@ -40,13 +40,15 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     response.addCookie(createCookie(refresh));
 
     log.info("OAuth 로그인 성공");
-    String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:8080/api/v1/users/test")
+    String targetUrl = UriComponentsBuilder.fromUriString("https://api.jamanchu.site/api/v1/users/test")
+//    String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:8080/api/v1/users/test")
         .queryParam("access", "Bearer " + access)
         .queryParam("refresh", refresh)
         .build()
         .toUriString();
 
-    log.info("redirect -> http://localhost:8080/api/v1/users/test");
+    log.info("redirect -> https://api.jamanchu.site/api/v1/users/test");
+//    log.info("redirect -> http://localhost:8080/api/v1/users/test");
     getRedirectStrategy().sendRedirect(request, response, targetUrl);
   }
 
