@@ -32,10 +32,10 @@ public class JwtFilter extends OncePerRequestFilter {
       throws ServletException, IOException {
 
     String requestURI = request.getRequestURI();
+    logger.info("requestURI -> {}", requestURI);
 
     // 인증이 필요 없는 경로
     if (isExcludedPath(requestURI)) {
-      logger.info("requestURI -> {}", requestURI);
       filterChain.doFilter(request, response);
       return;
     }
@@ -44,7 +44,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
     // Bearer 토큰이 헤더에 있는지 확인
     if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-      logger.info("Authorization header is missing or doesn't start with Bearer");
+      logger.info("Access-token is null or doesn't start with Bearer");
       filterChain.doFilter(request, response);
       return;
     }
@@ -75,7 +75,6 @@ public class JwtFilter extends OncePerRequestFilter {
   // access 토큰이 만료되었을 경우 refresh 토큰 검증 후 재 발급
   private void expiredAccessToken(HttpServletRequest request, HttpServletResponse response)
       throws IOException {
-
     logger.info("Access-Token is Expired!!");
     String refreshToken = getRefreshTokenFromCookies(request);
 
