@@ -37,12 +37,10 @@ class RecipesUpdateDTOTest {
         CookingTimeType.TEN_MINUTES,
         null,
         List.of(
-            IngredientEntity.builder()
-                .build()
+            new Ingredient("재료", "재료 양")
         ),
         List.of(
-            ManualEntity.builder()
-                .build()
+            new RecipesManual("레시피 순서", "레시피 이미지")
         ),
         0L
     );
@@ -64,12 +62,10 @@ class RecipesUpdateDTOTest {
         CookingTimeType.TEN_MINUTES,
         null,
         List.of(
-            IngredientEntity.builder()
-                .build()
+            new Ingredient("재료", "재료 양")
         ),
         List.of(
-            ManualEntity.builder()
-                .build()
+            new RecipesManual("레시피 순서", "레시피 이미지")
         ),
         null
     );
