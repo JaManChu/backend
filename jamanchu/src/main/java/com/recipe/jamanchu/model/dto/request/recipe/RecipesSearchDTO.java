@@ -6,7 +6,6 @@ import com.recipe.jamanchu.annotation.AtLeastOneNotEmpty;
 import com.recipe.jamanchu.model.type.CookingTimeType;
 import com.recipe.jamanchu.model.type.LevelType;
 import java.util.List;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter

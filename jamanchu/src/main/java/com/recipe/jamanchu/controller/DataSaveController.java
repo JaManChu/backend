@@ -20,9 +20,6 @@ public class DataSaveController {
   public ResponseEntity<ResultResponse> processAndSaveRecipes(
       @RequestParam Long startId,
       @RequestParam Long endId) {
-
-    recipeDivideService.processAndSaveAllData(startId, endId);
-
     return ResponseEntity.ok(recipeDivideService.processAndSaveAllData(startId, endId));
   }
 }

@@ -3,7 +3,6 @@ package com.recipe.jamanchu.model.dto.request.recipe;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Min;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter

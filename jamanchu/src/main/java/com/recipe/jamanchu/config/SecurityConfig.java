@@ -63,7 +63,8 @@ public class SecurityConfig {
                 "/api/v1/users/signup",
                 "/api/v1/users/login",
                 "/api/v1/users/test",
-                "/api/v1/notify/**").permitAll()
+                "/api/v1/notify/**",
+                "/api/v1/recipes/**").permitAll()
             .anyRequest().authenticated());
 
     http
