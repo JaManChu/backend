@@ -2,6 +2,8 @@ package com.recipe.jamanchu.model.dto.request.recipe;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.recipe.jamanchu.entity.IngredientEntity;
+import com.recipe.jamanchu.entity.ManualEntity;
 import com.recipe.jamanchu.model.dto.response.ingredients.Ingredient;
 import com.recipe.jamanchu.model.dto.response.ingredients.Ingredients;
 import com.recipe.jamanchu.model.dto.response.recipes.RecipesManual;
@@ -34,12 +36,14 @@ class RecipesUpdateDTOTest {
         LevelType.LOW,
         CookingTimeType.TEN_MINUTES,
         null,
-        new Ingredients(List.of(
-            new Ingredient("재료 이름", "재료 양")
-        )),
-        new RecipesManuals(List.of(
-            new RecipesManual(1L, "레시피 순서", null)
-        )),
+        List.of(
+            IngredientEntity.builder()
+                .build()
+        ),
+        List.of(
+            ManualEntity.builder()
+                .build()
+        ),
         0L
     );
 
@@ -59,12 +63,14 @@ class RecipesUpdateDTOTest {
         LevelType.LOW,
         CookingTimeType.TEN_MINUTES,
         null,
-        new Ingredients(List.of(
-            new Ingredient("재료 이름", "재료 양")
-        )),
-        new RecipesManuals(List.of(
-            new RecipesManual(1L, "레시피 순서", null)
-        )),
+        List.of(
+            IngredientEntity.builder()
+                .build()
+        ),
+        List.of(
+            ManualEntity.builder()
+                .build()
+        ),
         null
     );
 

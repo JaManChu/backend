@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.recipe.jamanchu.entity.IngredientEntity;
+import com.recipe.jamanchu.entity.ManualEntity;
 import com.recipe.jamanchu.model.dto.response.ingredients.Ingredient;
 import com.recipe.jamanchu.model.dto.response.ingredients.Ingredients;
 import com.recipe.jamanchu.model.dto.response.recipes.RecipesManual;
@@ -36,16 +38,13 @@ class RecipesDTOTest {
         LevelType.LOW,
         CookingTimeType.TEN_MINUTES,
         null,
-        new Ingredients(
-            List.of(
-                new Ingredient("재료 이름", "재료 양")
-            )
+        List.of(
+            IngredientEntity.builder()
+                .build()
         ),
-        new RecipesManuals(
-            List.of(
-                new RecipesManual(1L, "레시피 순서", null
-                )
-            )
+        List.of(
+            ManualEntity.builder()
+                .build()
         ));
     //when
     Set<ConstraintViolation<RecipesDTO>> violations = validator.validate(recipesDTO);
