@@ -161,6 +161,7 @@ public class RecipeServiceImpl implements RecipeService {
   }
 
   @Override
+  @Transactional
   public ResultResponse deleteRecipe(HttpServletRequest request,
       RecipesDeleteDTO recipesDeleteDTO) {
     Long userId = jwtUtil.getUserId(request.getHeader("access-token"));
