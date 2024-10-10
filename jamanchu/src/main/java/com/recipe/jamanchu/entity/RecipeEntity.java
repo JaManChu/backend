@@ -61,6 +61,9 @@ public class RecipeEntity extends BaseTimeEntity{
   @Enumerated(EnumType.STRING)
   private RecipeProvider provider;
 
+  @Column(name = "origin_rcp_id")
+  private Long originRcpId;
+
   @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
   private List<ManualEntity> manuals;
 
