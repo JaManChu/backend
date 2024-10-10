@@ -1,11 +1,13 @@
 package com.recipe.jamanchu.controller;
 
 import com.recipe.jamanchu.model.dto.request.auth.DeleteUserDTO;
+import com.recipe.jamanchu.model.dto.request.auth.LoginDTO;
 import com.recipe.jamanchu.model.dto.request.auth.SignupDTO;
 import com.recipe.jamanchu.model.dto.request.auth.UserUpdateDTO;
 import com.recipe.jamanchu.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -34,6 +36,14 @@ public class UserController {
 
     ResultResponse response = ResultResponse.of(userService.signup(signupDTO));
     return ResponseEntity.status(response.getCode()).body(response);
+  }
+
+  // 로그인
+  @PostMapping("/login")
+  public ResponseEntity<ResultResponse> login(@Valid @RequestBody LoginDTO loginDTO,
+      HttpServletResponse response) {
+
+    return ResponseEntity.ok(ResultResponse.of(userService.login(loginDTO, response)));
   }
 
   // OAuth signup & login from Kakao
