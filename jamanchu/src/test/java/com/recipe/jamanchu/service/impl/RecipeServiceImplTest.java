@@ -23,7 +23,9 @@ import com.recipe.jamanchu.model.dto.request.recipe.RecipesDeleteDTO;
 import com.recipe.jamanchu.model.dto.request.recipe.RecipesSearchDTO;
 import com.recipe.jamanchu.model.dto.request.recipe.RecipesUpdateDTO;
 import com.recipe.jamanchu.model.dto.response.ResultResponse;
+import com.recipe.jamanchu.model.dto.response.ingredients.Ingredient;
 import com.recipe.jamanchu.model.dto.response.recipes.RecipesInfo;
+import com.recipe.jamanchu.model.dto.response.recipes.RecipesManual;
 import com.recipe.jamanchu.model.dto.response.recipes.RecipesSummary;
 import com.recipe.jamanchu.model.type.CookingTimeType;
 import com.recipe.jamanchu.model.type.LevelType;
@@ -76,8 +78,8 @@ class RecipeServiceImplTest {
   private RecipeServiceImpl recipeService;
 
   private UserEntity user;
-  private List<ManualEntity> manuals;
-  private List<IngredientEntity> ingredients;
+  private List<IngredientEntity> ingredientEntities;
+  private List<ManualEntity> manualEntities;
   private RecipeRatingEntity rating;
   private RecipeEntity recipe;
   private RecipesDTO recipesDTO;
@@ -95,33 +97,22 @@ class RecipeServiceImplTest {
         .providerId(null)
         .build();
 
-    ingredients = new ArrayList<>();
-    ingredients.add(IngredientEntity.builder()
-        .name("돼지고기")
-        .quantity("200g")
-        .build());
-
-    ingredients.add(IngredientEntity.builder()
-        .name("달걀")
-        .quantity("2개")
-        .build());
-
-    manuals = new ArrayList<>();
-    manuals.add(ManualEntity.builder()
-        .manualContent("고기를 구워주세요.")
-        .manualPicture("manual_picture_1.jpg")
-        .build());
-
-    manuals.add(ManualEntity.builder()
-        .manualContent("달걀을 삶아주세요.")
-        .manualPicture("manual_picture_2.jpg")
-        .build());
+    List<Ingredient> ingredients =
+        List.of(
+            new Ingredient("재료", "재료 양"),
+            new Ingredient("재료1", "재료 양1")
+        );
+    List<RecipesManual> manuals =
+        List.of(
+            new RecipesManual("레시피 순서", "레시피 이미지"),
+            new RecipesManual("레시피 순서1", "레시피 이미지1")
+        );
 
     recipesDTO = new RecipesDTO(
         "recipeName",
         LevelType.LOW,
         CookingTimeType.FIFTEEN_MINUTES,
-        "thumbnail",
+        null,
         ingredients,
         manuals
     );
@@ -130,11 +121,33 @@ class RecipeServiceImplTest {
         "recipeUpdateName",
         LevelType.LOW,
         CookingTimeType.TEN_MINUTES,
-        "thumbnail.jpg",
+        null,
         ingredients,
         manuals,
         1L
     );
+
+    ingredientEntities = new ArrayList<>();
+    for (int i = 0; i < recipesDTO.getIngredients().size(); i++) {
+      IngredientEntity ingredient = IngredientEntity.builder()
+          .recipe(recipe)
+          .name(recipesDTO.getIngredients().get(i).getIngredientName())
+          .quantity(recipesDTO.getIngredients().get(i).getIngredientQuantity())
+          .build();
+
+      ingredientEntities.add(ingredient);
+    }
+
+    manualEntities = new ArrayList<>();
+    for (int i = 0; i < recipesDTO.getManuals().size(); i++) {
+      ManualEntity manual = ManualEntity.builder()
+          .recipe(recipe)
+          .manualContent(recipesDTO.getManuals().get(i).getRecipeOrderContent())
+          .manualPicture(recipesDTO.getManuals().get(i).getRecipeOrderImage())
+          .build();
+
+      manualEntities.add(manual);
+    }
 
     recipe = RecipeEntity.builder()
         .id(1L)
@@ -142,9 +155,9 @@ class RecipeServiceImplTest {
         .name(recipesDTO.getRecipeName())
         .level(recipesDTO.getLevel())
         .time(recipesDTO.getCookingTime())
-        .thumbnail(recipesDTO.getRecipeImage())
-        .ingredients(recipesDTO.getIngredients())
-        .manuals(recipesDTO.getManuals())
+        .thumbnail(String.valueOf(recipesDTO.getRecipeImage()))
+        .ingredients(ingredientEntities)
+        .manuals(manualEntities)
         .build();
   }
 
@@ -177,16 +190,16 @@ class RecipeServiceImplTest {
         .name(recipesDTO.getRecipeName())
         .level(recipesDTO.getLevel())
         .time(recipesDTO.getCookingTime())
-        .thumbnail(recipesDTO.getRecipeImage())
-        .ingredients(recipesDTO.getIngredients())
-        .manuals(recipesDTO.getManuals())
+        .thumbnail(String.valueOf(recipesDTO.getRecipeImage()))
+        .ingredients(ingredientEntities)
+        .manuals(manualEntities)
         .build();
 
     when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(user.getUserId());
     when(userAccessHandler.findByUserId(1L)).thenReturn(user);
     when(recipeRepository.findById(1L)).thenReturn(Optional.of(recipe));
-    when(ingredientRepository.findAllByRecipeId(1L)).thenReturn(Optional.of(ingredients));
-    when(manualRepository.findAllByRecipeId(1L)).thenReturn(Optional.of(manuals));
+    when(ingredientRepository.findAllByRecipeId(1L)).thenReturn(Optional.of(ingredientEntities));
+    when(manualRepository.findAllByRecipeId(1L)).thenReturn(Optional.of(manualEntities));
 
     // When
     ResultResponse result = recipeService.updateRecipe(request, recipesUpdateDTO);
@@ -331,7 +344,7 @@ class RecipeServiceImplTest {
         List.of("돼지고기"),
         LevelType.LOW,
         CookingTimeType.TEN_MINUTES
-        );
+    );
     List<RecipeEntity> recipeEntities = List.of(
         RecipeEntity.builder()
             .id(1L)
@@ -344,7 +357,8 @@ class RecipeServiceImplTest {
     );
     Page<RecipeEntity> recipePage = new PageImpl<>(recipeEntities);
 
-    when(recipeRepository.searchAndRecipes(any(), any(), any(), anyLong(), any(Pageable.class))).thenReturn(recipePage);
+    when(recipeRepository.searchAndRecipes(any(), any(), any(), anyLong(),
+        any(Pageable.class))).thenReturn(recipePage);
 
     // when
     ResultResponse result = recipeService.searchRecipes(searchDTO, 0, 10);
@@ -367,8 +381,10 @@ class RecipeServiceImplTest {
     );
     Page<RecipeEntity> emptyPage = Page.empty();
 
-    when(recipeRepository.searchAndRecipes(any(), any(), any(), anyLong(), any(Pageable.class))).thenReturn(emptyPage);
-    when(recipeRepository.searchOrRecipes(any(), any(), any(), any(Pageable.class))).thenReturn(emptyPage);
+    when(recipeRepository.searchAndRecipes(any(), any(), any(), anyLong(),
+        any(Pageable.class))).thenReturn(emptyPage);
+    when(recipeRepository.searchOrRecipes(any(), any(), any(), any(Pageable.class))).thenReturn(
+        emptyPage);
 
     // when & then
     assertThrows(RecipeNotFoundException.class,
@@ -395,8 +411,8 @@ class RecipeServiceImplTest {
         .level(LevelType.LOW)
         .time(CookingTimeType.FIFTEEN_MINUTES)
         .thumbnail("thumbnail")
-        .ingredients(ingredients)
-        .manuals(manuals)
+        .ingredients(ingredientEntities)
+        .manuals(manualEntities)
         .comments(commentEntities)
         .build();
 
