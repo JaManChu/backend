@@ -16,7 +16,6 @@ import com.recipe.jamanchu.repository.RecipeRatingRepository;
 import com.recipe.jamanchu.repository.RecipeRepository;
 import com.recipe.jamanchu.repository.TenThousandRecipeRepository;
 import com.recipe.jamanchu.service.RecipeDivideService;
-import com.recipe.jamanchu.util.LastRecipeIdUtil;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -32,7 +31,6 @@ public class RecipeDivideServiceImpl implements RecipeDivideService {
   private final ManualRepository manualRepository;
   private final IngredientRepository ingredientRepository;
   private final TenThousandRecipeRepository tenThousandRecipeRepository;
-  private final LastRecipeIdUtil lastRecipeIdUtil;
 
   @Override
   public ResultResponse processAndSaveAllData(Long startId, Long endId) {
@@ -65,8 +63,9 @@ public class RecipeDivideServiceImpl implements RecipeDivideService {
 
   @Scheduled(cron = "0 30 0 * * SUN")
   public void weeklyRecipeDivide() {
-    Long lastRecipeId = lastRecipeIdUtil.getLastRecipeId();
-    processAndSaveAllData(lastRecipeId + 1, lastRecipeId + 200);
+    Long lastOriginRecipeId = recipeRepository.findMaxOriginRcpId();
+    Long lastScrapRecipeId = tenThousandRecipeRepository.findMaxRecipeId();
+    processAndSaveAllData(lastOriginRecipeId + 1, lastScrapRecipeId);
   }
 
   public RecipeEntity saveRecipeData(TenThousandRecipeEntity scrapedRecipe) {
