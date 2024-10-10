@@ -16,6 +16,7 @@ public enum ExceptionStatus {
   UNMATCHED_USER(HttpStatus.UNAUTHORIZED, "일치하는 사용자가 없습니다."),
   PASSWORD_MISMATCH(HttpStatus.BAD_REQUEST, "비밀번호가 일치하지 않습니다."),
   BAD_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
+  MISSING_EMAIL(HttpStatus.BAD_REQUEST, "이메일을 입력해주세요!"),
   ;
 
   private final HttpStatus statusCode;
