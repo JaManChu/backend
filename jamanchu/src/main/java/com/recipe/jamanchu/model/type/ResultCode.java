@@ -26,6 +26,9 @@ public enum ResultCode {
   SUCCESS_RETRIEVE_RECIPES_DETAILS(HttpStatus.OK, "레시피 상세 조회 성공"),
   SUCCESS_RETRIEVE_ALL_RECIPES_BY_RATING(HttpStatus.OK, "인기 레시피 조회 성공"),
   SUCCESS_SCRAPED_RECIPE(HttpStatus.OK, "레시피 찜하기 성공"),
+  SUCCESS_LOGIN(HttpStatus.OK, "로그인 성공"),
+  EMAIL_AVAILABLE(HttpStatus.OK, "사용할 수 있는 이메일입니다."),
+  EMAIL_ALREADY_IN_USE(HttpStatus.OK, "이미 사용 중인 이메일입니다."),
   ;
 
   private final HttpStatus statusCode;

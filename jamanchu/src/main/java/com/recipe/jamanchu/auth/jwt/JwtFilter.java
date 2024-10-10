@@ -1,5 +1,6 @@
 package com.recipe.jamanchu.auth.jwt;
 
+import com.recipe.jamanchu.auth.service.CustomUserDetailService;
 import com.recipe.jamanchu.entity.UserEntity;
 import com.recipe.jamanchu.model.dto.request.auth.UserDetailsDTO;
 import com.recipe.jamanchu.model.type.UserRole;
@@ -18,12 +19,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
 
   private final JwtUtil jwtUtil;
+  private final CustomUserDetailService userDetailService;
   private final Logger logger = LoggerFactory.getLogger(JwtFilter.class);
 
   @Override
@@ -104,14 +107,8 @@ public class JwtFilter extends OncePerRequestFilter {
 
   private Authentication getAuthToken(String token) {
     Long userId = jwtUtil.getUserId(token);
-    UserRole role = UserRole.valueOf(jwtUtil.getRole(token));
 
-    UserEntity user = UserEntity.builder()
-        .userId(userId)
-        .role(role)
-        .build();
-
-    UserDetailsDTO userDetails = new UserDetailsDTO(user);
+    UserDetails userDetails = userDetailService.loadUserByUsername(userId.toString());
     return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
   }
 
@@ -139,7 +136,8 @@ public class JwtFilter extends OncePerRequestFilter {
         || requestURI.equals("/api/v1/users/login")
         || requestURI.equals("/api/v1/users/signup")
         || requestURI.equals("/api/v1/users/test")
-        || Pattern.matches("/api/v1/notify/.*",requestURI);
+        || Pattern.matches("/api/v1/notify/.*", requestURI)
+        || requestURI.equals("/api/v1/auth/email-check");
   }
 }
 

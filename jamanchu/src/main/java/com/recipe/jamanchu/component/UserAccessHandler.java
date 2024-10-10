@@ -7,6 +7,7 @@ import com.recipe.jamanchu.exceptions.exception.DuplicatedNicknameException;
 import com.recipe.jamanchu.exceptions.exception.PasswordMismatchException;
 import com.recipe.jamanchu.exceptions.exception.SocialAccountException;
 import com.recipe.jamanchu.exceptions.exception.UserNotFoundException;
+import com.recipe.jamanchu.model.type.ResultCode;
 import com.recipe.jamanchu.model.type.UserRole;
 import com.recipe.jamanchu.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -64,14 +65,13 @@ public class UserAccessHandler {
   }
 
   // 이메일 중복 체크
-  public void existsByEmail(String email){
+  public ResultCode existsByEmail(String email){
 
-    log.info("existsByEmail -> email : {}", email);
     if (userRepository.existsByEmail(email)) {
-
-      log.info("Email is Duplicated!!");
-      throw new DuplicatedEmailException();
+      return ResultCode.EMAIL_ALREADY_IN_USE;
     }
+
+    return ResultCode.EMAIL_AVAILABLE;
   }
 
   // 닉네임 중복 체크
