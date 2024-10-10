@@ -2,12 +2,13 @@ package com.recipe.jamanchu.model.dto.request.recipe;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.recipe.jamanchu.model.dto.response.ingredients.Ingredients;
-import com.recipe.jamanchu.model.dto.response.recipes.RecipesManuals;
+import com.recipe.jamanchu.model.dto.response.ingredients.Ingredient;
+import com.recipe.jamanchu.model.dto.response.recipes.RecipesManual;
 import com.recipe.jamanchu.model.type.CookingTimeType;
 import com.recipe.jamanchu.model.type.LevelType;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import java.util.List;
 import lombok.Getter;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,10 +26,10 @@ public class RecipesUpdateDTO extends RecipesDTO{
       LevelType level,
       CookingTimeType cookingTime,
       MultipartFile recipeImage,
-      Ingredients ingredients,
-      RecipesManuals orders,
+      List<Ingredient> ingredients,
+      List<RecipesManual> manuals,
       Long recipeId) {
-    super(recipeName, level, cookingTime, recipeImage, ingredients, orders);
+    super(recipeName, level, cookingTime, recipeImage, ingredients, manuals);
     this.recipeId = recipeId;
   }
 }
