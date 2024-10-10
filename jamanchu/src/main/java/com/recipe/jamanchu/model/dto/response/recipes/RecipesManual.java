@@ -1,6 +1,5 @@
 package com.recipe.jamanchu.model.dto.response.recipes;
 
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
