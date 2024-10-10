@@ -41,4 +41,7 @@ public interface RecipeRepository extends JpaRepository<RecipeEntity, Long> {
       "GROUP BY r.id " +
       "ORDER BY AVG(rat.rating) DESC")
   Page<RecipeEntity> findAllOrderByRating(Pageable pageable);
+
+  @Query("SELECT MAX(r.originRcpId) FROM RecipeEntity r")
+  Long findMaxOriginRcpId();
 }
