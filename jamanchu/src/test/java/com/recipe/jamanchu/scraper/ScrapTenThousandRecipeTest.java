@@ -12,7 +12,6 @@ import com.recipe.jamanchu.model.type.CookingTimeType;
 import com.recipe.jamanchu.model.type.LevelType;
 import com.recipe.jamanchu.repository.TenThousandRecipeRepository;
 import com.recipe.jamanchu.service.impl.ScrapTenThousandRecipeServiceImpl;
-import com.recipe.jamanchu.util.LastRecipeIdUtil;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -30,9 +29,6 @@ class ScrapTenThousandRecipeTest {
 
   @Mock
   private TenThousandRecipeRepository tenThousandRecipeRepository;
-
-  @Mock
-  private LastRecipeIdUtil lastRecipeIdUtil;
 
   @InjectMocks
   private ScrapTenThousandRecipe scrapTenThousandRecipe;
@@ -112,6 +108,5 @@ class ScrapTenThousandRecipeTest {
 
     // then
     verify(tenThousandRecipeRepository).findMaxRecipeId();
-    verify(lastRecipeIdUtil).setLastRecipeId(100L);
   }
 }

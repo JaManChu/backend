@@ -8,7 +8,6 @@ import com.recipe.jamanchu.model.type.CookingTimeType;
 import com.recipe.jamanchu.model.type.LevelType;
 import com.recipe.jamanchu.repository.TenThousandRecipeRepository;
 import com.recipe.jamanchu.service.ScrapTenThousandRecipeService;
-import com.recipe.jamanchu.util.LastRecipeIdUtil;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +26,6 @@ public class ScrapTenThousandRecipe {
   private static final String url = "https://www.10000recipe.com/recipe/";
   private final ScrapTenThousandRecipeService scrapRecipeService;
   private final TenThousandRecipeRepository tenThousandRecipeRepository;
-  private final LastRecipeIdUtil lastRecipeIdUtil;
 
   public ResultResponse scrap(Long startRecipeId, Long stopRecipeId) {
     List<ScrapResult> recipeBatch = new ArrayList<>();
@@ -58,7 +56,6 @@ public class ScrapTenThousandRecipe {
   @Scheduled(cron = "0 0 0 * * SUN")
   public void weeklyRecipeScrape() {
     Long lastRecipeId = tenThousandRecipeRepository.findMaxRecipeId();
-    lastRecipeIdUtil.setLastRecipeId(lastRecipeId);
     scrap(lastRecipeId + 1, lastRecipeId + 200);
   }
 
