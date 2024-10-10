@@ -25,7 +25,6 @@ import com.recipe.jamanchu.repository.ManualRepository;
 import com.recipe.jamanchu.repository.RecipeRatingRepository;
 import com.recipe.jamanchu.repository.RecipeRepository;
 import com.recipe.jamanchu.repository.TenThousandRecipeRepository;
-import com.recipe.jamanchu.util.LastRecipeIdUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -42,8 +41,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class RecipeDivideServiceImplTest {
-  @Mock
-  private LastRecipeIdUtil lastRecipeIdUtil;
 
   @Mock
   private UserAccessHandler userAccessHandler;
@@ -253,7 +250,8 @@ class RecipeDivideServiceImplTest {
   @DisplayName("스케쥴링 함수 정상 동작")
   void testWeeklyRecipeDivide() {
     // given
-    when(lastRecipeIdUtil.getLastRecipeId()).thenReturn(100L);
+    when(recipeRepository.findMaxOriginRcpId()).thenReturn(100L);
+    when(tenThousandRecipeRepository.findMaxRecipeId()).thenReturn(300L);
 
     List<TenThousandRecipeEntity> mockedRecipes = new ArrayList<>();
     mockedRecipes.add(scrapRecipe);
@@ -263,7 +261,9 @@ class RecipeDivideServiceImplTest {
     recipeDivideService.weeklyRecipeDivide();
 
     // then
-    // processAndSaveAllData 메서드가 lastRecipeId + 1과 lastRecipeId + 200로 호출되는지 확인
+    // processAndSaveAllData 메서드가 lastRecipeId + 1과 크롤링 데이터의 마지막 recipeId로 호출되는지 확인
+    verify(recipeRepository).findMaxOriginRcpId();
+    verify(tenThousandRecipeRepository).findMaxRecipeId();
     verify(tenThousandRecipeRepository).findByRecipeIdBetween(101L, 300L);
   }
 
