@@ -64,7 +64,7 @@ public class RecipeServiceImpl implements RecipeService {
         .name(recipesDTO.getRecipeName())
         .level(recipesDTO.getLevel())
         .time(recipesDTO.getCookingTime())
-        .thumbnail(recipesDTO.getRecipeImage())
+        .thumbnail(String.valueOf(recipesDTO.getRecipeImage()))
         .provider(USER)
         .build();
 
@@ -74,8 +74,8 @@ public class RecipeServiceImpl implements RecipeService {
     for (int i = 0; i < recipesDTO.getIngredients().size(); i++) {
       IngredientEntity ingredient = IngredientEntity.builder()
           .recipe(recipe)
-          .name(recipesDTO.getIngredients().get(i).getName())
-          .quantity(recipesDTO.getIngredients().get(i).getQuantity())
+          .name(recipesDTO.getIngredients().get(i).getIngredientName())
+          .quantity(recipesDTO.getIngredients().get(i).getIngredientQuantity())
           .build();
 
       ingredients.add(ingredient);
@@ -87,8 +87,8 @@ public class RecipeServiceImpl implements RecipeService {
     for (int i = 0; i < recipesDTO.getManuals().size(); i++) {
       ManualEntity manual = ManualEntity.builder()
           .recipe(recipe)
-          .manualContent(recipesDTO.getManuals().get(i).getManualContent())
-          .manualPicture(recipesDTO.getManuals().get(i).getManualPicture())
+          .manualContent(recipesDTO.getManuals().get(i).getRecipeOrderContent())
+          .manualPicture(recipesDTO.getManuals().get(i).getRecipeOrderImage())
           .build();
 
       manuals.add(manual);
@@ -118,7 +118,7 @@ public class RecipeServiceImpl implements RecipeService {
 
     recipe.updateRecipe(recipesUpdateDTO.getRecipeName(),
         recipesUpdateDTO.getLevel(), recipesUpdateDTO.getCookingTime(),
-        recipesUpdateDTO.getRecipeImage());
+        String.valueOf(recipesUpdateDTO.getRecipeImage()));
 
     // 기존 recipeId로 저장된 재료 확인
     ingredientRepository.findAllByRecipeId(recipeId)
@@ -130,8 +130,8 @@ public class RecipeServiceImpl implements RecipeService {
     for (int i = 0; i < recipesUpdateDTO.getIngredients().size(); i++) {
       IngredientEntity ingredient = IngredientEntity.builder()
           .recipe(recipe)
-          .name(recipesUpdateDTO.getIngredients().get(i).getName())
-          .quantity(recipesUpdateDTO.getIngredients().get(i).getQuantity())
+          .name(recipesUpdateDTO.getIngredients().get(i).getIngredientName())
+          .quantity(recipesUpdateDTO.getIngredients().get(i).getIngredientQuantity())
           .build();
 
       ingredients.add(ingredient);
@@ -148,8 +148,8 @@ public class RecipeServiceImpl implements RecipeService {
     for (int i = 0; i < recipesUpdateDTO.getManuals().size(); i++) {
       ManualEntity manual = ManualEntity.builder()
           .recipe(recipe)
-          .manualContent(recipesUpdateDTO.getManuals().get(i).getManualContent())
-          .manualPicture(recipesUpdateDTO.getManuals().get(i).getManualPicture())
+          .manualContent(recipesUpdateDTO.getManuals().get(i).getRecipeOrderContent())
+          .manualPicture(recipesUpdateDTO.getManuals().get(i).getRecipeOrderImage())
           .build();
 
       manuals.add(manual);
