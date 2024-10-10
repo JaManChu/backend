@@ -2,11 +2,10 @@ package com.recipe.jamanchu.config;
 
 import com.recipe.jamanchu.auth.jwt.JwtFilter;
 import com.recipe.jamanchu.auth.jwt.JwtUtil;
-import com.recipe.jamanchu.auth.jwt.LoginFilter;
 import com.recipe.jamanchu.auth.oauth2.CustomOauth2UserService;
 import com.recipe.jamanchu.auth.oauth2.handler.OAuth2FailureHandler;
 import com.recipe.jamanchu.auth.oauth2.handler.OAuth2SuccessHandler;
-import com.recipe.jamanchu.repository.UserRepository;
+import com.recipe.jamanchu.auth.service.CustomUserDetailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
@@ -18,7 +17,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -28,9 +26,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
   private final AuthenticationConfiguration authenticationConfiguration;
-  private final BCryptPasswordEncoder passwordEncoder;
   private final JwtUtil jwtUtil;
-  private final UserRepository userRepository;
+  private final CustomUserDetailService userDetailService;
   private final CustomOauth2UserService customOauth2UserService;
   private final OAuth2SuccessHandler oAuth2SuccessHandler;
   private final OAuth2FailureHandler oAuth2FailureHandler;
@@ -63,7 +60,8 @@ public class SecurityConfig {
                 "/api/v1/users/signup",
                 "/api/v1/users/login",
                 "/api/v1/users/test",
-                "/api/v1/notify/**").permitAll()
+                "/api/v1/notify/**",
+                "/api/v1/auth/email-check").permitAll()
             .anyRequest().authenticated());
 
     http
@@ -74,9 +72,7 @@ public class SecurityConfig {
             .failureHandler(oAuth2FailureHandler));
 
     http
-        .addFilterBefore(new JwtFilter(jwtUtil), LoginFilter.class);
-    http
-        .addFilterAt(customLoginFilter(), UsernamePasswordAuthenticationFilter.class);
+        .addFilterBefore(new JwtFilter(jwtUtil, userDetailService), UsernamePasswordAuthenticationFilter.class);
     http
         .sessionManagement(session -> session
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
@@ -84,9 +80,4 @@ public class SecurityConfig {
     return http.build();
   }
 
-  private LoginFilter customLoginFilter() throws Exception {
-    LoginFilter loginFilter = new LoginFilter(authenticationManager(), passwordEncoder, jwtUtil, userRepository);
-    loginFilter.setFilterProcessesUrl("/api/v1/users/login");
-    return loginFilter;
-  }
 }
