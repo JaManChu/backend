@@ -79,6 +79,7 @@ public class RecipeDivideServiceImpl implements RecipeDivideService {
         .time(scrapedRecipe.getCookingTimeType())
         .thumbnail(scrapedRecipe.getThumbnail())
         .provider(RecipeProvider.SCRAP)
+        .originRcpId(scrapedRecipe.getRecipeId())
         .build();
 
     recipeRepository.save(recipe);
