@@ -33,8 +33,7 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public ResultCode signup(SignupDTO signupDTO) {
-    // 이메일 중복 체크
-    userAccessHandler.existsByEmail(signupDTO.getEmail());
+
     // 닉네임 중복 체크
     userAccessHandler.existsByNickname(signupDTO.getNickname());
 
