@@ -39,7 +39,7 @@ public class RecipesDTO {
   private final List<IngredientEntity> ingredients;
 
   @NotNull(message = "레시피 순서를 입력해주세요.")
-  @JsonProperty("orders")
+  @JsonProperty("manuals")
   private final List<ManualEntity> manuals;
 
   @JsonCreator
