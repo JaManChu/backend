@@ -1,6 +1,6 @@
 package com.recipe.jamanchu.model.dto.response.recipes;
 
-import com.recipe.jamanchu.model.dto.response.comments.Comments;
+import com.recipe.jamanchu.model.dto.response.comments.Comment;
 import com.recipe.jamanchu.model.dto.response.ingredients.IngredientCoupang;
 import com.recipe.jamanchu.model.type.CookingTimeType;
 import com.recipe.jamanchu.model.type.LevelType;
@@ -27,10 +27,10 @@ public class RecipesInfo {
 
   private final String recipeThumbnail;
 
-  private final List<IngredientCoupang> ingredients;
+  private final List<IngredientCoupang> recipeIngredients;
 
-  private final RecipesManuals recipesManuals;
+  private final List<RecipesManual> recipesManuals;
 
-  private final Comments comments;
+  private final List<Comment> comments;
 }
 

@@ -257,20 +257,16 @@ public class RecipeServiceImpl implements RecipeService {
             tempCoupangLink))
         .toList();
 
-    RecipesManuals recipesManuals = new RecipesManuals(
-        recipe.getManuals().stream()
+    List<RecipesManual> recipesManuals = recipe.getManuals().stream()
             .map(manual -> new RecipesManual(
                 manual.getManualContent(),
                 manual.getManualPicture()
             ))
-            .toList()
-    );
+            .toList();
 
-    Comments comments = new Comments(
-        recipe.getComments().stream()
+    List<Comment> comments = recipe.getComments().stream()
             .map(Comment::new)
-            .toList()
-    );
+            .toList();
 
     RecipesInfo recipesInfo = new RecipesInfo(
         recipe.getId(),
