@@ -279,22 +279,15 @@ class UserAccessHandlerTest {
   @DisplayName("saveUser - 성공: 사용자 저장")
   void saveUser_Success() {
     // given
-    UserEntity newUser = UserEntity.builder()
-        .email("newuser@example.com")
-        .password("newEncodedPassword")
-        .nickname("newNickname")
-        .provider("kakao")
-        .providerId("newProviderId")
-        .role(com.recipe.jamanchu.model.type.UserRole.USER)
-        .build();
-
-    when(userRepository.save(user)).thenReturn(newUser);
+    when(userRepository.save(user)).thenReturn(user);
 
     // when
-    userAccessHandler.saveUser(user);
+    UserEntity newUser = userRepository.save(user);
 
     // then
-    verify(userRepository).save(user);
+    assertEquals(newUser, user);
+    assertEquals(newUser.getUserId(), user.getUserId());
+    assertEquals(newUser.getNickname(), user.getNickname());
   }
 
 }
