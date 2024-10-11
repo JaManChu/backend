@@ -9,9 +9,9 @@ public class Comment {
 
   private final Long commentId;
 
-  private final String nickname;
+  private final String commentAuthor;
 
-  private final String content;
+  private final String commentContent;
 
   private final Double rating;
 
@@ -26,8 +26,8 @@ public class Comment {
 
   public Comment(CommentEntity commentEntity){
     this.commentId = commentEntity.getCommentId();
-    this.nickname = commentEntity.getUser().getNickname();
-    this.content = commentEntity.getCommentContent();
+    this.commentAuthor = commentEntity.getUser().getNickname();
+    this.commentContent = commentEntity.getCommentContent();
     this.rating = commentEntity.getCommentLike();
     this.createdAt = commentEntity.getCreatedAt();
     this.updatedAt = commentEntity.getUpdatedAt();

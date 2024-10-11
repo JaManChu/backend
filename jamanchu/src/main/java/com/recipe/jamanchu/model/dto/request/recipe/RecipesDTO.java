@@ -20,31 +20,31 @@ public class RecipesDTO {
   private final String recipeName;
 
   @NotNull(message = "레시피 레벨을 설정해주세요.")
-  @JsonProperty("level")
-  private final LevelType level;
+  @JsonProperty("recipeLevel")
+  private final LevelType recipeLevel;
 
   @NotNull(message = "레시피 소요시간을 설정해주세요.")
-  @JsonProperty("cookingTime")
-  private final CookingTimeType cookingTime;
+  @JsonProperty("recipeCookingTime")
+  private final CookingTimeType recipeCookingTime;
 
   @JsonProperty("recipeImage")
   private final MultipartFile recipeImage;
 
   @NotNull(message = "레시피 재료를 입력해주세요.")
-  @JsonProperty("ingredients")
-  private final List<Ingredient> ingredients;
+  @JsonProperty("recipeIngredients")
+  private final List<Ingredient> recipeIngredients;
 
   @NotNull(message = "레시피 순서를 입력해주세요.")
-  @JsonProperty("manuals")
-  private final List<RecipesManual> manuals;
+  @JsonProperty("recipeOrderContents")
+  private final List<RecipesManual> recipeOrderContents;
 
   @JsonCreator
-  public RecipesDTO(String recipeName, LevelType level, CookingTimeType cookingTime, MultipartFile recipeImage, List<Ingredient> ingredients, List<RecipesManual> manuals) {
+  public RecipesDTO(String recipeName, LevelType recipeLevel, CookingTimeType recipeCookingTime, MultipartFile recipeImage, List<Ingredient> recipeIngredients, List<RecipesManual> recipeOrderContents) {
     this.recipeName = recipeName;
-    this.level = level;
-    this.cookingTime = cookingTime;
+    this.recipeLevel = recipeLevel;
+    this.recipeCookingTime = recipeCookingTime;
     this.recipeImage = recipeImage;
-    this.ingredients = ingredients;
-    this.manuals = manuals;
+    this.recipeIngredients = recipeIngredients;
+    this.recipeOrderContents = recipeOrderContents;
   }
 }

@@ -62,8 +62,8 @@ public class RecipeServiceImpl implements RecipeService {
     RecipeEntity recipe = RecipeEntity.builder()
         .user(user)
         .name(recipesDTO.getRecipeName())
-        .level(recipesDTO.getLevel())
-        .time(recipesDTO.getCookingTime())
+        .level(recipesDTO.getRecipeLevel())
+        .time(recipesDTO.getRecipeCookingTime())
         .thumbnail(String.valueOf(recipesDTO.getRecipeImage()))
         .provider(USER)
         .build();
@@ -71,11 +71,11 @@ public class RecipeServiceImpl implements RecipeService {
     recipeRepository.save(recipe);
 
     List<IngredientEntity> ingredients = new ArrayList<>();
-    for (int i = 0; i < recipesDTO.getIngredients().size(); i++) {
+    for (int i = 0; i < recipesDTO.getRecipeIngredients().size(); i++) {
       IngredientEntity ingredient = IngredientEntity.builder()
           .recipe(recipe)
-          .name(recipesDTO.getIngredients().get(i).getIngredientName())
-          .quantity(recipesDTO.getIngredients().get(i).getIngredientQuantity())
+          .name(recipesDTO.getRecipeIngredients().get(i).getIngredientName())
+          .quantity(recipesDTO.getRecipeIngredients().get(i).getIngredientQuantity())
           .build();
 
       ingredients.add(ingredient);
@@ -84,11 +84,11 @@ public class RecipeServiceImpl implements RecipeService {
     ingredientRepository.saveAll(ingredients);
 
     List<ManualEntity> manuals = new ArrayList<>();
-    for (int i = 0; i < recipesDTO.getManuals().size(); i++) {
+    for (int i = 0; i < recipesDTO.getRecipeOrderContents().size(); i++) {
       ManualEntity manual = ManualEntity.builder()
           .recipe(recipe)
-          .manualContent(recipesDTO.getManuals().get(i).getRecipeOrderContent())
-          .manualPicture(recipesDTO.getManuals().get(i).getRecipeOrderImage())
+          .manualContent(recipesDTO.getRecipeOrderContents().get(i).getRecipeOrderContent())
+          .manualPicture(recipesDTO.getRecipeOrderContents().get(i).getRecipeOrderImage())
           .build();
 
       manuals.add(manual);
@@ -117,7 +117,7 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     recipe.updateRecipe(recipesUpdateDTO.getRecipeName(),
-        recipesUpdateDTO.getLevel(), recipesUpdateDTO.getCookingTime(),
+        recipesUpdateDTO.getRecipeLevel(), recipesUpdateDTO.getRecipeCookingTime(),
         String.valueOf(recipesUpdateDTO.getRecipeImage()));
 
     // 기존 recipeId로 저장된 재료 확인
@@ -127,11 +127,11 @@ public class RecipeServiceImpl implements RecipeService {
     ingredientRepository.deleteAllByRecipeId(recipeId);
 
     List<IngredientEntity> ingredients = new ArrayList<>();
-    for (int i = 0; i < recipesUpdateDTO.getIngredients().size(); i++) {
+    for (int i = 0; i < recipesUpdateDTO.getRecipeIngredients().size(); i++) {
       IngredientEntity ingredient = IngredientEntity.builder()
           .recipe(recipe)
-          .name(recipesUpdateDTO.getIngredients().get(i).getIngredientName())
-          .quantity(recipesUpdateDTO.getIngredients().get(i).getIngredientQuantity())
+          .name(recipesUpdateDTO.getRecipeIngredients().get(i).getIngredientName())
+          .quantity(recipesUpdateDTO.getRecipeIngredients().get(i).getIngredientQuantity())
           .build();
 
       ingredients.add(ingredient);
@@ -145,11 +145,11 @@ public class RecipeServiceImpl implements RecipeService {
     manualRepository.deleteAllByRecipeId(recipeId);
 
     List<ManualEntity> manuals = new ArrayList<>();
-    for (int i = 0; i < recipesUpdateDTO.getManuals().size(); i++) {
+    for (int i = 0; i < recipesUpdateDTO.getRecipeOrderContents().size(); i++) {
       ManualEntity manual = ManualEntity.builder()
           .recipe(recipe)
-          .manualContent(recipesUpdateDTO.getManuals().get(i).getRecipeOrderContent())
-          .manualPicture(recipesUpdateDTO.getManuals().get(i).getRecipeOrderImage())
+          .manualContent(recipesUpdateDTO.getRecipeOrderContents().get(i).getRecipeOrderContent())
+          .manualPicture(recipesUpdateDTO.getRecipeOrderContents().get(i).getRecipeOrderImage())
           .build();
 
       manuals.add(manual);

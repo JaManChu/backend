@@ -18,9 +18,9 @@ public class RecipesSummary {
 
   private final String recipeAuthor;
 
-  private final LevelType level;
+  private final LevelType recipeLevel;
 
-  private final CookingTimeType time;
+  private final CookingTimeType recipeCookingTime;
 
   private final String recipeThumbnail;
 
