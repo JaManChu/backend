@@ -56,7 +56,7 @@ public class UserServiceImpl implements UserService {
     String access = jwtUtil.createJwt("access", user.getUserId(), user.getRole());
     String refresh = jwtUtil.createJwt("refresh", user.getUserId(), user.getRole());
 
-    response.addHeader("access-token", "Bearer " + access);
+    response.addHeader("Access-Token", "Bearer " + access);
     response.addCookie(createCookie(refresh));
 
     return ResultCode.SUCCESS_LOGIN;
@@ -66,7 +66,7 @@ public class UserServiceImpl implements UserService {
   @Override
   public ResultCode updateUserInfo(HttpServletRequest request, UserUpdateDTO userUpdateDTO) {
     UserEntity user = userAccessHandler
-        .findByUserId(jwtUtil.getUserId(request.getHeader("access-token")));
+        .findByUserId(jwtUtil.getUserId(request.getHeader("Access-Token")));
 
     // 비밀번호 중복 체크
     userAccessHandler.validatePassword(user.getPassword(), userUpdateDTO.getBeforePassword());
@@ -92,7 +92,7 @@ public class UserServiceImpl implements UserService {
   @Override
   public ResultCode deleteUser(HttpServletRequest request, DeleteUserDTO deleteUserDTO) {
     UserEntity user = userAccessHandler
-        .findByUserId(jwtUtil.getUserId(request.getHeader("access-token")));
+        .findByUserId(jwtUtil.getUserId(request.getHeader("Access-Token")));
 
     if (user.getProvider() == null) {
       userAccessHandler.validatePassword(user.getPassword(), deleteUserDTO.getPassword());
@@ -106,7 +106,7 @@ public class UserServiceImpl implements UserService {
   @Override
   public ResultResponse getUserInfo(HttpServletRequest request) {
     UserEntity user = userAccessHandler
-        .findByUserId(jwtUtil.getUserId(request.getHeader("access-token")));
+        .findByUserId(jwtUtil.getUserId(request.getHeader("Access-Token")));
 
     return new ResultResponse(SUCCESS_GET_USER_INFO,
         new UserInfoDTO(user.getEmail(), user.getNickname()));
@@ -114,7 +114,7 @@ public class UserServiceImpl implements UserService {
 
 
   private Cookie createCookie(String value) {
-    Cookie cookie = new Cookie("refresh-token", value);
+    Cookie cookie = new Cookie("Refresh-Token", value);
     cookie.setMaxAge(24 * 60 * 60);
     cookie.setHttpOnly(true);
 

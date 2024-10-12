@@ -109,7 +109,7 @@ class OAuth2SuccessHandlerTest {
     oAuth2SuccessHandler.onAuthenticationSuccess(request, response, authentication);
 
     // then
-    verify(response).addHeader("access-token", "Bearer " + ACCESS_TOKEN);
+    verify(response).addHeader("Access-Token", "Bearer " + ACCESS_TOKEN);
     verify(response).addCookie(any(Cookie.class));
     verify(redirectStrategy).sendRedirect(eq(request), eq(response), anyString());
   }

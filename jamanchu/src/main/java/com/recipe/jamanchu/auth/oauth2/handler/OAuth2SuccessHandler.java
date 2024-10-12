@@ -36,7 +36,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     String access = jwtUtil.createJwt("access", user.getUserId(), user.getRole());
     String refresh = jwtUtil.createJwt("refresh", user.getUserId(), user.getRole());
 
-    response.addHeader("access-token", "Bearer " + access);
+    response.addHeader("Access-Token", "Bearer " + access);
     response.addCookie(createCookie(refresh));
 
     log.info("OAuth 로그인 성공");
@@ -53,7 +53,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
   }
 
   private Cookie createCookie(String value) {
-    Cookie cookie = new Cookie("refresh-token", value);
+    Cookie cookie = new Cookie("Refresh-Token", value);
     cookie.setMaxAge(24 * 60 * 60);
     cookie.setHttpOnly(true);
 

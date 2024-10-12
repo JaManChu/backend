@@ -43,11 +43,11 @@ public class JwtFilter extends OncePerRequestFilter {
       return;
     }
 
-    String authorizationHeader = request.getHeader("access-token");
+    String authorizationHeader = request.getHeader("Access-Token");
 
     // Bearer 토큰이 헤더에 있는지 확인
     if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-      logger.info("Access-token is null or doesn't start with Bearer");
+      logger.info("Access-Token is null or doesn't start with Bearer");
       filterChain.doFilter(request, response);
       return;
     }
@@ -68,7 +68,7 @@ public class JwtFilter extends OncePerRequestFilter {
   }
 
   private void setAuthenticationFromToken(HttpServletResponse response, String token) {
-    response.addHeader("access-token", "Bearer " + token);
+    response.addHeader("Access-Token", "Bearer " + token);
 
     Authentication authToken = getAuthToken(token);
     SecurityContextHolder.getContext().setAuthentication(authToken);
@@ -99,7 +99,7 @@ public class JwtFilter extends OncePerRequestFilter {
   // refresh 토큰 반환
   private String getRefreshTokenFromCookies(HttpServletRequest request) {
     return Arrays.stream(request.getCookies())
-        .filter(cookie -> "refresh-token".equals(cookie.getName()))
+        .filter(cookie -> "Refresh-Token".equals(cookie.getName()))
         .map(Cookie::getValue)
         .findFirst()
         .orElse(null);
