@@ -13,10 +13,10 @@ public class AtLeastOneNotEmptyValidator implements ConstraintValidator<AtLeastO
     boolean hasIngredients = dto.getIngredients() != null && !dto.getIngredients().isEmpty();
 
     // level이 null이 아닌지 확인
-    boolean hasLevel = dto.getLevel() != null;
+    boolean hasLevel = dto.getRecipeLevel() != null;
 
     // cookingTime이 null이 아닌지 확인
-    boolean hasCookingTime = dto.getCookingTime() != null;
+    boolean hasCookingTime = dto.getRecipeCookingTime() != null;
 
     // 하나라도 값이 있는지 확인
     return hasIngredients || hasLevel || hasCookingTime;

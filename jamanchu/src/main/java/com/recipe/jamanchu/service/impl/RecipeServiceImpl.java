@@ -17,11 +17,9 @@ import com.recipe.jamanchu.model.dto.request.recipe.RecipesSearchDTO;
 import com.recipe.jamanchu.model.dto.request.recipe.RecipesUpdateDTO;
 import com.recipe.jamanchu.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.model.dto.response.comments.Comment;
-import com.recipe.jamanchu.model.dto.response.comments.Comments;
 import com.recipe.jamanchu.model.dto.response.ingredients.IngredientCoupang;
 import com.recipe.jamanchu.model.dto.response.recipes.RecipesInfo;
 import com.recipe.jamanchu.model.dto.response.recipes.RecipesManual;
-import com.recipe.jamanchu.model.dto.response.recipes.RecipesManuals;
 import com.recipe.jamanchu.model.dto.response.recipes.RecipesSummary;
 import com.recipe.jamanchu.model.type.ResultCode;
 import com.recipe.jamanchu.repository.IngredientRepository;
@@ -64,7 +62,7 @@ public class RecipeServiceImpl implements RecipeService {
         .name(recipesDTO.getRecipeName())
         .level(recipesDTO.getRecipeLevel())
         .time(recipesDTO.getRecipeCookingTime())
-        .thumbnail(String.valueOf(recipesDTO.getRecipeImage()))
+        .thumbnail(String.valueOf(recipesDTO.getRecipeThumbnail()))
         .provider(USER)
         .build();
 
@@ -118,7 +116,7 @@ public class RecipeServiceImpl implements RecipeService {
 
     recipe.updateRecipe(recipesUpdateDTO.getRecipeName(),
         recipesUpdateDTO.getRecipeLevel(), recipesUpdateDTO.getRecipeCookingTime(),
-        String.valueOf(recipesUpdateDTO.getRecipeImage()));
+        String.valueOf(recipesUpdateDTO.getRecipeThumbnail()));
 
     // 기존 recipeId로 저장된 재료 확인
     ingredientRepository.findAllByRecipeId(recipeId)
@@ -210,8 +208,8 @@ public class RecipeServiceImpl implements RecipeService {
     Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
 
     Page<RecipeEntity> recipes = recipeRepository.searchAndRecipes(
-        recipesSearchDTO.getLevel(),
-        recipesSearchDTO.getCookingTime(),
+        recipesSearchDTO.getRecipeLevel(),
+        recipesSearchDTO.getRecipeCookingTime(),
         recipesSearchDTO.getIngredients(),
         (long) recipesSearchDTO.getIngredients().size(),
         pageable
@@ -219,8 +217,8 @@ public class RecipeServiceImpl implements RecipeService {
 
     if (recipes.isEmpty()) {
       recipes = recipeRepository.searchOrRecipes(
-          recipesSearchDTO.getLevel(),
-          recipesSearchDTO.getCookingTime(),
+          recipesSearchDTO.getRecipeLevel(),
+          recipesSearchDTO.getRecipeCookingTime(),
           recipesSearchDTO.getIngredients(),
           pageable);
     }

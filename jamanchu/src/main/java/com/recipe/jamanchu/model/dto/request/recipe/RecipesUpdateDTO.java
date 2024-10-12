@@ -25,11 +25,11 @@ public class RecipesUpdateDTO extends RecipesDTO{
       String recipeName,
       LevelType level,
       CookingTimeType cookingTime,
-      MultipartFile recipeImage,
+      MultipartFile recipeThumbnail,
       List<Ingredient> ingredients,
       List<RecipesManual> manuals,
       Long recipeId) {
-    super(recipeName, level, cookingTime, recipeImage, ingredients, manuals);
+    super(recipeName, level, cookingTime, recipeThumbnail, ingredients, manuals);
     this.recipeId = recipeId;
   }
 }

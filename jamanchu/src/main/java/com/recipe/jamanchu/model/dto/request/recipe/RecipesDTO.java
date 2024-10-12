@@ -27,8 +27,8 @@ public class RecipesDTO {
   @JsonProperty("recipeCookingTime")
   private final CookingTimeType recipeCookingTime;
 
-  @JsonProperty("recipeImage")
-  private final MultipartFile recipeImage;
+  @JsonProperty("recipeThumbnail")
+  private final MultipartFile recipeThumbnail;
 
   @NotNull(message = "레시피 재료를 입력해주세요.")
   @JsonProperty("recipeIngredients")
@@ -39,11 +39,11 @@ public class RecipesDTO {
   private final List<RecipesManual> recipeOrderContents;
 
   @JsonCreator
-  public RecipesDTO(String recipeName, LevelType recipeLevel, CookingTimeType recipeCookingTime, MultipartFile recipeImage, List<Ingredient> recipeIngredients, List<RecipesManual> recipeOrderContents) {
+  public RecipesDTO(String recipeName, LevelType recipeLevel, CookingTimeType recipeCookingTime, MultipartFile recipeThumbnail, List<Ingredient> recipeIngredients, List<RecipesManual> recipeOrderContents) {
     this.recipeName = recipeName;
     this.recipeLevel = recipeLevel;
     this.recipeCookingTime = recipeCookingTime;
-    this.recipeImage = recipeImage;
+    this.recipeThumbnail = recipeThumbnail;
     this.recipeIngredients = recipeIngredients;
     this.recipeOrderContents = recipeOrderContents;
   }
