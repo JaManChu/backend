@@ -47,7 +47,7 @@ public class UserController {
   }
 
   // OAuth signup & login from Kakao
-  @GetMapping("/login/auth/kakako")
+  @GetMapping("/login/auth/kakao")
   public ResponseEntity<ResultResponse> kakaoLogin(@RequestParam String code,
       HttpServletResponse response) {
 

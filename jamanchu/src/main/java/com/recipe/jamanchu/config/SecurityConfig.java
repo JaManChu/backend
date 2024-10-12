@@ -58,7 +58,7 @@ public class SecurityConfig {
                 "/api/v1/recipes/**",
                 "/api/v1/auth/email-check",
                 "/favicon.ico",
-                "/api/v1/users/login/auth/kakako").permitAll()
+                "/api/v1/users/login/auth/kakao").permitAll()
             .anyRequest().authenticated());
     http
         .addFilterBefore(new JwtFilter(jwtUtil, userDetailService),
