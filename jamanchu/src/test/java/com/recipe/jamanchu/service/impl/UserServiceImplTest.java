@@ -7,6 +7,8 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 import com.recipe.jamanchu.auth.jwt.JwtUtil;
+import com.recipe.jamanchu.auth.oauth2.CustomOauth2UserService;
+import com.recipe.jamanchu.auth.oauth2.KakaoUserDetails;
 import com.recipe.jamanchu.component.UserAccessHandler;
 import com.recipe.jamanchu.entity.UserEntity;
 import com.recipe.jamanchu.exceptions.exception.DuplicatedNicknameException;
@@ -23,6 +25,8 @@ import com.recipe.jamanchu.model.type.ResultCode;
 import com.recipe.jamanchu.model.type.UserRole;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -51,6 +55,9 @@ class UserServiceImplTest {
   @Mock
   private BCryptPasswordEncoder passwordEncoder;
 
+  @Mock
+  private CustomOauth2UserService customOauth2UserService;
+
   @InjectMocks
   private UserServiceImpl userServiceimpl;
 
@@ -64,6 +71,8 @@ class UserServiceImplTest {
   private static final String NEW_NICKNAME = "newNickName";
   private static final String ACCESS = "Access-Token";
   private static final String REFRESH = "Refresh-Token";
+  private static final String CODE = "kakaoCode";
+  private static final String KAKAO_ACCESS_TOKEN = "kakaoAccessToken";
 
   private SignupDTO signup;
   private UserUpdateDTO userUpdateDTO;
@@ -72,6 +81,7 @@ class UserServiceImplTest {
   private DeleteUserDTO deleteUserDTO;
   private UserInfoDTO userInfoDTO;
   private LoginDTO loginDTO;
+  private KakaoUserDetails kakaoUserDetails;
 
   @BeforeEach
   void setUp() {
@@ -100,6 +110,19 @@ class UserServiceImplTest {
         .password(PASSWORD)
         .provider(PROVIDER)
         .build();
+
+    Map<String, Object> kakaoAccount = new HashMap<>();
+    kakaoAccount.put("email", EMAIL);
+
+    Map<String, Object> properties = new HashMap<>();
+    properties.put("nickname", NICKNAME);
+
+    Map<String, Object> attributes = new HashMap<>();
+    attributes.put("id", "providerId");
+    attributes.put("kakao_account", kakaoAccount);
+    attributes.put("properties", properties);
+
+    kakaoUserDetails = new KakaoUserDetails(attributes);
   }
 
   @Test
@@ -166,6 +189,47 @@ class UserServiceImplTest {
     // when then
     assertThrows(PasswordMismatchException.class,
         () -> userServiceimpl.login(loginDTO, response));
+  }
+
+  @Test
+  @DisplayName("카카오 로그인 : 성공")
+  void kakaoLogin_Success() {
+    // given
+    when(customOauth2UserService.getAccessToken(CODE)).thenReturn(KAKAO_ACCESS_TOKEN);
+    when(customOauth2UserService.getUserDetails(KAKAO_ACCESS_TOKEN)).thenReturn(kakaoUserDetails);
+    when(userAccessHandler.findOrCreateUser(kakaoUserDetails)).thenReturn(user);
+    when(jwtUtil.createJwt("access", user.getUserId(), user.getRole())).thenReturn(ACCESS);
+    when(jwtUtil.createJwt("refresh", user.getUserId(), user.getRole())).thenReturn(REFRESH);
+
+    // when
+    ResultResponse resultResponse = userServiceimpl.kakaoLogin(CODE, response);
+
+    // then
+    ResultResponse response = new ResultResponse(ResultCode.SUCCESS_LOGIN, NICKNAME);
+    assertEquals(response.getCode(), resultResponse.getCode());
+    assertEquals(response.getMessage(), resultResponse.getMessage());
+    assertEquals(response.getData(), resultResponse.getData());
+  }
+
+  @Test
+  @DisplayName("카카오 로그인 실패: 엑세스 토큰 발급 실패")
+  void kakaoLogin_AccessDenied() {
+    // given
+    when(customOauth2UserService.getAccessToken(CODE)).thenThrow(new RuntimeException());
+
+    // when & then
+    assertThrows(RuntimeException.class, () -> userServiceimpl.kakaoLogin(CODE, response));
+  }
+
+  @Test
+  @DisplayName("카카오 로그인 실패 : 사용자 정보 가져오기 실패")
+  void kakaoLogin_KakaoAccessDenied() {
+    when(customOauth2UserService.getAccessToken(CODE)).thenReturn(KAKAO_ACCESS_TOKEN);
+    when(customOauth2UserService.getUserDetails(KAKAO_ACCESS_TOKEN)).thenThrow(new RuntimeException());
+
+    // when & then
+    assertThrows(RuntimeException.class, () -> userServiceimpl.kakaoLogin(CODE, response));
+
   }
 
   @Test
