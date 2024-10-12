@@ -60,7 +60,6 @@ public class SecurityConfig {
                 "/api/v1/users/signup",
                 "/api/v1/users/login",
                 "/api/v1/users/test",
-                "/api/v1/notify/**",
                 "/api/v1/recipes/**",
                 "/api/v1/auth/email-check").permitAll()
             .anyRequest().authenticated());
