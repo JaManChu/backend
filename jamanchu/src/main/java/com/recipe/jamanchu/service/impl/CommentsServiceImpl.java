@@ -66,6 +66,7 @@ public class CommentsServiceImpl implements CommentsService {
 
     commentRepository.save(userComment);
 
+    //알림 전송 부분
     if(recipe.getProvider() != SCRAP){
       Notify notify = Notify.of(recipe.getName(),commentsDTO.getComment(),commentsDTO.getRating(), user.getNickname());
       notifyService.notifyUser(recipe.getUser().getUserId(), notify);
