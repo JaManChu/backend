@@ -19,6 +19,6 @@ public interface UserService {
 
   ResultResponse getUserInfo(HttpServletRequest request);
 
-  ResultCode login(LoginDTO loginDTO, HttpServletResponse response);
+  ResultResponse login(LoginDTO loginDTO, HttpServletResponse response);
 }
 

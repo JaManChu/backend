@@ -49,7 +49,7 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public ResultCode login(LoginDTO loginDTO, HttpServletResponse response) {
+  public ResultResponse login(LoginDTO loginDTO, HttpServletResponse response) {
     UserEntity user = userAccessHandler.findByEmail(loginDTO.getEmail());
     userAccessHandler.validatePassword(user.getPassword(), loginDTO.getPassword());
 
@@ -59,7 +59,7 @@ public class UserServiceImpl implements UserService {
     response.addHeader("Access-Token", "Bearer " + access);
     response.addCookie(createCookie(refresh));
 
-    return ResultCode.SUCCESS_LOGIN;
+    return new ResultResponse(ResultCode.SUCCESS_LOGIN, user.getNickname());
   }
 
 

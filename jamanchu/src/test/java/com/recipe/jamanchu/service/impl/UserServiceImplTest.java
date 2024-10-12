@@ -30,6 +30,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @ExtendWith(MockitoExtension.class)
@@ -135,9 +136,10 @@ class UserServiceImplTest {
     when(jwtUtil.createJwt("refresh", user.getUserId(), user.getRole())).thenReturn(REFRESH);
 
     // when
-    ResultCode resultCode = userServiceimpl.login(loginDTO, response);
+    ResultResponse resultResponse = userServiceimpl.login(loginDTO, response);
 
-    assertEquals(ResultCode.SUCCESS_LOGIN, resultCode);
+    assertEquals(resultResponse.getCode(), HttpStatus.OK);
+    assertEquals(resultResponse.getData(), user.getNickname());
   }
 
   @Test
