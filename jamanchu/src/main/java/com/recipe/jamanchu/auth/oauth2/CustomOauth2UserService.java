@@ -1,5 +1,7 @@
 package com.recipe.jamanchu.auth.oauth2;
 
+import com.recipe.jamanchu.exceptions.exception.AccessTokenRetrievalException;
+import com.recipe.jamanchu.exceptions.exception.UserInfoRetrievalException;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +20,9 @@ import org.springframework.web.client.RestTemplate;
 @Service
 @RequiredArgsConstructor
 public class CustomOauth2UserService  {
+
+  private final String TOKEN_URL = "https://kauth.kakao.com/oauth/token";
+  private final String USER_INFO_URL = "https://kapi.kakao.com/v2/user/me";
 
   @Value("${PROD.AUTH.OAUTH.REGISTRATION.KAKAO.client-id}")
   private String clientId;
@@ -44,7 +49,7 @@ public class CustomOauth2UserService  {
     HttpEntity<MultiValueMap<String, String>> kakaoTokenRequest = new HttpEntity<>(body, headers);
     RestTemplate rt = new RestTemplate();
     ResponseEntity<Map> response = rt.exchange(
-        "https://kauth.kakao.com/oauth/token",
+        TOKEN_URL,
         HttpMethod.POST,
         kakaoTokenRequest,
         Map.class
@@ -57,7 +62,7 @@ public class CustomOauth2UserService  {
         return responseBody.get("access_token").toString();
       }
     }
-    throw new RuntimeException("액세스 토큰을 가져오는 데 실패했습니다.");
+    throw new AccessTokenRetrievalException();
   }
 
   // 사용자 정보 가지고 오기
@@ -70,7 +75,7 @@ public class CustomOauth2UserService  {
     HttpEntity<MultiValueMap<String, String>> kakaoUserInfoRequest = new HttpEntity<>(headers);
     RestTemplate rt = new RestTemplate();
     ResponseEntity<Map> response = rt.exchange(
-        "https://kapi.kakao.com/v2/user/me",
+        USER_INFO_URL,
         HttpMethod.POST,
         kakaoUserInfoRequest,
         Map.class
@@ -81,7 +86,7 @@ public class CustomOauth2UserService  {
         return new KakaoUserDetails(response.getBody());
       }
     }
-    throw new RuntimeException("사용자 정보를 가져오는 데 실패했습니다.");
+    throw new UserInfoRetrievalException();
   }
 }
 
