@@ -24,5 +24,7 @@ public class RecipesSummary {
 
   private final String recipeThumbnail;
 
+  private final Double recipeRating;
+
 }
 

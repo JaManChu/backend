@@ -32,5 +32,7 @@ public class RecipesInfo {
   private final List<RecipesManual> recipesManuals;
 
   private final List<Comment> comments;
+
+  private final Double recipeRating;
 }
 
