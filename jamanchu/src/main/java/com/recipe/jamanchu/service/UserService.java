@@ -20,5 +20,7 @@ public interface UserService {
   ResultResponse getUserInfo(HttpServletRequest request);
 
   ResultResponse login(LoginDTO loginDTO, HttpServletResponse response);
+
+  ResultResponse kakaoLogin(String code, HttpServletResponse response);
 }
 

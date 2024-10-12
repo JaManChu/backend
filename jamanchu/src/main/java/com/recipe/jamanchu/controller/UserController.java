@@ -47,18 +47,11 @@ public class UserController {
   }
 
   // OAuth signup & login from Kakao
-  @GetMapping("/test")
-  public ResponseEntity<?> test(
-      @RequestParam("access") String access,
-      @RequestParam("refresh") String refresh
-  ) {
+  @GetMapping("/login/auth/kakao")
+  public ResponseEntity<ResultResponse> kakaoLogin(@RequestParam String code,
+      HttpServletResponse response) {
 
-    log.info("method -> test");
-
-    log.info("access : {}", access);
-    log.info("refresh : {}", refresh);
-
-    return ResponseEntity.ok().body("로그인 성공");
+    return ResponseEntity.ok().body(userService.kakaoLogin(code, response));
   }
 
   // 회원 정보 수정

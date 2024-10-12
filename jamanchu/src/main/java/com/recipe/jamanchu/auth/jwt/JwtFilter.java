@@ -1,8 +1,6 @@
 package com.recipe.jamanchu.auth.jwt;
 
 import com.recipe.jamanchu.auth.service.CustomUserDetailService;
-import com.recipe.jamanchu.entity.UserEntity;
-import com.recipe.jamanchu.model.dto.request.auth.UserDetailsDTO;
 import com.recipe.jamanchu.model.type.UserRole;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
@@ -137,7 +135,8 @@ public class JwtFilter extends OncePerRequestFilter {
         || requestURI.equals("/api/v1/users/signup")
         || requestURI.equals("/api/v1/users/test")
         || Pattern.matches("/api/v1/notify/.*", requestURI)
-        || requestURI.equals("/api/v1/auth/email-check");
+        || requestURI.equals("/api/v1/auth/email-check")
+        || requestURI.equals("/api/v1/users/login/auth/kakao");
   }
 }
 
