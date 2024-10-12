@@ -1,11 +1,12 @@
 package com.recipe.jamanchu.service;
 
 import com.recipe.jamanchu.model.dto.response.notify.Notify;
-import reactor.core.publisher.FluxSink;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 public interface NotifyService {
 
-  void subscribe(Long recipeId, FluxSink<Notify> sink);
+  SseEmitter subscribe(HttpServletRequest request);
 
   void notifyUser(Long userId, Notify notify);
 }
