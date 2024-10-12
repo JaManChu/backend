@@ -11,6 +11,7 @@ import com.recipe.jamanchu.auth.oauth2.CustomOauth2UserService;
 import com.recipe.jamanchu.auth.oauth2.KakaoUserDetails;
 import com.recipe.jamanchu.component.UserAccessHandler;
 import com.recipe.jamanchu.entity.UserEntity;
+import com.recipe.jamanchu.exceptions.exception.AccessTokenRetrievalException;
 import com.recipe.jamanchu.exceptions.exception.DuplicatedNicknameException;
 import com.recipe.jamanchu.exceptions.exception.PasswordMismatchException;
 import com.recipe.jamanchu.exceptions.exception.SocialAccountException;
@@ -215,7 +216,7 @@ class UserServiceImplTest {
   @DisplayName("카카오 로그인 실패: 엑세스 토큰 발급 실패")
   void kakaoLogin_AccessDenied() {
     // given
-    when(customOauth2UserService.getAccessToken(CODE)).thenThrow(new RuntimeException());
+    when(customOauth2UserService.getAccessToken(CODE)).thenThrow(new AccessTokenRetrievalException());
 
     // when & then
     assertThrows(RuntimeException.class, () -> userServiceimpl.kakaoLogin(CODE, response));
@@ -225,7 +226,7 @@ class UserServiceImplTest {
   @DisplayName("카카오 로그인 실패 : 사용자 정보 가져오기 실패")
   void kakaoLogin_KakaoAccessDenied() {
     when(customOauth2UserService.getAccessToken(CODE)).thenReturn(KAKAO_ACCESS_TOKEN);
-    when(customOauth2UserService.getUserDetails(KAKAO_ACCESS_TOKEN)).thenThrow(new RuntimeException());
+    when(customOauth2UserService.getUserDetails(KAKAO_ACCESS_TOKEN)).thenThrow(new UserNotFoundException());
 
     // when & then
     assertThrows(RuntimeException.class, () -> userServiceimpl.kakaoLogin(CODE, response));
