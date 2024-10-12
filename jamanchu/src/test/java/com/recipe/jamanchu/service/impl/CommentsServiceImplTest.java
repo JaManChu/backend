@@ -82,7 +82,7 @@ class CommentsServiceImplTest {
     CommentsDTO requestDTO = new CommentsDTO(recipeId, "댓글 내용", 5.0);
 
     // when
-    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(userId);
+    when(jwtUtil.getUserId(request.getHeader("Access-Token"))).thenReturn(userId);
     when(userAccessHandler.findByUserId(userId)).thenReturn(user);
     when(recipeRepository.findById(recipeId)).thenReturn(Optional.of(recipe));
 
@@ -118,7 +118,7 @@ class CommentsServiceImplTest {
     CommentsDTO requestDTO = new CommentsDTO(recipeId, "댓글 내용", 5.0);
 
     // when
-    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(userId);
+    when(jwtUtil.getUserId(request.getHeader("Access-Token"))).thenReturn(userId);
     when(userAccessHandler.findByUserId(userId)).thenReturn(user);
     when(recipeRepository.findById(recipeId)).thenReturn(Optional.of(recipe));
 
@@ -155,7 +155,7 @@ class CommentsServiceImplTest {
     CommentsUpdateDTO requestDTO = new CommentsUpdateDTO(commentId, "새로운 댓글 내용", 4.0);
 
     // when
-    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(userId);
+    when(jwtUtil.getUserId(request.getHeader("Access-Token"))).thenReturn(userId);
     when(userAccessHandler.findByUserId(userId)).thenReturn(user);
     when(commentRepository.findById(commentId)).thenReturn(Optional.of(oldComment));
 
@@ -205,7 +205,7 @@ class CommentsServiceImplTest {
     CommentsUpdateDTO requestDTO = new CommentsUpdateDTO(commentId, "새로운 댓글 내용", 4.0);
 
     //when
-    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(requestUserId);
+    when(jwtUtil.getUserId(request.getHeader("Access-Token"))).thenReturn(requestUserId);
     when(userAccessHandler.findByUserId(requestUserId)).thenReturn(requestUser);
     when(commentRepository.findById(commentId)).thenReturn(Optional.of(oldComment));
 
@@ -237,7 +237,7 @@ class CommentsServiceImplTest {
 
     CommentsDeleteDTO requestDTO = new CommentsDeleteDTO(commentId);
     // when
-    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(userId);
+    when(jwtUtil.getUserId(request.getHeader("Access-Token"))).thenReturn(userId);
     when(userAccessHandler.findByUserId(userId)).thenReturn(user);
     when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
 
@@ -276,7 +276,7 @@ class CommentsServiceImplTest {
 
     CommentsDeleteDTO requestDTO = new CommentsDeleteDTO(commentId);
     // when
-    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(requestUserId);
+    when(jwtUtil.getUserId(request.getHeader("Access-Token"))).thenReturn(requestUserId);
     when(userAccessHandler.findByUserId(requestUserId)).thenReturn(requestUser);
     when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
 

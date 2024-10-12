@@ -20,7 +20,7 @@ public class SwaggerConfig {
         .components(new Components()
             .addSecuritySchemes("bearerAuth",
                 new SecurityScheme()
-                    .name("access-token")
+                    .name("Access-Token")
                     .type(Type.APIKEY)
                     .in(SecurityScheme.In.HEADER)
                     .bearerFormat("JWT")))

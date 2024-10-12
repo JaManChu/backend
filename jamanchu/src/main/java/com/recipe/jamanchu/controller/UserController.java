@@ -43,7 +43,7 @@ public class UserController {
   public ResponseEntity<ResultResponse> login(@Valid @RequestBody LoginDTO loginDTO,
       HttpServletResponse response) {
 
-    return ResponseEntity.ok(ResultResponse.of(userService.login(loginDTO, response)));
+    return ResponseEntity.ok(userService.login(loginDTO, response));
   }
 
   // OAuth signup & login from Kakao

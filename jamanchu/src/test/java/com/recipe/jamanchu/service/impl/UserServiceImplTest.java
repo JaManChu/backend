@@ -30,6 +30,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @ExtendWith(MockitoExtension.class)
@@ -61,8 +62,8 @@ class UserServiceImplTest {
   private static final String BEFORE_PASSWORD = "oldPassword";
   private static final String AFTER_PASSWORD = "newPassword";
   private static final String NEW_NICKNAME = "newNickName";
-  private static final String ACCESS = "access-token";
-  private static final String REFRESH = "refresh-token";
+  private static final String ACCESS = "Access-Token";
+  private static final String REFRESH = "Refresh-Token";
 
   private SignupDTO signup;
   private UserUpdateDTO userUpdateDTO;
@@ -135,9 +136,10 @@ class UserServiceImplTest {
     when(jwtUtil.createJwt("refresh", user.getUserId(), user.getRole())).thenReturn(REFRESH);
 
     // when
-    ResultCode resultCode = userServiceimpl.login(loginDTO, response);
+    ResultResponse resultResponse = userServiceimpl.login(loginDTO, response);
 
-    assertEquals(ResultCode.SUCCESS_LOGIN, resultCode);
+    assertEquals(resultResponse.getCode(), HttpStatus.OK);
+    assertEquals(resultResponse.getData(), user.getNickname());
   }
 
   @Test
@@ -170,7 +172,7 @@ class UserServiceImplTest {
   @DisplayName("회원정보 수정 성공 - 닉네임, 패스워드 모두 변경")
   void updateUserInfo_SuccessForPasswordAndNickname() {
     // given
-    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(USERID);
+    when(jwtUtil.getUserId(request.getHeader("Access-Token"))).thenReturn(USERID);
     when(userAccessHandler.findByUserId(USERID)).thenReturn(user);
 
     doNothing().when(userAccessHandler).validatePassword(user.getPassword(), BEFORE_PASSWORD);
@@ -190,7 +192,7 @@ class UserServiceImplTest {
     // given
     UserUpdateDTO userUpdateDTO = new UserUpdateDTO("nickname", BEFORE_PASSWORD, AFTER_PASSWORD);
 
-    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(USERID);
+    when(jwtUtil.getUserId(request.getHeader("Access-Token"))).thenReturn(USERID);
     when(userAccessHandler.findByUserId(USERID)).thenReturn(user);
 
     doNothing().when(userAccessHandler).validatePassword(user.getPassword(), BEFORE_PASSWORD);
@@ -206,7 +208,7 @@ class UserServiceImplTest {
   @DisplayName("회원정보 수정 실패 : 존재하지 않은 회원인 경우")
   void updateUserInfo_NotFoundUser() {
     // given
-    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(USERID);
+    when(jwtUtil.getUserId(request.getHeader("Access-Token"))).thenReturn(USERID);
     when(userAccessHandler.findByUserId(USERID)).thenThrow(new UserNotFoundException());
 
     // when then
@@ -218,7 +220,7 @@ class UserServiceImplTest {
   @DisplayName("회원정보 수정 실패 : 비밀번호가 일치하지 않은 경우")
   void updateUserInfo_PasswordMisMatch() {
     // given
-    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(USERID);
+    when(jwtUtil.getUserId(request.getHeader("Access-Token"))).thenReturn(USERID);
     when(userAccessHandler.findByUserId(USERID)).thenReturn(user);
 
     doThrow(new PasswordMismatchException()).when(userAccessHandler)
@@ -233,7 +235,7 @@ class UserServiceImplTest {
   @DisplayName("회원정보 수정 실패 : 카카오로 로그인을 한 회원")
   void updateUserInfo_SocialAccountException() {
     // given
-    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(USERID);
+    when(jwtUtil.getUserId(request.getHeader("Access-Token"))).thenReturn(USERID);
     when(userAccessHandler.findByUserId(USERID)).thenReturn(kakaoUser);
 
     doNothing().when(userAccessHandler).validatePassword(user.getPassword(), BEFORE_PASSWORD);
@@ -249,7 +251,7 @@ class UserServiceImplTest {
   @DisplayName("회원정보 수정 실패 : 닉네임이 중복인 경우")
   void updateUserInfo_DuplicationNickname() {
     // given
-    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(USERID);
+    when(jwtUtil.getUserId(request.getHeader("Access-Token"))).thenReturn(USERID);
     when(userAccessHandler.findByUserId(USERID)).thenReturn(user);
 
     doNothing().when(userAccessHandler).validatePassword(user.getPassword(), BEFORE_PASSWORD);
@@ -268,7 +270,7 @@ class UserServiceImplTest {
   void deleteUser_Success() {
 
     // given
-    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(USERID);
+    when(jwtUtil.getUserId(request.getHeader("Access-Token"))).thenReturn(USERID);
     when(userAccessHandler.findByUserId(USERID)).thenReturn(user);
     doNothing().when(userAccessHandler)
         .validatePassword(user.getPassword(), deleteUserDTO.getPassword());
@@ -285,7 +287,7 @@ class UserServiceImplTest {
   void deleteUser_Success_SocialAccount() {
 
     // given
-    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(USERID);
+    when(jwtUtil.getUserId(request.getHeader("Access-Token"))).thenReturn(USERID);
     when(userAccessHandler.findByUserId(USERID)).thenReturn(kakaoUser);
 
     // when
@@ -299,7 +301,7 @@ class UserServiceImplTest {
   @DisplayName("회원 탈퇴 실패 : 존재하지 않은 회원인 경우")
   void deleteUser_NotFoundUser() {
     // given
-    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(USERID);
+    when(jwtUtil.getUserId(request.getHeader("Access-Token"))).thenReturn(USERID);
     when(userAccessHandler.findByUserId(USERID)).thenThrow(new UserNotFoundException());
 
     // when then
@@ -312,7 +314,7 @@ class UserServiceImplTest {
   void deleteUser_PasswordMisMatch() {
 
     // given
-    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(USERID);
+    when(jwtUtil.getUserId(request.getHeader("Access-Token"))).thenReturn(USERID);
     when(userAccessHandler.findByUserId(USERID)).thenReturn(user);
 
     doThrow(new PasswordMismatchException()).when(userAccessHandler)
@@ -327,7 +329,7 @@ class UserServiceImplTest {
   @DisplayName("회원 정보 조회 성공")
   void getUserInfo_Success() {
     // given
-    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(USERID);
+    when(jwtUtil.getUserId(request.getHeader("Access-Token"))).thenReturn(USERID);
     when(userAccessHandler.findByUserId(USERID)).thenReturn(user);
 
     // when
@@ -343,7 +345,7 @@ class UserServiceImplTest {
   @DisplayName("회원 정보 조회 실패 : 존재하지 않은 사용자")
   void getUserInfo_NotFoundUser() {
     // given
-    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(USERID);
+    when(jwtUtil.getUserId(request.getHeader("Access-Token"))).thenReturn(USERID);
     when(userAccessHandler.findByUserId(USERID)).thenThrow(new UserNotFoundException());
 
     // when then
