@@ -17,11 +17,9 @@ import com.recipe.jamanchu.model.dto.request.recipe.RecipesSearchDTO;
 import com.recipe.jamanchu.model.dto.request.recipe.RecipesUpdateDTO;
 import com.recipe.jamanchu.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.model.dto.response.comments.Comment;
-import com.recipe.jamanchu.model.dto.response.comments.Comments;
 import com.recipe.jamanchu.model.dto.response.ingredients.IngredientCoupang;
 import com.recipe.jamanchu.model.dto.response.recipes.RecipesInfo;
 import com.recipe.jamanchu.model.dto.response.recipes.RecipesManual;
-import com.recipe.jamanchu.model.dto.response.recipes.RecipesManuals;
 import com.recipe.jamanchu.model.dto.response.recipes.RecipesSummary;
 import com.recipe.jamanchu.model.type.ResultCode;
 import com.recipe.jamanchu.repository.IngredientRepository;
@@ -62,20 +60,20 @@ public class RecipeServiceImpl implements RecipeService {
     RecipeEntity recipe = RecipeEntity.builder()
         .user(user)
         .name(recipesDTO.getRecipeName())
-        .level(recipesDTO.getLevel())
-        .time(recipesDTO.getCookingTime())
-        .thumbnail(String.valueOf(recipesDTO.getRecipeImage()))
+        .level(recipesDTO.getRecipeLevel())
+        .time(recipesDTO.getRecipeCookingTime())
+        .thumbnail(String.valueOf(recipesDTO.getRecipeThumbnail()))
         .provider(USER)
         .build();
 
     recipeRepository.save(recipe);
 
     List<IngredientEntity> ingredients = new ArrayList<>();
-    for (int i = 0; i < recipesDTO.getIngredients().size(); i++) {
+    for (int i = 0; i < recipesDTO.getRecipeIngredients().size(); i++) {
       IngredientEntity ingredient = IngredientEntity.builder()
           .recipe(recipe)
-          .name(recipesDTO.getIngredients().get(i).getIngredientName())
-          .quantity(recipesDTO.getIngredients().get(i).getIngredientQuantity())
+          .name(recipesDTO.getRecipeIngredients().get(i).getIngredientName())
+          .quantity(recipesDTO.getRecipeIngredients().get(i).getIngredientQuantity())
           .build();
 
       ingredients.add(ingredient);
@@ -84,11 +82,11 @@ public class RecipeServiceImpl implements RecipeService {
     ingredientRepository.saveAll(ingredients);
 
     List<ManualEntity> manuals = new ArrayList<>();
-    for (int i = 0; i < recipesDTO.getManuals().size(); i++) {
+    for (int i = 0; i < recipesDTO.getRecipeOrderContents().size(); i++) {
       ManualEntity manual = ManualEntity.builder()
           .recipe(recipe)
-          .manualContent(recipesDTO.getManuals().get(i).getRecipeOrderContent())
-          .manualPicture(recipesDTO.getManuals().get(i).getRecipeOrderImage())
+          .manualContent(recipesDTO.getRecipeOrderContents().get(i).getRecipeOrderContent())
+          .manualPicture(recipesDTO.getRecipeOrderContents().get(i).getRecipeOrderImage())
           .build();
 
       manuals.add(manual);
@@ -117,8 +115,8 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     recipe.updateRecipe(recipesUpdateDTO.getRecipeName(),
-        recipesUpdateDTO.getLevel(), recipesUpdateDTO.getCookingTime(),
-        String.valueOf(recipesUpdateDTO.getRecipeImage()));
+        recipesUpdateDTO.getRecipeLevel(), recipesUpdateDTO.getRecipeCookingTime(),
+        String.valueOf(recipesUpdateDTO.getRecipeThumbnail()));
 
     // 기존 recipeId로 저장된 재료 확인
     ingredientRepository.findAllByRecipeId(recipeId)
@@ -127,11 +125,11 @@ public class RecipeServiceImpl implements RecipeService {
     ingredientRepository.deleteAllByRecipeId(recipeId);
 
     List<IngredientEntity> ingredients = new ArrayList<>();
-    for (int i = 0; i < recipesUpdateDTO.getIngredients().size(); i++) {
+    for (int i = 0; i < recipesUpdateDTO.getRecipeIngredients().size(); i++) {
       IngredientEntity ingredient = IngredientEntity.builder()
           .recipe(recipe)
-          .name(recipesUpdateDTO.getIngredients().get(i).getIngredientName())
-          .quantity(recipesUpdateDTO.getIngredients().get(i).getIngredientQuantity())
+          .name(recipesUpdateDTO.getRecipeIngredients().get(i).getIngredientName())
+          .quantity(recipesUpdateDTO.getRecipeIngredients().get(i).getIngredientQuantity())
           .build();
 
       ingredients.add(ingredient);
@@ -145,11 +143,11 @@ public class RecipeServiceImpl implements RecipeService {
     manualRepository.deleteAllByRecipeId(recipeId);
 
     List<ManualEntity> manuals = new ArrayList<>();
-    for (int i = 0; i < recipesUpdateDTO.getManuals().size(); i++) {
+    for (int i = 0; i < recipesUpdateDTO.getRecipeOrderContents().size(); i++) {
       ManualEntity manual = ManualEntity.builder()
           .recipe(recipe)
-          .manualContent(recipesUpdateDTO.getManuals().get(i).getRecipeOrderContent())
-          .manualPicture(recipesUpdateDTO.getManuals().get(i).getRecipeOrderImage())
+          .manualContent(recipesUpdateDTO.getRecipeOrderContents().get(i).getRecipeOrderContent())
+          .manualPicture(recipesUpdateDTO.getRecipeOrderContents().get(i).getRecipeOrderImage())
           .build();
 
       manuals.add(manual);
@@ -210,8 +208,8 @@ public class RecipeServiceImpl implements RecipeService {
     Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
 
     Page<RecipeEntity> recipes = recipeRepository.searchAndRecipes(
-        recipesSearchDTO.getLevel(),
-        recipesSearchDTO.getCookingTime(),
+        recipesSearchDTO.getRecipeLevel(),
+        recipesSearchDTO.getRecipeCookingTime(),
         recipesSearchDTO.getIngredients(),
         (long) recipesSearchDTO.getIngredients().size(),
         pageable
@@ -219,8 +217,8 @@ public class RecipeServiceImpl implements RecipeService {
 
     if (recipes.isEmpty()) {
       recipes = recipeRepository.searchOrRecipes(
-          recipesSearchDTO.getLevel(),
-          recipesSearchDTO.getCookingTime(),
+          recipesSearchDTO.getRecipeLevel(),
+          recipesSearchDTO.getRecipeCookingTime(),
           recipesSearchDTO.getIngredients(),
           pageable);
     }
@@ -257,20 +255,16 @@ public class RecipeServiceImpl implements RecipeService {
             tempCoupangLink))
         .toList();
 
-    RecipesManuals recipesManuals = new RecipesManuals(
-        recipe.getManuals().stream()
+    List<RecipesManual> recipesManuals = recipe.getManuals().stream()
             .map(manual -> new RecipesManual(
                 manual.getManualContent(),
                 manual.getManualPicture()
             ))
-            .toList()
-    );
+            .toList();
 
-    Comments comments = new Comments(
-        recipe.getComments().stream()
+    List<Comment> comments = recipe.getComments().stream()
             .map(Comment::new)
-            .toList()
-    );
+            .toList();
 
     RecipesInfo recipesInfo = new RecipesInfo(
         recipe.getId(),

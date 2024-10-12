@@ -12,19 +12,19 @@ import lombok.Getter;
 @AtLeastOneNotEmpty(message = "하나 이상의 검색 조건을 입력해야 합니다.")
 public class RecipesSearchDTO {
 
-  @JsonProperty("ingredients")
+  @JsonProperty("ingredientName")
   private final List<String> ingredients;
 
-  @JsonProperty("level")
-  private final LevelType level;
+  @JsonProperty("recipeLevel")
+  private final LevelType recipeLevel;
 
-  @JsonProperty("cookingTime")
-  private final CookingTimeType cookingTime;
+  @JsonProperty("recipeCookingTime")
+  private final CookingTimeType recipeCookingTime;
 
   @JsonCreator
-  public RecipesSearchDTO(List<String> ingredients, LevelType level, CookingTimeType cookingTime) {
+  public RecipesSearchDTO(List<String> ingredients, LevelType recipeLevel, CookingTimeType recipeCookingTime) {
     this.ingredients = ingredients;
-    this.level = level;
-    this.cookingTime = cookingTime;
+    this.recipeLevel = recipeLevel;
+    this.recipeCookingTime = recipeCookingTime;
   }
 }
