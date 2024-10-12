@@ -1,8 +1,6 @@
 package com.recipe.jamanchu.auth.jwt;
 
 import com.recipe.jamanchu.auth.service.CustomUserDetailService;
-import com.recipe.jamanchu.entity.UserEntity;
-import com.recipe.jamanchu.model.dto.request.auth.UserDetailsDTO;
 import com.recipe.jamanchu.model.type.UserRole;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
@@ -12,7 +10,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

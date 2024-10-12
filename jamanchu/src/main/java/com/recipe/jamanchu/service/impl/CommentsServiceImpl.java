@@ -16,7 +16,6 @@ import com.recipe.jamanchu.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.model.dto.response.comments.Comment;
 import com.recipe.jamanchu.model.dto.response.comments.Comments;
 import com.recipe.jamanchu.model.dto.response.notify.Notify;
-import com.recipe.jamanchu.model.type.RecipeProvider;
 import com.recipe.jamanchu.model.type.ResultCode;
 import com.recipe.jamanchu.repository.CommentRepository;
 import com.recipe.jamanchu.repository.RecipeRepository;
