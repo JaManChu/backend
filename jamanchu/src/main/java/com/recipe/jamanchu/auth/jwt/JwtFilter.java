@@ -41,11 +41,11 @@ public class JwtFilter extends OncePerRequestFilter {
       return;
     }
 
-    String authorizationHeader = request.getHeader("Access-Token");
+    String authorizationHeader = request.getHeader("access-token");
 
     // Bearer 토큰이 헤더에 있는지 확인
     if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-      logger.info("Access-Token is null or doesn't start with Bearer");
+      logger.info("access-token is null or doesn't start with Bearer");
       filterChain.doFilter(request, response);
       return;
     }
@@ -66,7 +66,7 @@ public class JwtFilter extends OncePerRequestFilter {
   }
 
   private void setAuthenticationFromToken(HttpServletResponse response, String token) {
-    response.addHeader("Access-Token", "Bearer " + token);
+    response.addHeader("access-token", "Bearer " + token);
 
     Authentication authToken = getAuthToken(token);
     SecurityContextHolder.getContext().setAuthentication(authToken);
@@ -76,7 +76,7 @@ public class JwtFilter extends OncePerRequestFilter {
   // access 토큰이 만료되었을 경우 refresh 토큰 검증 후 재 발급
   private void expiredAccessToken(HttpServletRequest request, HttpServletResponse response)
       throws IOException {
-    logger.info("Access-Token is Expired!!");
+    logger.info("access-token is Expired!!");
     String refreshToken = getRefreshTokenFromCookies(request);
 
     if (refreshToken == null) {
@@ -97,7 +97,7 @@ public class JwtFilter extends OncePerRequestFilter {
   // refresh 토큰 반환
   private String getRefreshTokenFromCookies(HttpServletRequest request) {
     return Arrays.stream(request.getCookies())
-        .filter(cookie -> "Refresh-Token".equals(cookie.getName()))
+        .filter(cookie -> "refresh-token".equals(cookie.getName()))
         .map(Cookie::getValue)
         .findFirst()
         .orElse(null);
@@ -113,7 +113,7 @@ public class JwtFilter extends OncePerRequestFilter {
   // access 토큰 재발급
   private String createNewAccessToken(String refreshToken) {
 
-    logger.info("Create New Access-Token!");
+    logger.info("Create New access-token!");
 
     Long userId = jwtUtil.getUserId(refreshToken);
     UserRole role = UserRole.valueOf(jwtUtil.getRole(refreshToken));
