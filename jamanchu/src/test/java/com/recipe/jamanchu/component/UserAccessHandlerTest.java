@@ -1,20 +1,26 @@
 package com.recipe.jamanchu.component;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.recipe.jamanchu.auth.oauth2.KakaoUserDetails;
 import com.recipe.jamanchu.entity.UserEntity;
-import com.recipe.jamanchu.exceptions.exception.DuplicatedEmailException;
 import com.recipe.jamanchu.exceptions.exception.DuplicatedNicknameException;
 import com.recipe.jamanchu.exceptions.exception.PasswordMismatchException;
 import com.recipe.jamanchu.exceptions.exception.SocialAccountException;
 import com.recipe.jamanchu.exceptions.exception.UserNotFoundException;
+import com.recipe.jamanchu.model.type.ResultCode;
 import com.recipe.jamanchu.repository.UserRepository;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,8 +29,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-
-import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 class UserAccessHandlerTest {
@@ -155,25 +159,53 @@ class UserAccessHandlerTest {
   }
 
   @Test
-  @DisplayName("existsByEmail - 실패: 이메일 중복")
+  @DisplayName("existsById - 성공 : 사용자 존재")
+  void existsById_Success() {
+    // given
+    Long userId = 1L;
+    when(userRepository.existsById(userId)).thenReturn(true);
+
+    // when & then
+    assertDoesNotThrow(() -> userAccessHandler.existsById(userId));
+  }
+
+  @Test
+  @DisplayName("existsById - 실패 : 존재하지 않은 사용자")
+  void existsById_UserNotFound() {
+    // given
+    Long userId = 1L;
+    when(userRepository.existsById(userId)).thenReturn(false);
+
+    // when & then
+    assertThrows(UserNotFoundException.class, () -> userAccessHandler.existsById(userId));
+  }
+
+  @Test
+  @DisplayName("existsByEmail :  이미 사용 중인 이메일입니다.")
   void existsByEmail_Duplicated() {
     // given
     String email = "test@example.com";
     when(userRepository.existsByEmail(email)).thenReturn(true);
 
-    // when & then
-    assertThrows(DuplicatedEmailException.class, () -> userAccessHandler.existsByEmail(email));
+    // when
+    ResultCode resultCode = userAccessHandler.existsByEmail(email);
+
+    // then
+    assertEquals(ResultCode.EMAIL_ALREADY_IN_USE, resultCode);
   }
 
   @Test
-  @DisplayName("existsByEmail - 성공: 이메일 미중복")
+  @DisplayName("existsByEmail : 사용할 수 있는 이메일입니다.")
   void existsByEmail_NotDuplicated() {
     // given
-    String email = "unique@example.com";
+    String email = "test@example.com";
     when(userRepository.existsByEmail(email)).thenReturn(false);
 
-    // when & then
-    assertDoesNotThrow(() -> userAccessHandler.existsByEmail(email));
+    // when
+    ResultCode resultCode = userAccessHandler.existsByEmail(email);
+
+    // then
+    assertEquals(ResultCode.EMAIL_AVAILABLE, resultCode);
   }
 
   @Test
@@ -247,21 +279,15 @@ class UserAccessHandlerTest {
   @DisplayName("saveUser - 성공: 사용자 저장")
   void saveUser_Success() {
     // given
-    UserEntity newUser = UserEntity.builder()
-        .email("newuser@example.com")
-        .password("newEncodedPassword")
-        .nickname("newNickname")
-        .provider("kakao")
-        .providerId("newProviderId")
-        .role(com.recipe.jamanchu.model.type.UserRole.USER)
-        .build();
-
-    when(userRepository.save(newUser)).thenReturn(newUser);
+    when(userRepository.save(user)).thenReturn(user);
 
     // when
-    userAccessHandler.saveUser(newUser);
+    UserEntity newUser = userRepository.save(user);
 
     // then
-    verify(userRepository).save(newUser);
+    assertEquals(newUser, user);
+    assertEquals(newUser.getUserId(), user.getUserId());
+    assertEquals(newUser.getNickname(), user.getNickname());
   }
+
 }

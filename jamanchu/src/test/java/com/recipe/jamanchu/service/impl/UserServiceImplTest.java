@@ -9,12 +9,12 @@ import static org.mockito.Mockito.when;
 import com.recipe.jamanchu.auth.jwt.JwtUtil;
 import com.recipe.jamanchu.component.UserAccessHandler;
 import com.recipe.jamanchu.entity.UserEntity;
-import com.recipe.jamanchu.exceptions.exception.DuplicatedEmailException;
 import com.recipe.jamanchu.exceptions.exception.DuplicatedNicknameException;
 import com.recipe.jamanchu.exceptions.exception.PasswordMismatchException;
 import com.recipe.jamanchu.exceptions.exception.SocialAccountException;
 import com.recipe.jamanchu.exceptions.exception.UserNotFoundException;
 import com.recipe.jamanchu.model.dto.request.auth.DeleteUserDTO;
+import com.recipe.jamanchu.model.dto.request.auth.LoginDTO;
 import com.recipe.jamanchu.model.dto.request.auth.SignupDTO;
 import com.recipe.jamanchu.model.dto.request.auth.UserUpdateDTO;
 import com.recipe.jamanchu.model.dto.response.ResultResponse;
@@ -22,6 +22,7 @@ import com.recipe.jamanchu.model.dto.response.auth.UserInfoDTO;
 import com.recipe.jamanchu.model.type.ResultCode;
 import com.recipe.jamanchu.model.type.UserRole;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -44,6 +45,9 @@ class UserServiceImplTest {
   private HttpServletRequest request;
 
   @Mock
+  private HttpServletResponse response;
+
+  @Mock
   private BCryptPasswordEncoder passwordEncoder;
 
   @InjectMocks
@@ -57,6 +61,8 @@ class UserServiceImplTest {
   private static final String BEFORE_PASSWORD = "oldPassword";
   private static final String AFTER_PASSWORD = "newPassword";
   private static final String NEW_NICKNAME = "newNickName";
+  private static final String ACCESS = "access-token";
+  private static final String REFRESH = "refresh-token";
 
   private SignupDTO signup;
   private UserUpdateDTO userUpdateDTO;
@@ -64,6 +70,7 @@ class UserServiceImplTest {
   private UserEntity kakaoUser;
   private DeleteUserDTO deleteUserDTO;
   private UserInfoDTO userInfoDTO;
+  private LoginDTO loginDTO;
 
   @BeforeEach
   void setUp() {
@@ -71,7 +78,7 @@ class UserServiceImplTest {
     userUpdateDTO = new UserUpdateDTO(NEW_NICKNAME, BEFORE_PASSWORD, AFTER_PASSWORD);
     deleteUserDTO = new DeleteUserDTO(PASSWORD);
     userInfoDTO = new UserInfoDTO(EMAIL, NICKNAME);
-
+    loginDTO = new LoginDTO(EMAIL, PASSWORD);
 
     // 일반 회원
     user = UserEntity.builder()
@@ -98,7 +105,6 @@ class UserServiceImplTest {
   @DisplayName("회원가입 성공")
   void signup_Success() {
     // given
-    doNothing().when(userAccessHandler).existsByEmail(signup.getEmail());
     doNothing().when(userAccessHandler).existsByNickname(signup.getNickname());
 
     // when
@@ -106,17 +112,6 @@ class UserServiceImplTest {
 
     // then
     assertEquals(ResultCode.SUCCESS_SIGNUP, result);
-  }
-
-  @Test
-  @DisplayName("회원가입 실패 : 중복된 이메일")
-  void signup_DuplicationEmail() {
-    // given
-    doThrow(new DuplicatedEmailException()).when(userAccessHandler)
-        .existsByEmail(signup.getEmail());
-
-    // when then
-    assertThrows(DuplicatedEmailException.class, () -> userServiceimpl.signup(signup));
   }
 
   @Test
@@ -128,6 +123,47 @@ class UserServiceImplTest {
 
     // when then
     assertThrows(DuplicatedNicknameException.class, () -> userServiceimpl.signup(signup));
+  }
+
+  @Test
+  @DisplayName("로그인 성공")
+  void login_Success() {
+    // given
+    when(userAccessHandler.findByEmail(loginDTO.getEmail())).thenReturn(user);
+    doNothing().when(userAccessHandler).validatePassword(user.getPassword(), loginDTO.getPassword());
+    when(jwtUtil.createJwt("access", user.getUserId(), user.getRole())).thenReturn(ACCESS);
+    when(jwtUtil.createJwt("refresh", user.getUserId(), user.getRole())).thenReturn(REFRESH);
+
+    // when
+    ResultCode resultCode = userServiceimpl.login(loginDTO, response);
+
+    assertEquals(ResultCode.SUCCESS_LOGIN, resultCode);
+  }
+
+  @Test
+  @DisplayName("로그인 실패 : 존재하지 않은 사용자")
+  void login_UserNotFound() {
+    // given
+    when(userAccessHandler.findByEmail(loginDTO.getEmail())).thenThrow(new UserNotFoundException());
+
+    // when then
+    assertThrows(UserNotFoundException.class,
+        () -> userServiceimpl.login(loginDTO, response));
+  }
+
+  @Test
+  @DisplayName("로그인 실패 : 비밀번호 불일치")
+  void login_PasswordMisMatch() {
+    // given
+    loginDTO = new LoginDTO(EMAIL, BEFORE_PASSWORD);
+    when(userAccessHandler.findByEmail(loginDTO.getEmail())).thenReturn(user);
+
+    doThrow(new PasswordMismatchException()).when(userAccessHandler)
+        .validatePassword(user.getPassword(), loginDTO.getPassword());
+
+    // when then
+    assertThrows(PasswordMismatchException.class,
+        () -> userServiceimpl.login(loginDTO, response));
   }
 
   @Test
@@ -315,26 +351,4 @@ class UserServiceImplTest {
         () -> userServiceimpl.getUserInfo(request));
   }
 
-  @DisplayName("유저 객체를 DTO로 변환")
-  @Test
-  void UserEntityToUserDetailDTO() {
-    //given
-    String email = "test@gmail.com";
-
-    UserEntity user = UserEntity.builder()
-        .email(email)
-        .nickname("nickname")
-        .role(UserRole.USER)
-        .password("password")
-        .provider(null)
-        .build();
-    //when
-    when(userAccessHandler.findByEmail(email)).thenReturn(user);
-
-    //then
-    assertEquals(
-        user.getEmail(),
-        userServiceimpl.loadUserByUsername(email).getUsername()
-    );
-  }
 }

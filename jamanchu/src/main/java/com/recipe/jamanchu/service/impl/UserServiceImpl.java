@@ -6,26 +6,26 @@ import com.recipe.jamanchu.auth.jwt.JwtUtil;
 import com.recipe.jamanchu.component.UserAccessHandler;
 import com.recipe.jamanchu.entity.UserEntity;
 import com.recipe.jamanchu.model.dto.request.auth.DeleteUserDTO;
+import com.recipe.jamanchu.model.dto.request.auth.LoginDTO;
 import com.recipe.jamanchu.model.dto.request.auth.SignupDTO;
-import com.recipe.jamanchu.model.dto.request.auth.UserDetailsDTO;
 import com.recipe.jamanchu.model.dto.request.auth.UserUpdateDTO;
 import com.recipe.jamanchu.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.model.dto.response.auth.UserInfoDTO;
 import com.recipe.jamanchu.model.type.ResultCode;
 import com.recipe.jamanchu.model.type.UserRole;
 import com.recipe.jamanchu.service.UserService;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService, UserDetailsService {
+public class UserServiceImpl implements UserService {
 
   private final BCryptPasswordEncoder passwordEncoder;
   private final UserAccessHandler userAccessHandler;
@@ -33,8 +33,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
   @Override
   public ResultCode signup(SignupDTO signupDTO) {
-    // 이메일 중복 체크
-    userAccessHandler.existsByEmail(signupDTO.getEmail());
+
     // 닉네임 중복 체크
     userAccessHandler.existsByNickname(signupDTO.getNickname());
 
@@ -50,13 +49,19 @@ public class UserServiceImpl implements UserService, UserDetailsService {
   }
 
   @Override
-  public UserDetails loadUserByUsername(String email) {
+  public ResultCode login(LoginDTO loginDTO, HttpServletResponse response) {
+    UserEntity user = userAccessHandler.findByEmail(loginDTO.getEmail());
+    userAccessHandler.validatePassword(user.getPassword(), loginDTO.getPassword());
 
-    log.info("loadUserByUsername -> email : {}", email);
-    UserEntity user = userAccessHandler.findByEmail(email);
+    String access = jwtUtil.createJwt("access", user.getUserId(), user.getRole());
+    String refresh = jwtUtil.createJwt("refresh", user.getUserId(), user.getRole());
 
-    return new UserDetailsDTO(user);
+    response.addHeader("access-token", "Bearer " + access);
+    response.addCookie(createCookie(refresh));
+
+    return ResultCode.SUCCESS_LOGIN;
   }
+
 
   @Override
   public ResultCode updateUserInfo(HttpServletRequest request, UserUpdateDTO userUpdateDTO) {
@@ -106,5 +111,15 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     return new ResultResponse(SUCCESS_GET_USER_INFO,
         new UserInfoDTO(user.getEmail(), user.getNickname()));
   }
+
+
+  private Cookie createCookie(String value) {
+    Cookie cookie = new Cookie("refresh-token", value);
+    cookie.setMaxAge(24 * 60 * 60);
+    cookie.setHttpOnly(true);
+
+    return cookie;
+  }
+
 }
 
