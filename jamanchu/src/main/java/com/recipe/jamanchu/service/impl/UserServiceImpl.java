@@ -3,6 +3,8 @@ package com.recipe.jamanchu.service.impl;
 import static com.recipe.jamanchu.model.type.ResultCode.SUCCESS_GET_USER_INFO;
 
 import com.recipe.jamanchu.auth.jwt.JwtUtil;
+import com.recipe.jamanchu.auth.oauth2.CustomOauth2UserService;
+import com.recipe.jamanchu.auth.oauth2.KakaoUserDetails;
 import com.recipe.jamanchu.component.UserAccessHandler;
 import com.recipe.jamanchu.entity.UserEntity;
 import com.recipe.jamanchu.model.dto.request.auth.DeleteUserDTO;
@@ -30,7 +32,9 @@ public class UserServiceImpl implements UserService {
   private final BCryptPasswordEncoder passwordEncoder;
   private final UserAccessHandler userAccessHandler;
   private final JwtUtil jwtUtil;
+  private final CustomOauth2UserService oauth2UserService;
 
+  // 회원가입
   @Override
   public ResultCode signup(SignupDTO signupDTO) {
 
@@ -48,9 +52,12 @@ public class UserServiceImpl implements UserService {
     return ResultCode.SUCCESS_SIGNUP;
   }
 
+  // 일반 로그인
   @Override
   public ResultResponse login(LoginDTO loginDTO, HttpServletResponse response) {
+
     UserEntity user = userAccessHandler.findByEmail(loginDTO.getEmail());
+
     userAccessHandler.validatePassword(user.getPassword(), loginDTO.getPassword());
 
     String access = jwtUtil.createJwt("access", user.getUserId(), user.getRole());
@@ -62,9 +69,32 @@ public class UserServiceImpl implements UserService {
     return new ResultResponse(ResultCode.SUCCESS_LOGIN, user.getNickname());
   }
 
+  // 카카오 로그인
+  @Override
+  public ResultResponse kakaoLogin(String code, HttpServletResponse response) {
 
+    // "인가 코드"로 "액세스 토큰" 요청
+    String accessToken = oauth2UserService.getAccessToken(code);
+
+    // 토큰으로 사용자 정보 요청
+    KakaoUserDetails userInfo = oauth2UserService.getUserDetails(accessToken);
+
+    // 카카오ID로 회원가입 OR 로그인 처리
+    UserEntity user = userAccessHandler.findOrCreateUser(userInfo);
+
+    String access = jwtUtil.createJwt("access", user.getUserId(), user.getRole());
+    String refresh = jwtUtil.createJwt("refresh", user.getUserId(), user.getRole());
+
+    response.addHeader("Access-Token", "Bearer " + access);
+    response.addCookie(createCookie(refresh));
+
+    return new ResultResponse(ResultCode.SUCCESS_LOGIN, user.getNickname());
+  }
+
+  // 회원 정보 수정
   @Override
   public ResultCode updateUserInfo(HttpServletRequest request, UserUpdateDTO userUpdateDTO) {
+
     UserEntity user = userAccessHandler
         .findByUserId(jwtUtil.getUserId(request.getHeader("Access-Token")));
 
@@ -73,10 +103,12 @@ public class UserServiceImpl implements UserService {
 
     // 소셜 계정 체크
     userAccessHandler.isSocialUser(user.getProvider());
+
     // 닉네임 중복 체크
     if (!user.getNickname().equals(userUpdateDTO.getNickname())) {
       userAccessHandler.existsByNickname(userUpdateDTO.getNickname());
     }
+
     // 회원 정보 저장
     userAccessHandler.saveUser(UserEntity.builder()
         .userId(user.getUserId())
@@ -89,8 +121,10 @@ public class UserServiceImpl implements UserService {
     return ResultCode.SUCCESS_UPDATE_USER_INFO;
   }
 
+  // 회원 탈퇴
   @Override
   public ResultCode deleteUser(HttpServletRequest request, DeleteUserDTO deleteUserDTO) {
+
     UserEntity user = userAccessHandler
         .findByUserId(jwtUtil.getUserId(request.getHeader("Access-Token")));
 
@@ -102,9 +136,10 @@ public class UserServiceImpl implements UserService {
     return ResultCode.SUCCESS_DELETE_USER;
   }
 
-
+  // 회원 정보 조회
   @Override
   public ResultResponse getUserInfo(HttpServletRequest request) {
+
     UserEntity user = userAccessHandler
         .findByUserId(jwtUtil.getUserId(request.getHeader("Access-Token")));
 
