@@ -347,7 +347,7 @@ class CommentsServiceImplTest {
     // then
     Comments data = (Comments) commentService.getCommentsList(recipeId).getData();
     assertEquals(4, data.getComments().size());
-    assertEquals("댓글 내용1", data.getComments().get(0).getContent());
+    assertEquals("댓글 내용1", data.getComments().get(0).getCommentContent());
     assertEquals(5.0, data.getComments().get(0).getRating());
 
   }

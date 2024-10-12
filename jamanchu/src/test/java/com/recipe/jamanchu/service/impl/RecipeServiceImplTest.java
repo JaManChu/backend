@@ -128,22 +128,22 @@ class RecipeServiceImplTest {
     );
 
     ingredientEntities = new ArrayList<>();
-    for (int i = 0; i < recipesDTO.getIngredients().size(); i++) {
+    for (int i = 0; i < recipesDTO.getRecipeIngredients().size(); i++) {
       IngredientEntity ingredient = IngredientEntity.builder()
           .recipe(recipe)
-          .name(recipesDTO.getIngredients().get(i).getIngredientName())
-          .quantity(recipesDTO.getIngredients().get(i).getIngredientQuantity())
+          .name(recipesDTO.getRecipeIngredients().get(i).getIngredientName())
+          .quantity(recipesDTO.getRecipeIngredients().get(i).getIngredientQuantity())
           .build();
 
       ingredientEntities.add(ingredient);
     }
 
     manualEntities = new ArrayList<>();
-    for (int i = 0; i < recipesDTO.getManuals().size(); i++) {
+    for (int i = 0; i < recipesDTO.getRecipeOrderContents().size(); i++) {
       ManualEntity manual = ManualEntity.builder()
           .recipe(recipe)
-          .manualContent(recipesDTO.getManuals().get(i).getRecipeOrderContent())
-          .manualPicture(recipesDTO.getManuals().get(i).getRecipeOrderImage())
+          .manualContent(recipesDTO.getRecipeOrderContents().get(i).getRecipeOrderContent())
+          .manualPicture(recipesDTO.getRecipeOrderContents().get(i).getRecipeOrderImage())
           .build();
 
       manualEntities.add(manual);
@@ -153,9 +153,9 @@ class RecipeServiceImplTest {
         .id(1L)
         .user(user)
         .name(recipesDTO.getRecipeName())
-        .level(recipesDTO.getLevel())
-        .time(recipesDTO.getCookingTime())
-        .thumbnail(String.valueOf(recipesDTO.getRecipeImage()))
+        .level(recipesDTO.getRecipeLevel())
+        .time(recipesDTO.getRecipeCookingTime())
+        .thumbnail(String.valueOf(recipesDTO.getRecipeThumbnail()))
         .ingredients(ingredientEntities)
         .manuals(manualEntities)
         .build();
@@ -188,9 +188,9 @@ class RecipeServiceImplTest {
         .id(1L)
         .user(user)
         .name(recipesDTO.getRecipeName())
-        .level(recipesDTO.getLevel())
-        .time(recipesDTO.getCookingTime())
-        .thumbnail(String.valueOf(recipesDTO.getRecipeImage()))
+        .level(recipesDTO.getRecipeLevel())
+        .time(recipesDTO.getRecipeCookingTime())
+        .thumbnail(String.valueOf(recipesDTO.getRecipeThumbnail()))
         .ingredients(ingredientEntities)
         .manuals(manualEntities)
         .build();
@@ -426,9 +426,9 @@ class RecipeServiceImplTest {
     RecipesInfo recipesInfo = (RecipesInfo) result.getData();
     assertEquals(recipe.getName(), recipesInfo.getRecipeName());
     assertEquals(recipe.getUser().getNickname(), recipesInfo.getRecipeAuthor());
-    assertFalse(recipesInfo.getIngredients().isEmpty());
-    assertFalse(recipesInfo.getRecipesManuals().getRecipesManuals().isEmpty());
-    assertFalse(recipesInfo.getComments().getComments().isEmpty());
+    assertFalse(recipesInfo.getRecipeIngredients().isEmpty());
+    assertFalse(recipesInfo.getRecipesManuals().isEmpty());
+    assertFalse(recipesInfo.getComments().isEmpty());
   }
 
   @Test
