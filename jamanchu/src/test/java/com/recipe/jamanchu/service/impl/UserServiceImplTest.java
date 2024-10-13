@@ -75,6 +75,7 @@ class UserServiceImplTest {
   private static final String REFRESH = "refresh-token";
   private static final String CODE = "kakaoCode";
   private static final String KAKAO_ACCESS_TOKEN = "kakaoAccessToken";
+  private final String REDIRECT_URI = "https://frontend-dun-eight-78.vercel.app/users/login/auth/kakao";
 
   private SignupDTO signup;
   private UserUpdateDTO userUpdateDTO;
@@ -84,6 +85,7 @@ class UserServiceImplTest {
   private UserInfoDTO userInfoDTO;
   private LoginDTO loginDTO;
   private KakaoUserDetails kakaoUserDetails;
+
 
   @BeforeEach
   void setUp() {
@@ -207,7 +209,7 @@ class UserServiceImplTest {
     String resultResponse = userServiceimpl.kakaoLogin(CODE, response);
 
     // then
-    String response = UriComponentsBuilder.fromUriString("https://frontend-dun-eight-78.vercel.app/users/login/auth/kakao")
+    String response = UriComponentsBuilder.fromUriString(REDIRECT_URI)
         .queryParam("access-token", ACCESS)
         .queryParam("nickname", user.getNickname())
         .build()

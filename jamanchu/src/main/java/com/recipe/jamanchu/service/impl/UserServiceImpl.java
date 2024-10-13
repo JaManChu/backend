@@ -34,6 +34,7 @@ public class UserServiceImpl implements UserService {
   private final UserAccessHandler userAccessHandler;
   private final JwtUtil jwtUtil;
   private final CustomOauth2UserService oauth2UserService;
+  private final String REDIRECT_URI = "https://frontend-dun-eight-78.vercel.app/users/login/auth/kakao";
 
   // 회원가입
   @Override
@@ -88,7 +89,7 @@ public class UserServiceImpl implements UserService {
 
     response.addCookie(createCookie(refresh));
 
-    return UriComponentsBuilder.fromUriString("https://frontend-dun-eight-78.vercel.app/users/login/auth/kakao")
+    return UriComponentsBuilder.fromUriString(REDIRECT_URI)
         .queryParam("access-token", access)
         .queryParam("nickname", user.getNickname())
         .build()
@@ -156,6 +157,7 @@ public class UserServiceImpl implements UserService {
     Cookie cookie = new Cookie("refresh-token", value);
     cookie.setMaxAge(24 * 60 * 60);
     cookie.setHttpOnly(true);
+    cookie.setSecure(true);
 
     return cookie;
   }
