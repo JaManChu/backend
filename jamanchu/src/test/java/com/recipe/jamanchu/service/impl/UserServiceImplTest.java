@@ -37,6 +37,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
@@ -203,13 +204,16 @@ class UserServiceImplTest {
     when(jwtUtil.createJwt("refresh", user.getUserId(), user.getRole())).thenReturn(REFRESH);
 
     // when
-    ResultResponse resultResponse = userServiceimpl.kakaoLogin(CODE, response);
+    String resultResponse = userServiceimpl.kakaoLogin(CODE, response);
 
     // then
-    ResultResponse response = new ResultResponse(ResultCode.SUCCESS_LOGIN, NICKNAME);
-    assertEquals(response.getCode(), resultResponse.getCode());
-    assertEquals(response.getMessage(), resultResponse.getMessage());
-    assertEquals(response.getData(), resultResponse.getData());
+    String response = UriComponentsBuilder.fromUriString("https://frontend-dun-eight-78.vercel.app/users/login/auth/kakao")
+        .queryParam("access-token", ACCESS)
+        .queryParam("nickname", user.getNickname())
+        .build()
+        .toUriString();
+
+    assertEquals(response, resultResponse);
   }
 
   @Test
