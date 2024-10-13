@@ -56,7 +56,7 @@ public class RecipeServiceImpl implements RecipeService {
   @Override
   @Transactional
   public ResultResponse registerRecipe(HttpServletRequest request, RecipesDTO recipesDTO) {
-    Long userId = jwtUtil.getUserId(request.getHeader("Access-Token"));
+    Long userId = jwtUtil.getUserId(request.getHeader("access-token"));
 
     UserEntity user = userAccessHandler.findByUserId(userId);
 
@@ -104,7 +104,7 @@ public class RecipeServiceImpl implements RecipeService {
   @Transactional
   public ResultResponse updateRecipe(HttpServletRequest request,
       RecipesUpdateDTO recipesUpdateDTO) {
-    Long userId = jwtUtil.getUserId(request.getHeader("Access-Token"));
+    Long userId = jwtUtil.getUserId(request.getHeader("access-token"));
 
     UserEntity user = userAccessHandler.findByUserId(userId);
 
@@ -165,7 +165,7 @@ public class RecipeServiceImpl implements RecipeService {
   @Transactional
   public ResultResponse deleteRecipe(HttpServletRequest request,
       RecipesDeleteDTO recipesDeleteDTO) {
-    Long userId = jwtUtil.getUserId(request.getHeader("Access-Token"));
+    Long userId = jwtUtil.getUserId(request.getHeader("access-token"));
 
     UserEntity user = userAccessHandler.findByUserId(userId);
 
@@ -317,7 +317,7 @@ public class RecipeServiceImpl implements RecipeService {
 
   @Override
   public ResultResponse scrapedRecipe(HttpServletRequest request, Long recipeId) {
-    Long userId = jwtUtil.getUserId(request.getHeader("Access-Token"));
+    Long userId = jwtUtil.getUserId(request.getHeader("access-token"));
 
     UserEntity user = userAccessHandler.findByUserId(userId);
 

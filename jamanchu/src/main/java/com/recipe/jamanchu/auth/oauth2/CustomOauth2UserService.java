@@ -55,7 +55,7 @@ public class CustomOauth2UserService  {
         Map.class
     );
 
-    // Access-token 반환
+    // access-token 반환
     if (response.getStatusCode() == HttpStatus.OK) {
       Map responseBody = response.getBody();
       if (responseBody != null && responseBody.containsKey("access_token")) {

@@ -170,7 +170,7 @@ class RecipeServiceImplTest {
   @DisplayName("레시피 등록 성공")
   void registerRecipe_Success() {
     // given
-    when(jwtUtil.getUserId(request.getHeader("Access-Token"))).thenReturn(user.getUserId());
+    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(user.getUserId());
     when(userAccessHandler.findByUserId(user.getUserId())).thenReturn(user);
 
     // when
@@ -200,7 +200,7 @@ class RecipeServiceImplTest {
         .manuals(manualEntities)
         .build();
 
-    when(jwtUtil.getUserId(request.getHeader("Access-Token"))).thenReturn(user.getUserId());
+    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(user.getUserId());
     when(userAccessHandler.findByUserId(1L)).thenReturn(user);
     when(recipeRepository.findById(1L)).thenReturn(Optional.of(recipe));
     when(ingredientRepository.findAllByRecipeId(1L)).thenReturn(Optional.of(ingredientEntities));
@@ -228,7 +228,7 @@ class RecipeServiceImplTest {
         .userId(2L)
         .build();
 
-    when(jwtUtil.getUserId(request.getHeader("Access-Token"))).thenReturn(2L);
+    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(2L);
     when(userAccessHandler.findByUserId(requestUser.getUserId())).thenReturn(requestUser);
     when(recipeRepository.findById(recipe.getId())).thenReturn(Optional.ofNullable(recipe));
 
@@ -252,7 +252,7 @@ class RecipeServiceImplTest {
         1L
     );
 
-    when(jwtUtil.getUserId(request.getHeader("Access-Token"))).thenReturn(user.getUserId());
+    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(user.getUserId());
     when(userAccessHandler.findByUserId(1L)).thenReturn(user);
     when(recipeRepository.findById(recipe.getId())).thenReturn(Optional.of(recipe));
 
@@ -277,7 +277,7 @@ class RecipeServiceImplTest {
         1L
     );
 
-    when(jwtUtil.getUserId(request.getHeader("Access-Token"))).thenReturn(2L);
+    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(2L);
     when(userAccessHandler.findByUserId(requestUser.getUserId())).thenReturn(requestUser);
     when(recipeRepository.findById(recipe.getId())).thenReturn(Optional.ofNullable(recipe));
 
@@ -497,7 +497,7 @@ class RecipeServiceImplTest {
   @DisplayName("레시피 스크랩 성공")
   void scrapedRecipe_Success() {
     // given
-    when(jwtUtil.getUserId(request.getHeader("Access-Token"))).thenReturn(user.getUserId());
+    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(user.getUserId());
     when(userAccessHandler.findByUserId(user.getUserId())).thenReturn(user);
     when(recipeRepository.findById(recipe.getId())).thenReturn(Optional.of(recipe));
 

@@ -63,7 +63,7 @@ public class UserServiceImpl implements UserService {
     String access = jwtUtil.createJwt("access", user.getUserId(), user.getRole());
     String refresh = jwtUtil.createJwt("refresh", user.getUserId(), user.getRole());
 
-    response.addHeader("Access-Token", "Bearer " + access);
+    response.addHeader("access-token", "Bearer " + access);
     response.addCookie(createCookie(refresh));
 
     return new ResultResponse(ResultCode.SUCCESS_LOGIN, user.getNickname());
@@ -85,7 +85,7 @@ public class UserServiceImpl implements UserService {
     String access = jwtUtil.createJwt("access", user.getUserId(), user.getRole());
     String refresh = jwtUtil.createJwt("refresh", user.getUserId(), user.getRole());
 
-    response.addHeader("Access-Token", "Bearer " + access);
+    response.addHeader("access-token", "Bearer " + access);
     response.addCookie(createCookie(refresh));
 
     return new ResultResponse(ResultCode.SUCCESS_LOGIN, user.getNickname());
@@ -96,7 +96,7 @@ public class UserServiceImpl implements UserService {
   public ResultCode updateUserInfo(HttpServletRequest request, UserUpdateDTO userUpdateDTO) {
 
     UserEntity user = userAccessHandler
-        .findByUserId(jwtUtil.getUserId(request.getHeader("Access-Token")));
+        .findByUserId(jwtUtil.getUserId(request.getHeader("access-token")));
 
     // 비밀번호 중복 체크
     userAccessHandler.validatePassword(user.getPassword(), userUpdateDTO.getBeforePassword());
@@ -126,7 +126,7 @@ public class UserServiceImpl implements UserService {
   public ResultCode deleteUser(HttpServletRequest request, DeleteUserDTO deleteUserDTO) {
 
     UserEntity user = userAccessHandler
-        .findByUserId(jwtUtil.getUserId(request.getHeader("Access-Token")));
+        .findByUserId(jwtUtil.getUserId(request.getHeader("access-token")));
 
     if (user.getProvider() == null) {
       userAccessHandler.validatePassword(user.getPassword(), deleteUserDTO.getPassword());
@@ -141,7 +141,7 @@ public class UserServiceImpl implements UserService {
   public ResultResponse getUserInfo(HttpServletRequest request) {
 
     UserEntity user = userAccessHandler
-        .findByUserId(jwtUtil.getUserId(request.getHeader("Access-Token")));
+        .findByUserId(jwtUtil.getUserId(request.getHeader("access-token")));
 
     return new ResultResponse(SUCCESS_GET_USER_INFO,
         new UserInfoDTO(user.getEmail(), user.getNickname()));
@@ -149,7 +149,7 @@ public class UserServiceImpl implements UserService {
 
 
   private Cookie createCookie(String value) {
-    Cookie cookie = new Cookie("Refresh-Token", value);
+    Cookie cookie = new Cookie("refresh-token", value);
     cookie.setMaxAge(24 * 60 * 60);
     cookie.setHttpOnly(true);
 
