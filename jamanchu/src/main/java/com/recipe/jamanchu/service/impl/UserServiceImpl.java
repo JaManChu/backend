@@ -23,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Slf4j
 @Service
@@ -71,7 +72,7 @@ public class UserServiceImpl implements UserService {
 
   // 카카오 로그인
   @Override
-  public ResultResponse kakaoLogin(String code, HttpServletResponse response) {
+  public String kakaoLogin(String code, HttpServletResponse response) {
 
     // "인가 코드"로 "액세스 토큰" 요청
     String accessToken = oauth2UserService.getAccessToken(code);
@@ -85,10 +86,13 @@ public class UserServiceImpl implements UserService {
     String access = jwtUtil.createJwt("access", user.getUserId(), user.getRole());
     String refresh = jwtUtil.createJwt("refresh", user.getUserId(), user.getRole());
 
-    response.addHeader("access-token", "Bearer " + access);
     response.addCookie(createCookie(refresh));
 
-    return new ResultResponse(ResultCode.SUCCESS_LOGIN, user.getNickname());
+    return UriComponentsBuilder.fromUriString("https://frontend-dun-eight-78.vercel.app/users/login/auth/kakao")
+        .queryParam("access-token", access)
+        .queryParam("nickname", user.getNickname())
+        .build()
+        .toUriString();
   }
 
   // 회원 정보 수정
