@@ -24,6 +24,7 @@ import com.recipe.jamanchu.model.dto.response.recipes.RecipesSummary;
 import com.recipe.jamanchu.model.type.ResultCode;
 import com.recipe.jamanchu.repository.IngredientRepository;
 import com.recipe.jamanchu.repository.ManualRepository;
+import com.recipe.jamanchu.repository.RecipeRatingRepository;
 import com.recipe.jamanchu.repository.RecipeRepository;
 import com.recipe.jamanchu.repository.ScrapedRecipeRepository;
 import com.recipe.jamanchu.service.RecipeService;
@@ -31,6 +32,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -47,6 +49,7 @@ public class RecipeServiceImpl implements RecipeService {
   private final IngredientRepository ingredientRepository;
   private final ManualRepository manualRepository;
   private final ScrapedRecipeRepository scrapedRecipeRepository;
+  private final RecipeRatingRepository recipeRatingRepository;
   private final UserAccessHandler userAccessHandler;
   private final JwtUtil jwtUtil;
 
@@ -197,7 +200,9 @@ public class RecipeServiceImpl implements RecipeService {
         recipeEntity.getUser().getNickname(),
         recipeEntity.getLevel(),
         recipeEntity.getTime(),
-        recipeEntity.getThumbnail()
+        recipeEntity.getThumbnail(),
+        Optional.ofNullable(recipeRatingRepository.findAverageRatingByRecipeId(recipeEntity.getId()))
+            .orElse(0.0)
     )).toList();
 
     return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_ALL_RECIPES, recipesSummaries);
@@ -234,7 +239,9 @@ public class RecipeServiceImpl implements RecipeService {
             recipeEntity.getUser().getNickname(),
             recipeEntity.getLevel(),
             recipeEntity.getTime(),
-            recipeEntity.getThumbnail()
+            recipeEntity.getThumbnail(),
+            Optional.ofNullable(recipeRatingRepository.findAverageRatingByRecipeId(recipeEntity.getId()))
+                .orElse(0.0)
         )).toList();
 
     return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_RECIPES, recipesSummaries);
@@ -275,7 +282,9 @@ public class RecipeServiceImpl implements RecipeService {
         recipe.getThumbnail(),
         ingredientCoupangList,
         recipesManuals,
-        comments
+        comments,
+        Optional.ofNullable(recipeRatingRepository.findAverageRatingByRecipeId(recipe.getId()))
+            .orElse(0.0)
     );
 
     return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_RECIPES_DETAILS, recipesInfo);
@@ -298,7 +307,9 @@ public class RecipeServiceImpl implements RecipeService {
             recipeEntity.getUser().getNickname(),
             recipeEntity.getLevel(),
             recipeEntity.getTime(),
-            recipeEntity.getThumbnail()
+            recipeEntity.getThumbnail(),
+            Optional.ofNullable(recipeRatingRepository.findAverageRatingByRecipeId(recipeEntity.getId()))
+                .orElse(0.0)
         )).toList();
 
     return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_ALL_RECIPES_BY_RATING, recipesSummaries);
