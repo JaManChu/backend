@@ -34,6 +34,7 @@ public class RecipeEntity extends BaseTimeEntity{
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "rcp_id")
   private Long id;
 
   @NotNull

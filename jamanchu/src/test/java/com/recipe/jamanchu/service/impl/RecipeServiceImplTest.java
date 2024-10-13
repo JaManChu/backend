@@ -23,7 +23,9 @@ import com.recipe.jamanchu.model.dto.request.recipe.RecipesDeleteDTO;
 import com.recipe.jamanchu.model.dto.request.recipe.RecipesSearchDTO;
 import com.recipe.jamanchu.model.dto.request.recipe.RecipesUpdateDTO;
 import com.recipe.jamanchu.model.dto.response.ResultResponse;
+import com.recipe.jamanchu.model.dto.response.comments.Comment;
 import com.recipe.jamanchu.model.dto.response.ingredients.Ingredient;
+import com.recipe.jamanchu.model.dto.response.ingredients.IngredientCoupang;
 import com.recipe.jamanchu.model.dto.response.recipes.RecipesInfo;
 import com.recipe.jamanchu.model.dto.response.recipes.RecipesManual;
 import com.recipe.jamanchu.model.dto.response.recipes.RecipesSummary;
@@ -32,6 +34,7 @@ import com.recipe.jamanchu.model.type.LevelType;
 import com.recipe.jamanchu.model.type.UserRole;
 import com.recipe.jamanchu.repository.IngredientRepository;
 import com.recipe.jamanchu.repository.ManualRepository;
+import com.recipe.jamanchu.repository.RecipeRatingRepository;
 import com.recipe.jamanchu.repository.RecipeRepository;
 import com.recipe.jamanchu.repository.ScrapedRecipeRepository;
 import jakarta.servlet.http.HttpServletRequest;
@@ -66,6 +69,9 @@ class RecipeServiceImplTest {
   private ScrapedRecipeRepository scrapedRecipeRepository;
 
   @Mock
+  private RecipeRatingRepository ratingRepository;
+
+  @Mock
   private UserAccessHandler userAccessHandler;
 
   @Mock
@@ -80,7 +86,6 @@ class RecipeServiceImplTest {
   private UserEntity user;
   private List<IngredientEntity> ingredientEntities;
   private List<ManualEntity> manualEntities;
-  private RecipeRatingEntity rating;
   private RecipeEntity recipe;
   private RecipesDTO recipesDTO;
   private RecipesUpdateDTO recipesUpdateDTO;
@@ -404,6 +409,14 @@ class RecipeServiceImplTest {
         .commentLike(5.0)
         .build());
 
+    List<RecipeRatingEntity> ratingEntities = new ArrayList<>();
+    ratingEntities.add(RecipeRatingEntity.builder()
+        .recipeRatingId(1L)
+        .user(user)
+        .recipe(recipe)
+        .rating(4.5)
+        .build());
+
     recipe = RecipeEntity.builder()
         .id(1L)
         .user(user)
@@ -414,9 +427,11 @@ class RecipeServiceImplTest {
         .ingredients(ingredientEntities)
         .manuals(manualEntities)
         .comments(commentEntities)
+        .rating(ratingEntities)
         .build();
 
     when(recipeRepository.findById(recipe.getId())).thenReturn(Optional.of(recipe));
+    when(ratingRepository.findAverageRatingByRecipeId(recipe.getId())).thenReturn(4.5);
 
     // when
     ResultResponse result = recipeService.getRecipeDetail(recipe.getId());
@@ -426,6 +441,7 @@ class RecipeServiceImplTest {
     RecipesInfo recipesInfo = (RecipesInfo) result.getData();
     assertEquals(recipe.getName(), recipesInfo.getRecipeName());
     assertEquals(recipe.getUser().getNickname(), recipesInfo.getRecipeAuthor());
+    assertEquals(4.5, recipesInfo.getRecipeRating());
     assertFalse(recipesInfo.getRecipeIngredients().isEmpty());
     assertFalse(recipesInfo.getRecipesManuals().isEmpty());
     assertFalse(recipesInfo.getComments().isEmpty());
@@ -457,6 +473,7 @@ class RecipeServiceImplTest {
     assertEquals(recipe.getId(), recipesSummaries.get(0).getRecipeId());
     assertEquals(recipe.getName(), recipesSummaries.get(0).getRecipeName());
     assertEquals(recipe.getUser().getNickname(), recipesSummaries.get(0).getRecipeAuthor());
+    assertEquals(0.0, recipesSummaries.get(0).getRecipeRating());
   }
 
   @Test
