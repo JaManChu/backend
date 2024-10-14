@@ -12,7 +12,6 @@ import static org.mockito.Mockito.when;
 
 import com.recipe.jamanchu.auth.oauth2.KakaoUserDetails;
 import com.recipe.jamanchu.entity.UserEntity;
-import com.recipe.jamanchu.exceptions.exception.DuplicatedNicknameException;
 import com.recipe.jamanchu.exceptions.exception.PasswordMismatchException;
 import com.recipe.jamanchu.exceptions.exception.SocialAccountException;
 import com.recipe.jamanchu.exceptions.exception.UserNotFoundException;
@@ -209,26 +208,31 @@ class UserAccessHandlerTest {
   }
 
   @Test
-  @DisplayName("existsByNickname - 실패: 닉네임 중복")
+  @DisplayName("existsByNickname : 이미 사용중인 닉네임 입니다.")
   void existsByNickname_Duplicated() {
     // given
-    String nickname = "testNickname";
+    String nickname = "nickname";
     when(userRepository.existsByNickname(nickname)).thenReturn(true);
 
-    // when & then
-    assertThrows(DuplicatedNicknameException.class, () -> userAccessHandler.existsByNickname(nickname));
-    verify(userRepository, times(1)).existsByNickname(nickname);
+    // when
+    ResultCode resultCode = userAccessHandler.existsByNickname(nickname);
+
+    // then
+    assertEquals(ResultCode.NICKNAME_ALREADY_IN_USE, resultCode);
   }
 
   @Test
-  @DisplayName("existsByNickname - 성공: 닉네임 미중복")
+  @DisplayName("existsByNickname : 사용할 수 있는 닉네임 입니다.")
   void existsByNickname_NotDuplicated() {
     // given
-    String nickname = "uniqueNickname";
+    String nickname = "nickname";
     when(userRepository.existsByNickname(nickname)).thenReturn(false);
 
-    // when & then
-    assertDoesNotThrow(() -> userAccessHandler.existsByNickname(nickname));
+    // when
+    ResultCode resultCode = userAccessHandler.existsByNickname(nickname);
+
+    // then
+    assertEquals(ResultCode.NICKNAME_AVAILABLE, resultCode);
   }
 
   @Test
