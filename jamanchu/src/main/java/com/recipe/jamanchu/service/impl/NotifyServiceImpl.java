@@ -2,6 +2,7 @@ package com.recipe.jamanchu.service.impl;
 
 import com.recipe.jamanchu.auth.jwt.JwtUtil;
 import com.recipe.jamanchu.component.UserAccessHandler;
+import com.recipe.jamanchu.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.model.dto.response.notify.Notify;
 import com.recipe.jamanchu.service.NotifyService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -74,5 +75,22 @@ public class NotifyServiceImpl implements NotifyService {
         subscribers.remove(userId);
       }
     }
+  }
+
+  /*
+   * 특정 레시피 알림 Toggle
+   */
+  @Override
+  public ResultResponse toggleSpecificRecipeCommentAlarm(HttpServletRequest request,
+      Long recipeId) {
+    return null;
+  }
+
+  /*
+   * 전체 레시피 알림 무시
+   */
+  @Override
+  public ResultResponse ignoreAllRecipeCommentAlarm(HttpServletRequest request) {
+    return null;
   }
 }
