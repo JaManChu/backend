@@ -21,6 +21,7 @@ import com.recipe.jamanchu.model.dto.response.recipes.RecipesInfo;
 import com.recipe.jamanchu.model.dto.response.recipes.RecipesManual;
 import com.recipe.jamanchu.model.dto.response.recipes.RecipesSummary;
 import com.recipe.jamanchu.model.type.ResultCode;
+import com.recipe.jamanchu.model.type.ScrapedType;
 import com.recipe.jamanchu.model.type.TokenType;
 import com.recipe.jamanchu.repository.IngredientRepository;
 import com.recipe.jamanchu.repository.ManualRepository;
@@ -316,13 +317,27 @@ public class RecipeServiceImpl implements RecipeService {
     RecipeEntity recipe = recipeRepository.findById(recipeId)
         .orElseThrow(RecipeNotFoundException::new);
 
-    ScrapedRecipeEntity scrapedRecipe = ScrapedRecipeEntity.builder()
-        .user(user)
-        .recipe(recipe)
-        .build();
+    ScrapedRecipeEntity scrapedRecipe = scrapedRecipeRepository.findByUserAndRecipe(user, recipe);
+
+    if (scrapedRecipe != null) {
+      scrapedRecipe = ScrapedRecipeEntity.builder()
+          .scrapedRecipeId(scrapedRecipe.getScrapedRecipeId())
+          .user(scrapedRecipe.getUser())
+          .recipe(scrapedRecipe.getRecipe())
+          .scrapedType(scrapedRecipe.getScrapedType() == ScrapedType.SCRAPED
+              ? ScrapedType.CANCELED
+              : ScrapedType.SCRAPED)
+          .build();
+    } else {
+      scrapedRecipe = ScrapedRecipeEntity.builder()
+          .user(user)
+          .recipe(recipe)
+          .scrapedType(ScrapedType.SCRAPED)
+          .build();
+    }
 
     scrapedRecipeRepository.save(scrapedRecipe);
 
-    return ResultResponse.of(ResultCode.SUCCESS_SCRAPED_RECIPE);
+    return ResultResponse.of(ResultCode.SUCCESS_SCRAPED_RECIPE, scrapedRecipe.getScrapedType());
   }
 }
