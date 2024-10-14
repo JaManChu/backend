@@ -37,6 +37,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
@@ -74,6 +75,7 @@ class UserServiceImplTest {
   private static final String REFRESH = "refresh-token";
   private static final String CODE = "kakaoCode";
   private static final String KAKAO_ACCESS_TOKEN = "kakaoAccessToken";
+  private final String REDIRECT_URI = "https://frontend-dun-eight-78.vercel.app/users/login/auth/kakao";
 
   private SignupDTO signup;
   private UserUpdateDTO userUpdateDTO;
@@ -83,6 +85,7 @@ class UserServiceImplTest {
   private UserInfoDTO userInfoDTO;
   private LoginDTO loginDTO;
   private KakaoUserDetails kakaoUserDetails;
+
 
   @BeforeEach
   void setUp() {
@@ -203,13 +206,16 @@ class UserServiceImplTest {
     when(jwtUtil.createJwt("refresh", user.getUserId(), user.getRole())).thenReturn(REFRESH);
 
     // when
-    ResultResponse resultResponse = userServiceimpl.kakaoLogin(CODE, response);
+    String resultResponse = userServiceimpl.kakaoLogin(CODE, response);
 
     // then
-    ResultResponse response = new ResultResponse(ResultCode.SUCCESS_LOGIN, NICKNAME);
-    assertEquals(response.getCode(), resultResponse.getCode());
-    assertEquals(response.getMessage(), resultResponse.getMessage());
-    assertEquals(response.getData(), resultResponse.getData());
+    String response = UriComponentsBuilder.fromUriString(REDIRECT_URI)
+        .queryParam("access-token", ACCESS)
+        .queryParam("nickname", user.getNickname())
+        .build()
+        .toUriString();
+
+    assertEquals(response, resultResponse);
   }
 
   @Test
