@@ -1,9 +1,11 @@
 package com.recipe.jamanchu.repository;
 
 import com.recipe.jamanchu.entity.RecipeEntity;
+import com.recipe.jamanchu.entity.UserEntity;
 import com.recipe.jamanchu.model.type.CookingTimeType;
 import com.recipe.jamanchu.model.type.LevelType;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -44,4 +46,11 @@ public interface RecipeRepository extends JpaRepository<RecipeEntity, Long> {
 
   @Query("SELECT MAX(r.originRcpId) FROM RecipeEntity r")
   Long findMaxOriginRcpId();
+
+  @Query(value = "SELECT r FROM RecipeEntity r " +
+      "JOIN ScrapedRecipeEntity s ON s.recipe.id = r.id " +
+      "WHERE s.user = :user")
+  Optional<List<RecipeEntity>> findScrapRecipeByUser(UserEntity user);
+
+  Optional<List<RecipeEntity>> findAllByUser(UserEntity user);
 }
