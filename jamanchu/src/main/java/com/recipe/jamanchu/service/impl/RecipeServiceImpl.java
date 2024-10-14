@@ -320,14 +320,9 @@ public class RecipeServiceImpl implements RecipeService {
     ScrapedRecipeEntity scrapedRecipe = scrapedRecipeRepository.findByUserAndRecipe(user, recipe);
 
     if (scrapedRecipe != null) {
-      scrapedRecipe = ScrapedRecipeEntity.builder()
-          .scrapedRecipeId(scrapedRecipe.getScrapedRecipeId())
-          .user(scrapedRecipe.getUser())
-          .recipe(scrapedRecipe.getRecipe())
-          .scrapedType(scrapedRecipe.getScrapedType() == ScrapedType.SCRAPED
-              ? ScrapedType.CANCELED
-              : ScrapedType.SCRAPED)
-          .build();
+      scrapedRecipe.updateScrapedType(scrapedRecipe.getScrapedType() == ScrapedType.SCRAPED
+          ? ScrapedType.CANCELED
+          : ScrapedType.SCRAPED);
     } else {
       scrapedRecipe = ScrapedRecipeEntity.builder()
           .user(user)
