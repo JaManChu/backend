@@ -2,9 +2,6 @@ package com.recipe.jamanchu.config;
 
 import com.recipe.jamanchu.auth.jwt.JwtFilter;
 import com.recipe.jamanchu.auth.jwt.JwtUtil;
-import com.recipe.jamanchu.auth.oauth2.CustomOauth2UserService;
-import com.recipe.jamanchu.auth.oauth2.handler.OAuth2FailureHandler;
-import com.recipe.jamanchu.auth.oauth2.handler.OAuth2SuccessHandler;
 import com.recipe.jamanchu.auth.service.CustomUserDetailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
@@ -28,9 +25,6 @@ public class SecurityConfig {
   private final AuthenticationConfiguration authenticationConfiguration;
   private final JwtUtil jwtUtil;
   private final CustomUserDetailService userDetailService;
-  private final CustomOauth2UserService customOauth2UserService;
-  private final OAuth2SuccessHandler oAuth2SuccessHandler;
-  private final OAuth2FailureHandler oAuth2FailureHandler;
 
   @Bean
   public AuthenticationManager authenticationManager() throws Exception {
@@ -61,18 +55,13 @@ public class SecurityConfig {
                 "/api/v1/users/login",
                 "/api/v1/users/test",
                 "/api/v1/recipes/**",
-                "/api/v1/auth/email-check").permitAll()
+                "/api/v1/auth/email-check",
+                "/favicon.ico",
+                "/api/v1/users/login/auth/kakao").permitAll()
             .anyRequest().authenticated());
-
     http
-        .oauth2Login(oauth2Login -> oauth2Login
-            .userInfoEndpoint(userInfoEndpoint -> userInfoEndpoint
-                .userService(customOauth2UserService))
-            .successHandler(oAuth2SuccessHandler)
-            .failureHandler(oAuth2FailureHandler));
-
-    http
-        .addFilterBefore(new JwtFilter(jwtUtil, userDetailService), UsernamePasswordAuthenticationFilter.class);
+        .addFilterBefore(new JwtFilter(jwtUtil, userDetailService),
+            UsernamePasswordAuthenticationFilter.class);
     http
         .sessionManagement(session -> session
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS));

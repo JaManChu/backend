@@ -29,7 +29,7 @@ public class RecipeRatingEntity {
   private Long recipeRatingId;
 
   @NotNull
-  @OneToOne
+  @ManyToOne
   @JoinColumn(name = "rcp_id")
   private RecipeEntity recipe;
 

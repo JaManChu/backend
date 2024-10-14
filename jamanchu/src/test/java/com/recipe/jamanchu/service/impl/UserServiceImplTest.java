@@ -7,8 +7,11 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 import com.recipe.jamanchu.auth.jwt.JwtUtil;
+import com.recipe.jamanchu.auth.oauth2.CustomOauth2UserService;
+import com.recipe.jamanchu.auth.oauth2.KakaoUserDetails;
 import com.recipe.jamanchu.component.UserAccessHandler;
 import com.recipe.jamanchu.entity.UserEntity;
+import com.recipe.jamanchu.exceptions.exception.AccessTokenRetrievalException;
 import com.recipe.jamanchu.exceptions.exception.DuplicatedNicknameException;
 import com.recipe.jamanchu.exceptions.exception.PasswordMismatchException;
 import com.recipe.jamanchu.exceptions.exception.SocialAccountException;
@@ -23,6 +26,8 @@ import com.recipe.jamanchu.model.type.ResultCode;
 import com.recipe.jamanchu.model.type.UserRole;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,6 +37,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
@@ -51,6 +57,9 @@ class UserServiceImplTest {
   @Mock
   private BCryptPasswordEncoder passwordEncoder;
 
+  @Mock
+  private CustomOauth2UserService customOauth2UserService;
+
   @InjectMocks
   private UserServiceImpl userServiceimpl;
 
@@ -62,8 +71,11 @@ class UserServiceImplTest {
   private static final String BEFORE_PASSWORD = "oldPassword";
   private static final String AFTER_PASSWORD = "newPassword";
   private static final String NEW_NICKNAME = "newNickName";
-  private static final String ACCESS = "Access-Token";
-  private static final String REFRESH = "Refresh-Token";
+  private static final String ACCESS = "access-token";
+  private static final String REFRESH = "refresh-token";
+  private static final String CODE = "kakaoCode";
+  private static final String KAKAO_ACCESS_TOKEN = "kakaoAccessToken";
+  private final String REDIRECT_URI = "https://frontend-dun-eight-78.vercel.app/users/login/auth/kakao";
 
   private SignupDTO signup;
   private UserUpdateDTO userUpdateDTO;
@@ -72,6 +84,8 @@ class UserServiceImplTest {
   private DeleteUserDTO deleteUserDTO;
   private UserInfoDTO userInfoDTO;
   private LoginDTO loginDTO;
+  private KakaoUserDetails kakaoUserDetails;
+
 
   @BeforeEach
   void setUp() {
@@ -100,6 +114,19 @@ class UserServiceImplTest {
         .password(PASSWORD)
         .provider(PROVIDER)
         .build();
+
+    Map<String, Object> kakaoAccount = new HashMap<>();
+    kakaoAccount.put("email", EMAIL);
+
+    Map<String, Object> properties = new HashMap<>();
+    properties.put("nickname", NICKNAME);
+
+    Map<String, Object> attributes = new HashMap<>();
+    attributes.put("id", "providerId");
+    attributes.put("kakao_account", kakaoAccount);
+    attributes.put("properties", properties);
+
+    kakaoUserDetails = new KakaoUserDetails(attributes);
   }
 
   @Test
@@ -169,10 +196,54 @@ class UserServiceImplTest {
   }
 
   @Test
+  @DisplayName("카카오 로그인 : 성공")
+  void kakaoLogin_Success() {
+    // given
+    when(customOauth2UserService.getAccessToken(CODE)).thenReturn(KAKAO_ACCESS_TOKEN);
+    when(customOauth2UserService.getUserDetails(KAKAO_ACCESS_TOKEN)).thenReturn(kakaoUserDetails);
+    when(userAccessHandler.findOrCreateUser(kakaoUserDetails)).thenReturn(user);
+    when(jwtUtil.createJwt("access", user.getUserId(), user.getRole())).thenReturn(ACCESS);
+    when(jwtUtil.createJwt("refresh", user.getUserId(), user.getRole())).thenReturn(REFRESH);
+
+    // when
+    String resultResponse = userServiceimpl.kakaoLogin(CODE, response);
+
+    // then
+    String response = UriComponentsBuilder.fromUriString(REDIRECT_URI)
+        .queryParam("access-token", ACCESS)
+        .queryParam("nickname", user.getNickname())
+        .build()
+        .toUriString();
+
+    assertEquals(response, resultResponse);
+  }
+
+  @Test
+  @DisplayName("카카오 로그인 실패: 엑세스 토큰 발급 실패")
+  void kakaoLogin_AccessDenied() {
+    // given
+    when(customOauth2UserService.getAccessToken(CODE)).thenThrow(new AccessTokenRetrievalException());
+
+    // when & then
+    assertThrows(RuntimeException.class, () -> userServiceimpl.kakaoLogin(CODE, response));
+  }
+
+  @Test
+  @DisplayName("카카오 로그인 실패 : 사용자 정보 가져오기 실패")
+  void kakaoLogin_KakaoAccessDenied() {
+    when(customOauth2UserService.getAccessToken(CODE)).thenReturn(KAKAO_ACCESS_TOKEN);
+    when(customOauth2UserService.getUserDetails(KAKAO_ACCESS_TOKEN)).thenThrow(new UserNotFoundException());
+
+    // when & then
+    assertThrows(RuntimeException.class, () -> userServiceimpl.kakaoLogin(CODE, response));
+
+  }
+
+  @Test
   @DisplayName("회원정보 수정 성공 - 닉네임, 패스워드 모두 변경")
   void updateUserInfo_SuccessForPasswordAndNickname() {
     // given
-    when(jwtUtil.getUserId(request.getHeader("Access-Token"))).thenReturn(USERID);
+    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(USERID);
     when(userAccessHandler.findByUserId(USERID)).thenReturn(user);
 
     doNothing().when(userAccessHandler).validatePassword(user.getPassword(), BEFORE_PASSWORD);
@@ -192,7 +263,7 @@ class UserServiceImplTest {
     // given
     UserUpdateDTO userUpdateDTO = new UserUpdateDTO("nickname", BEFORE_PASSWORD, AFTER_PASSWORD);
 
-    when(jwtUtil.getUserId(request.getHeader("Access-Token"))).thenReturn(USERID);
+    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(USERID);
     when(userAccessHandler.findByUserId(USERID)).thenReturn(user);
 
     doNothing().when(userAccessHandler).validatePassword(user.getPassword(), BEFORE_PASSWORD);
@@ -208,7 +279,7 @@ class UserServiceImplTest {
   @DisplayName("회원정보 수정 실패 : 존재하지 않은 회원인 경우")
   void updateUserInfo_NotFoundUser() {
     // given
-    when(jwtUtil.getUserId(request.getHeader("Access-Token"))).thenReturn(USERID);
+    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(USERID);
     when(userAccessHandler.findByUserId(USERID)).thenThrow(new UserNotFoundException());
 
     // when then
@@ -220,7 +291,7 @@ class UserServiceImplTest {
   @DisplayName("회원정보 수정 실패 : 비밀번호가 일치하지 않은 경우")
   void updateUserInfo_PasswordMisMatch() {
     // given
-    when(jwtUtil.getUserId(request.getHeader("Access-Token"))).thenReturn(USERID);
+    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(USERID);
     when(userAccessHandler.findByUserId(USERID)).thenReturn(user);
 
     doThrow(new PasswordMismatchException()).when(userAccessHandler)
@@ -235,7 +306,7 @@ class UserServiceImplTest {
   @DisplayName("회원정보 수정 실패 : 카카오로 로그인을 한 회원")
   void updateUserInfo_SocialAccountException() {
     // given
-    when(jwtUtil.getUserId(request.getHeader("Access-Token"))).thenReturn(USERID);
+    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(USERID);
     when(userAccessHandler.findByUserId(USERID)).thenReturn(kakaoUser);
 
     doNothing().when(userAccessHandler).validatePassword(user.getPassword(), BEFORE_PASSWORD);
@@ -251,7 +322,7 @@ class UserServiceImplTest {
   @DisplayName("회원정보 수정 실패 : 닉네임이 중복인 경우")
   void updateUserInfo_DuplicationNickname() {
     // given
-    when(jwtUtil.getUserId(request.getHeader("Access-Token"))).thenReturn(USERID);
+    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(USERID);
     when(userAccessHandler.findByUserId(USERID)).thenReturn(user);
 
     doNothing().when(userAccessHandler).validatePassword(user.getPassword(), BEFORE_PASSWORD);
@@ -270,7 +341,7 @@ class UserServiceImplTest {
   void deleteUser_Success() {
 
     // given
-    when(jwtUtil.getUserId(request.getHeader("Access-Token"))).thenReturn(USERID);
+    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(USERID);
     when(userAccessHandler.findByUserId(USERID)).thenReturn(user);
     doNothing().when(userAccessHandler)
         .validatePassword(user.getPassword(), deleteUserDTO.getPassword());
@@ -287,7 +358,7 @@ class UserServiceImplTest {
   void deleteUser_Success_SocialAccount() {
 
     // given
-    when(jwtUtil.getUserId(request.getHeader("Access-Token"))).thenReturn(USERID);
+    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(USERID);
     when(userAccessHandler.findByUserId(USERID)).thenReturn(kakaoUser);
 
     // when
@@ -301,7 +372,7 @@ class UserServiceImplTest {
   @DisplayName("회원 탈퇴 실패 : 존재하지 않은 회원인 경우")
   void deleteUser_NotFoundUser() {
     // given
-    when(jwtUtil.getUserId(request.getHeader("Access-Token"))).thenReturn(USERID);
+    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(USERID);
     when(userAccessHandler.findByUserId(USERID)).thenThrow(new UserNotFoundException());
 
     // when then
@@ -314,7 +385,7 @@ class UserServiceImplTest {
   void deleteUser_PasswordMisMatch() {
 
     // given
-    when(jwtUtil.getUserId(request.getHeader("Access-Token"))).thenReturn(USERID);
+    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(USERID);
     when(userAccessHandler.findByUserId(USERID)).thenReturn(user);
 
     doThrow(new PasswordMismatchException()).when(userAccessHandler)
@@ -329,7 +400,7 @@ class UserServiceImplTest {
   @DisplayName("회원 정보 조회 성공")
   void getUserInfo_Success() {
     // given
-    when(jwtUtil.getUserId(request.getHeader("Access-Token"))).thenReturn(USERID);
+    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(USERID);
     when(userAccessHandler.findByUserId(USERID)).thenReturn(user);
 
     // when
@@ -345,7 +416,7 @@ class UserServiceImplTest {
   @DisplayName("회원 정보 조회 실패 : 존재하지 않은 사용자")
   void getUserInfo_NotFoundUser() {
     // given
-    when(jwtUtil.getUserId(request.getHeader("Access-Token"))).thenReturn(USERID);
+    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(USERID);
     when(userAccessHandler.findByUserId(USERID)).thenThrow(new UserNotFoundException());
 
     // when then

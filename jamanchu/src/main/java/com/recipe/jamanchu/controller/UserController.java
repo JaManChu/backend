@@ -9,9 +9,12 @@ import com.recipe.jamanchu.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import java.net.URI;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -47,18 +50,15 @@ public class UserController {
   }
 
   // OAuth signup & login from Kakao
-  @GetMapping("/test")
-  public ResponseEntity<?> test(
-      @RequestParam("access") String access,
-      @RequestParam("refresh") String refresh
-  ) {
+  @GetMapping("/login/auth/kakao")
+  public ResponseEntity<Void> kakaoLogin(@RequestParam String code,
+      HttpServletResponse response) {
 
-    log.info("method -> test");
+    String redirectUrl = userService.kakaoLogin(code, response);
+    HttpHeaders headers = new HttpHeaders();
+    headers.setLocation(URI.create(redirectUrl));
 
-    log.info("access : {}", access);
-    log.info("refresh : {}", refresh);
-
-    return ResponseEntity.ok().body("로그인 성공");
+    return ResponseEntity.status(HttpStatus.FOUND).headers(headers).build();
   }
 
   // 회원 정보 수정
