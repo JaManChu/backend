@@ -10,6 +10,7 @@ import com.recipe.jamanchu.auth.jwt.JwtUtil;
 import com.recipe.jamanchu.auth.oauth2.CustomOauth2UserService;
 import com.recipe.jamanchu.auth.oauth2.KakaoUserDetails;
 import com.recipe.jamanchu.component.UserAccessHandler;
+import com.recipe.jamanchu.entity.RecipeEntity;
 import com.recipe.jamanchu.entity.UserEntity;
 import com.recipe.jamanchu.exceptions.exception.AccessTokenRetrievalException;
 import com.recipe.jamanchu.exceptions.exception.DuplicatedNicknameException;
@@ -22,13 +23,22 @@ import com.recipe.jamanchu.model.dto.request.auth.SignupDTO;
 import com.recipe.jamanchu.model.dto.request.auth.UserUpdateDTO;
 import com.recipe.jamanchu.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.model.dto.response.auth.UserInfoDTO;
+import com.recipe.jamanchu.model.dto.response.mypage.MyRecipeInfo;
+import com.recipe.jamanchu.model.dto.response.mypage.MyRecipes;
+import com.recipe.jamanchu.model.dto.response.mypage.MyScrapedRecipes;
+import com.recipe.jamanchu.model.type.CookingTimeType;
+import com.recipe.jamanchu.model.type.LevelType;
+import com.recipe.jamanchu.model.type.RecipeProvider;
 import com.recipe.jamanchu.model.type.ResultCode;
 import com.recipe.jamanchu.model.type.TokenType;
 import com.recipe.jamanchu.model.type.UserRole;
+import com.recipe.jamanchu.repository.RecipeRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -61,6 +71,9 @@ class UserServiceImplTest {
   @Mock
   private CustomOauth2UserService customOauth2UserService;
 
+  @Mock
+  private RecipeRepository recipeRepository;
+
   @InjectMocks
   private UserServiceImpl userServiceimpl;
 
@@ -86,6 +99,10 @@ class UserServiceImplTest {
   private UserInfoDTO userInfoDTO;
   private LoginDTO loginDTO;
   private KakaoUserDetails kakaoUserDetails;
+  private List<RecipeEntity> myRecipeList;
+  private List<RecipeEntity> myScrapRecipeList;
+  private List<MyRecipes> myRecipes;
+  private List<MyScrapedRecipes> myScrapedRecipes;
 
 
   @BeforeEach
@@ -128,6 +145,41 @@ class UserServiceImplTest {
     attributes.put("properties", properties);
 
     kakaoUserDetails = new KakaoUserDetails(attributes);
+
+    myRecipeList = List.of(
+        new RecipeEntity(
+            1L, user, "레시피 1", LevelType.LOW, CookingTimeType.TEN_MINUTES,
+            "thumbnail 1", RecipeProvider.USER, null, null, null, null, null, null),
+        new RecipeEntity(
+            2L, user, "레시피 2", LevelType.MEDIUM, CookingTimeType.FIFTEEN_MINUTES,
+            "thumbnail 2", RecipeProvider.USER, null, null, null, null, null, null)
+    );
+
+    myScrapRecipeList = List.of(
+        new RecipeEntity(
+            3L, kakaoUser, "레시피 3", LevelType.LOW, CookingTimeType.TEN_MINUTES,
+            "thumbnail 3", RecipeProvider.USER, null, null, null, null, null, null),
+        new RecipeEntity(
+            4L, kakaoUser, "레시피 4", LevelType.MEDIUM, CookingTimeType.FIFTEEN_MINUTES,
+            "thumbnail 4", RecipeProvider.USER, null, null, null, null, null, null)
+    );
+
+    myRecipes = myRecipeList.stream()
+        .limit(20)
+        .map(recipe -> new MyRecipes(
+            recipe.getId(),
+            recipe.getName(),
+            recipe.getThumbnail()
+        )).toList();
+
+    myScrapedRecipes = myScrapRecipeList.stream()
+        .limit(20)
+        .map(scraped -> new MyScrapedRecipes(
+            scraped.getId(),
+            scraped.getName(),
+            scraped.getUser().getNickname(),
+            scraped.getThumbnail()
+        )).toList();
   }
 
   @Test
@@ -423,6 +475,61 @@ class UserServiceImplTest {
     // when then
     assertThrows(UserNotFoundException.class,
         () -> userServiceimpl.getUserInfo(request));
+  }
+
+  @Test
+  @DisplayName("마이페이지 레시피 정보 조회 성공")
+  void getUserRecipeInfo_Success() {
+
+    // given
+    when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(USERID);
+    when(userAccessHandler.findByUserId(USERID)).thenReturn(user);
+    when(recipeRepository.findAllByUser(user)).thenReturn(Optional.of(myRecipeList));
+    when(recipeRepository.findScrapRecipeByUser(user)).thenReturn(Optional.of(myScrapRecipeList));
+
+    ResultResponse response = new ResultResponse(ResultCode.SUCCESS_GET_USER_RECIPES_INFO,
+        new MyRecipeInfo(myRecipes, myScrapedRecipes)
+    );
+
+    // when
+    ResultResponse actualResponse = userServiceimpl.getUserRecipes(request);
+
+    MyRecipeInfo recipeInfo = (MyRecipeInfo) response.getData();
+    MyRecipeInfo actualRecipeInfo = (MyRecipeInfo) actualResponse.getData();
+
+    // then
+    assertEquals(response.getCode(), actualResponse.getCode());
+
+    for (int i = 0; i < recipeInfo.getMyRecipes().size(); i++) {
+      MyRecipes myRecipes = recipeInfo.getMyRecipes().get(i);
+      MyRecipes actualRecipe = actualRecipeInfo.getMyRecipes().get(i);
+
+      assertEquals(myRecipes.getMyRecipeId(), actualRecipe.getMyRecipeId());
+      assertEquals(myRecipes.getMyRecipeName(), actualRecipe.getMyRecipeName());
+      assertEquals(myRecipes.getMyRecipeThumbnail(), actualRecipe.getMyRecipeThumbnail());
+    }
+
+    for (int i = 0; i < recipeInfo.getMyScrapedRecipes().size(); i++) {
+      MyScrapedRecipes myScrapedRecipes = recipeInfo.getMyScrapedRecipes().get(i);
+      MyScrapedRecipes actualScraped = actualRecipeInfo.getMyScrapedRecipes().get(i);
+
+      assertEquals(myScrapedRecipes.getRecipeId(), actualScraped.getRecipeId());
+      assertEquals(myScrapedRecipes.getRecipeName(), actualScraped.getRecipeName());
+      assertEquals(myScrapedRecipes.getRecipeAuthor(), actualScraped.getRecipeAuthor());
+      assertEquals(myScrapedRecipes.getRecipeThumbnail(), actualScraped.getRecipeThumbnail());
+    }
+  }
+
+  @Test
+  @DisplayName("마이페이지 레시피 정보 조회 실패 : 사용자 없음")
+  void getUserRecipeInfo_UserNotFound() {
+    // given
+    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(USERID);
+    when(userAccessHandler.findByUserId(USERID)).thenThrow(new UserNotFoundException());
+
+    // when then
+    assertThrows(UserNotFoundException.class,
+        () -> userServiceimpl.getUserRecipes(request));
   }
 
 }
