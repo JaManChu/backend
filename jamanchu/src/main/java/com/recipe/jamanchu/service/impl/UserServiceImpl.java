@@ -13,12 +13,17 @@ import com.recipe.jamanchu.model.dto.request.auth.SignupDTO;
 import com.recipe.jamanchu.model.dto.request.auth.UserUpdateDTO;
 import com.recipe.jamanchu.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.model.dto.response.auth.UserInfoDTO;
+import com.recipe.jamanchu.model.dto.response.mypage.MyRecipeInfo;
+import com.recipe.jamanchu.model.dto.response.mypage.MyRecipes;
+import com.recipe.jamanchu.model.dto.response.mypage.MyScrapedRecipes;
 import com.recipe.jamanchu.model.type.ResultCode;
 import com.recipe.jamanchu.model.type.TokenType;
 import com.recipe.jamanchu.model.type.UserRole;
+import com.recipe.jamanchu.repository.RecipeRepository;
 import com.recipe.jamanchu.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -37,6 +42,7 @@ public class UserServiceImpl implements UserService {
   private final JwtUtil jwtUtil;
   private final CustomOauth2UserService oauth2UserService;
   private final String REDIRECT_URI = "https://frontend-dun-eight-78.vercel.app/users/login/auth/kakao";
+  private final RecipeRepository recipeRepository;
 
   // 회원가입
   @Override
@@ -152,6 +158,37 @@ public class UserServiceImpl implements UserService {
 
     return new ResultResponse(SUCCESS_GET_USER_INFO,
         new UserInfoDTO(user.getEmail(), user.getNickname()));
+  }
+
+  @Override
+  public ResultResponse getUserRecipes(HttpServletRequest request) {
+    UserEntity user = userAccessHandler
+        .findByUserId(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue())));
+
+    List<MyRecipes> myRecipes = recipeRepository.findAllByUser(user)
+        .map(recipeEntities -> recipeEntities.stream()
+            .limit(20)
+            .map(recipe -> new MyRecipes(
+                recipe.getId(),
+                recipe.getName(),
+                recipe.getThumbnail()
+            )).toList())
+        .orElse(null);
+
+    List<MyScrapedRecipes> myScrapedRecipes = recipeRepository.findScrapRecipeByUser(user)
+        .map(recipeEntities -> recipeEntities.stream()
+            .limit(20)
+            .map(scraped -> new MyScrapedRecipes(
+                scraped.getId(),
+                scraped.getName(),
+                scraped.getUser().getNickname(),
+                scraped.getThumbnail()
+            )).toList())
+        .orElse(null);
+
+
+    return new ResultResponse(ResultCode.SUCCESS_GET_USER_RECIPES_INFO,
+        new MyRecipeInfo(myRecipes, myScrapedRecipes));
   }
 
 
