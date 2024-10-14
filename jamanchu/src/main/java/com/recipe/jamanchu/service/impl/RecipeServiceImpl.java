@@ -22,6 +22,7 @@ import com.recipe.jamanchu.model.dto.response.recipes.RecipesInfo;
 import com.recipe.jamanchu.model.dto.response.recipes.RecipesManual;
 import com.recipe.jamanchu.model.dto.response.recipes.RecipesSummary;
 import com.recipe.jamanchu.model.type.ResultCode;
+import com.recipe.jamanchu.model.type.TokenType;
 import com.recipe.jamanchu.repository.IngredientRepository;
 import com.recipe.jamanchu.repository.ManualRepository;
 import com.recipe.jamanchu.repository.RecipeRatingRepository;
@@ -56,7 +57,7 @@ public class RecipeServiceImpl implements RecipeService {
   @Override
   @Transactional
   public ResultResponse registerRecipe(HttpServletRequest request, RecipesDTO recipesDTO) {
-    Long userId = jwtUtil.getUserId(request.getHeader("access-token"));
+    Long userId = jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()));
 
     UserEntity user = userAccessHandler.findByUserId(userId);
 
@@ -104,7 +105,7 @@ public class RecipeServiceImpl implements RecipeService {
   @Transactional
   public ResultResponse updateRecipe(HttpServletRequest request,
       RecipesUpdateDTO recipesUpdateDTO) {
-    Long userId = jwtUtil.getUserId(request.getHeader("access-token"));
+    Long userId = jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()));
 
     UserEntity user = userAccessHandler.findByUserId(userId);
 
@@ -165,7 +166,7 @@ public class RecipeServiceImpl implements RecipeService {
   @Transactional
   public ResultResponse deleteRecipe(HttpServletRequest request,
       RecipesDeleteDTO recipesDeleteDTO) {
-    Long userId = jwtUtil.getUserId(request.getHeader("access-token"));
+    Long userId = jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()));
 
     UserEntity user = userAccessHandler.findByUserId(userId);
 
@@ -317,7 +318,7 @@ public class RecipeServiceImpl implements RecipeService {
 
   @Override
   public ResultResponse scrapedRecipe(HttpServletRequest request, Long recipeId) {
-    Long userId = jwtUtil.getUserId(request.getHeader("access-token"));
+    Long userId = jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()));
 
     UserEntity user = userAccessHandler.findByUserId(userId);
 

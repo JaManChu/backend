@@ -1,5 +1,6 @@
 package com.recipe.jamanchu.config;
 
+import com.recipe.jamanchu.model.type.TokenType;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
@@ -21,7 +22,7 @@ public class SwaggerConfig {
         .components(new Components()
             .addSecuritySchemes("bearerAuth",
                 new SecurityScheme()
-                    .name("access-token")
+                    .name(TokenType.ACCESS.getValue())
                     .type(Type.APIKEY)
                     .in(SecurityScheme.In.HEADER)
                     .bearerFormat("JWT")))
