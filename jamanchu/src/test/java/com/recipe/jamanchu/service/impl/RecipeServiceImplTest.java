@@ -502,7 +502,7 @@ class RecipeServiceImplTest {
     ResultResponse result = recipeService.scrapedRecipe(request, recipe.getId());
 
     // then
-    assertEquals("레시피 찜하기 성공", result.getMessage());
+    assertEquals("레시피 찜하기 취소 성공", result.getMessage());
     assertEquals(ScrapedType.CANCELED, result.getData()); // SCRAPED -> CANCELED
 
     // verify
