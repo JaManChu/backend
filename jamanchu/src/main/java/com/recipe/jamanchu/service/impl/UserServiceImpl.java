@@ -108,11 +108,6 @@ public class UserServiceImpl implements UserService {
     // 소셜 계정 체크
     userAccessHandler.isSocialUser(user.getProvider());
 
-    // 닉네임 중복 체크
-    if (!user.getNickname().equals(userUpdateDTO.getNickname())) {
-      userAccessHandler.existsByNickname(userUpdateDTO.getNickname());
-    }
-
     // 회원 정보 저장
     userAccessHandler.saveUser(UserEntity.builder()
         .userId(user.getUserId())
