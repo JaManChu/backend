@@ -16,6 +16,7 @@ import com.recipe.jamanchu.model.dto.response.auth.UserInfoDTO;
 import com.recipe.jamanchu.model.dto.response.mypage.MyRecipeInfo;
 import com.recipe.jamanchu.model.dto.response.mypage.MyRecipes;
 import com.recipe.jamanchu.model.dto.response.mypage.MyScrapedRecipes;
+import com.recipe.jamanchu.model.dto.response.mypage.PageResponse;
 import com.recipe.jamanchu.model.type.ResultCode;
 import com.recipe.jamanchu.model.type.TokenType;
 import com.recipe.jamanchu.model.type.UserRole;
@@ -23,6 +24,7 @@ import com.recipe.jamanchu.repository.RecipeRepository;
 import com.recipe.jamanchu.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -152,6 +154,7 @@ public class UserServiceImpl implements UserService {
   // 회원 정보 조회
   @Override
   public ResultResponse getUserInfo(HttpServletRequest request) {
+    System.out.println("UserServiceImpl.getUserInfo");
 
     UserEntity user = userAccessHandler
         .findByUserId(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue())));
@@ -160,35 +163,37 @@ public class UserServiceImpl implements UserService {
         new UserInfoDTO(user.getEmail(), user.getNickname()));
   }
 
+  // 내가 찜한 레시피 & 내가 스크랩한 레시피 조회
   @Override
-  public ResultResponse getUserRecipes(HttpServletRequest request) {
+  public ResultResponse getUserRecipes(int scrapRecipePage, int myRecipePage, HttpServletRequest request) {
     UserEntity user = userAccessHandler
         .findByUserId(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue())));
 
     List<MyRecipes> myRecipes = recipeRepository.findAllByUser(user)
         .map(recipeEntities -> recipeEntities.stream()
-            .limit(20)
             .map(recipe -> new MyRecipes(
                 recipe.getId(),
                 recipe.getName(),
                 recipe.getThumbnail()
             )).toList())
-        .orElse(null);
+        .orElse(new ArrayList<>());
 
     List<MyScrapedRecipes> myScrapedRecipes = recipeRepository.findScrapRecipeByUser(user)
         .map(recipeEntities -> recipeEntities.stream()
-            .limit(20)
             .map(scraped -> new MyScrapedRecipes(
                 scraped.getId(),
                 scraped.getName(),
                 scraped.getUser().getNickname(),
                 scraped.getThumbnail()
             )).toList())
-        .orElse(null);
+        .orElse(new ArrayList<>());
 
+    MyRecipeInfo myRecipeInfo = new MyRecipeInfo(
+        PageResponse.pagination(myRecipes, myRecipePage),
+        PageResponse.pagination(myScrapedRecipes, myRecipePage)
+    );
 
-    return new ResultResponse(ResultCode.SUCCESS_GET_USER_RECIPES_INFO,
-        new MyRecipeInfo(myRecipes, myScrapedRecipes));
+    return new ResultResponse(ResultCode.SUCCESS_GET_USER_RECIPES_INFO, myRecipeInfo);
   }
 
 
