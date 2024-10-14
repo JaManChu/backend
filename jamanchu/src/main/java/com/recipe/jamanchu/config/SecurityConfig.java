@@ -54,10 +54,12 @@ public class SecurityConfig {
                 "/api/v1/users/signup",
                 "/api/v1/users/login",
                 "/api/v1/users/test",
-                "/api/v1/recipes/**",
                 "/api/v1/auth/email-check",
                 "/favicon.ico",
                 "/api/v1/users/login/auth/kakao").permitAll()
+            .requestMatchers(HttpMethod.GET,
+                "/api/v1/recipes",
+                "/api/v1/recipes/**").permitAll()
             .anyRequest().authenticated());
     http
         .addFilterBefore(new JwtFilter(jwtUtil, userDetailService),
