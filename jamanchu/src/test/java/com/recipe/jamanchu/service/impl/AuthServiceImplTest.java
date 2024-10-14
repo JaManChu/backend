@@ -51,4 +51,35 @@ class AuthServiceImplTest {
 
     assertEquals(resultCode, result);
   }
+
+  @Test
+  @DisplayName("checkNickname : 이미 사용 중인 닉네임 입니다.")
+  void checkNickname_Nickname_Already_In_Use() {
+
+    // given
+    String nickname = "nickname";
+    ResultCode resultCode = ResultCode.NICKNAME_ALREADY_IN_USE;
+    when(userAccessHandler.existsByNickname(nickname)).thenReturn(resultCode);
+
+    // when
+    ResultCode result = authService.checkNickname(nickname);
+
+    assertEquals(resultCode, result);
+
+  }
+
+  @Test
+  @DisplayName("Nickname : 사용할 수 있는 닉네임 입니다.")
+  void checkNickname_Nickname_Available() {
+
+    // given
+    String nickname = "nickname";
+    ResultCode resultCode = ResultCode.NICKNAME_AVAILABLE;
+    when(userAccessHandler.existsByNickname(nickname)).thenReturn(resultCode);
+
+    // when
+    ResultCode result = authService.checkNickname(nickname);
+
+    assertEquals(resultCode, result);
+  }
 }
