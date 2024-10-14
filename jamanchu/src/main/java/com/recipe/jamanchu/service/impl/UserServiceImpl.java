@@ -14,13 +14,15 @@ import com.recipe.jamanchu.model.dto.request.auth.UserUpdateDTO;
 import com.recipe.jamanchu.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.model.dto.response.auth.UserInfoDTO;
 import com.recipe.jamanchu.model.type.ResultCode;
+import com.recipe.jamanchu.model.type.TokenType;
 import com.recipe.jamanchu.model.type.UserRole;
 import com.recipe.jamanchu.service.UserService;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -65,8 +67,8 @@ public class UserServiceImpl implements UserService {
     String access = jwtUtil.createJwt("access", user.getUserId(), user.getRole());
     String refresh = jwtUtil.createJwt("refresh", user.getUserId(), user.getRole());
 
-    response.addHeader("access-token", "Bearer " + access);
-    response.addCookie(createCookie(refresh));
+    response.addHeader(TokenType.ACCESS.getValue(), "Bearer " + access);
+    response.addHeader(HttpHeaders.SET_COOKIE, createCookie(refresh).toString());
 
     return new ResultResponse(ResultCode.SUCCESS_LOGIN, user.getNickname());
   }
@@ -87,10 +89,10 @@ public class UserServiceImpl implements UserService {
     String access = jwtUtil.createJwt("access", user.getUserId(), user.getRole());
     String refresh = jwtUtil.createJwt("refresh", user.getUserId(), user.getRole());
 
-    response.addCookie(createCookie(refresh));
+    response.addHeader(HttpHeaders.SET_COOKIE, createCookie(refresh).toString());
 
     return UriComponentsBuilder.fromUriString(REDIRECT_URI)
-        .queryParam("access-token", access)
+        .queryParam(TokenType.ACCESS.getValue(), access)
         .queryParam("nickname", user.getNickname())
         .build()
         .toUriString();
@@ -101,7 +103,7 @@ public class UserServiceImpl implements UserService {
   public ResultCode updateUserInfo(HttpServletRequest request, UserUpdateDTO userUpdateDTO) {
 
     UserEntity user = userAccessHandler
-        .findByUserId(jwtUtil.getUserId(request.getHeader("access-token")));
+        .findByUserId(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue())));
 
     // 비밀번호 중복 체크
     userAccessHandler.validatePassword(user.getPassword(), userUpdateDTO.getBeforePassword());
@@ -131,7 +133,7 @@ public class UserServiceImpl implements UserService {
   public ResultCode deleteUser(HttpServletRequest request, DeleteUserDTO deleteUserDTO) {
 
     UserEntity user = userAccessHandler
-        .findByUserId(jwtUtil.getUserId(request.getHeader("access-token")));
+        .findByUserId(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue())));
 
     if (user.getProvider() == null) {
       userAccessHandler.validatePassword(user.getPassword(), deleteUserDTO.getPassword());
@@ -146,20 +148,21 @@ public class UserServiceImpl implements UserService {
   public ResultResponse getUserInfo(HttpServletRequest request) {
 
     UserEntity user = userAccessHandler
-        .findByUserId(jwtUtil.getUserId(request.getHeader("access-token")));
+        .findByUserId(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue())));
 
     return new ResultResponse(SUCCESS_GET_USER_INFO,
         new UserInfoDTO(user.getEmail(), user.getNickname()));
   }
 
 
-  private Cookie createCookie(String value) {
-    Cookie cookie = new Cookie("refresh-token", value);
-    cookie.setMaxAge(24 * 60 * 60);
-    cookie.setHttpOnly(true);
-    cookie.setSecure(true);
-
-    return cookie;
+  private ResponseCookie createCookie(String value) {
+    return ResponseCookie.from(TokenType.REFRESH.getValue(), value)
+        .httpOnly(true)
+        .secure(true)
+        .path("/")
+        .maxAge(24 * 60 * 60)
+        .sameSite("None")
+        .build();
   }
 
 }

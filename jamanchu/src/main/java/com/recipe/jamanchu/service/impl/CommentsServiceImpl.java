@@ -17,6 +17,7 @@ import com.recipe.jamanchu.model.dto.response.comments.Comment;
 import com.recipe.jamanchu.model.dto.response.comments.Comments;
 import com.recipe.jamanchu.model.dto.response.notify.Notify;
 import com.recipe.jamanchu.model.type.ResultCode;
+import com.recipe.jamanchu.model.type.TokenType;
 import com.recipe.jamanchu.repository.CommentRepository;
 import com.recipe.jamanchu.repository.RecipeRepository;
 import com.recipe.jamanchu.service.CommentsService;
@@ -45,7 +46,7 @@ public class CommentsServiceImpl implements CommentsService {
   public ResultResponse writeComment(HttpServletRequest request, CommentsDTO commentsDTO) {
 
     // Token 검사
-    Long userId = jwtUtil.getUserId(request.getHeader("access-token"));
+    Long userId = jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()));
 
     // 유저 존재 검사
     UserEntity user = userAccessHandler.findByUserId(userId);
@@ -79,7 +80,7 @@ public class CommentsServiceImpl implements CommentsService {
   public ResultResponse updateComment(HttpServletRequest request, CommentsUpdateDTO commentsUpdateDTO) {
 
     // Token 검사
-    Long userId = jwtUtil.getUserId(request.getHeader("access-token"));
+    Long userId = jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()));
 
     // 유저 존재 검사
     UserEntity user = userAccessHandler.findByUserId(userId);
@@ -105,7 +106,7 @@ public class CommentsServiceImpl implements CommentsService {
   public ResultResponse deleteComment(HttpServletRequest request, CommentsDeleteDTO commentsDeleteDTO) {
 
     // Token 검사
-    Long userId = jwtUtil.getUserId(request.getHeader("access-token"));
+    Long userId = jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()));
 
     // 유저 존재 검사
     UserEntity user = userAccessHandler.findByUserId(userId);
