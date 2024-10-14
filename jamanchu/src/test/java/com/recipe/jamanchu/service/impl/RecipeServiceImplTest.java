@@ -23,9 +23,7 @@ import com.recipe.jamanchu.model.dto.request.recipe.RecipesDeleteDTO;
 import com.recipe.jamanchu.model.dto.request.recipe.RecipesSearchDTO;
 import com.recipe.jamanchu.model.dto.request.recipe.RecipesUpdateDTO;
 import com.recipe.jamanchu.model.dto.response.ResultResponse;
-import com.recipe.jamanchu.model.dto.response.comments.Comment;
 import com.recipe.jamanchu.model.dto.response.ingredients.Ingredient;
-import com.recipe.jamanchu.model.dto.response.ingredients.IngredientCoupang;
 import com.recipe.jamanchu.model.dto.response.recipes.RecipesInfo;
 import com.recipe.jamanchu.model.dto.response.recipes.RecipesManual;
 import com.recipe.jamanchu.model.dto.response.recipes.RecipesSummary;
@@ -401,15 +399,6 @@ class RecipeServiceImplTest {
   @DisplayName("레시피 상세 조회 성공")
   void getRecipeDetail_Success() {
     // given
-    List<CommentEntity> commentEntities = new ArrayList<>();
-    commentEntities.add(CommentEntity.builder()
-        .commentId(1L)
-        .user(user)
-        .recipe(recipe)
-        .commentContent("Great recipe!")
-        .commentLike(5.0)
-        .build());
-
     List<RecipeRatingEntity> ratingEntities = new ArrayList<>();
     ratingEntities.add(RecipeRatingEntity.builder()
         .recipeRatingId(1L)
@@ -427,7 +416,6 @@ class RecipeServiceImplTest {
         .thumbnail("thumbnail")
         .ingredients(ingredientEntities)
         .manuals(manualEntities)
-        .comments(commentEntities)
         .rating(ratingEntities)
         .build();
 
@@ -445,7 +433,6 @@ class RecipeServiceImplTest {
     assertEquals(4.5, recipesInfo.getRecipeRating());
     assertFalse(recipesInfo.getRecipeIngredients().isEmpty());
     assertFalse(recipesInfo.getRecipesManuals().isEmpty());
-    assertFalse(recipesInfo.getComments().isEmpty());
   }
 
   @Test
