@@ -26,6 +26,7 @@ import com.recipe.jamanchu.model.dto.response.auth.UserInfoDTO;
 import com.recipe.jamanchu.model.dto.response.mypage.MyRecipeInfo;
 import com.recipe.jamanchu.model.dto.response.mypage.MyRecipes;
 import com.recipe.jamanchu.model.dto.response.mypage.MyScrapedRecipes;
+import com.recipe.jamanchu.model.dto.response.mypage.PageResponse;
 import com.recipe.jamanchu.model.type.CookingTimeType;
 import com.recipe.jamanchu.model.type.LevelType;
 import com.recipe.jamanchu.model.type.RecipeProvider;
@@ -89,7 +90,10 @@ class UserServiceImplTest {
   private static final String REFRESH = "refresh-token";
   private static final String CODE = "kakaoCode";
   private static final String KAKAO_ACCESS_TOKEN = "kakaoAccessToken";
-  private final String REDIRECT_URI = "https://frontend-dun-eight-78.vercel.app/users/login/auth/kakao";
+  private static final String REDIRECT_URI = "https://frontend-dun-eight-78.vercel.app/users/login/auth/kakao";
+  private static final int MYRECIPEID = 1;
+  private static final int MYSCRAPEDRECIPEID = 1;
+
 
   private SignupDTO signup;
   private UserUpdateDTO userUpdateDTO;
@@ -480,43 +484,49 @@ class UserServiceImplTest {
   @Test
   @DisplayName("마이페이지 레시피 정보 조회 성공")
   void getUserRecipeInfo_Success() {
-
     // given
     when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(USERID);
     when(userAccessHandler.findByUserId(USERID)).thenReturn(user);
     when(recipeRepository.findAllByUser(user)).thenReturn(Optional.of(myRecipeList));
     when(recipeRepository.findScrapRecipeByUser(user)).thenReturn(Optional.of(myScrapRecipeList));
 
-    ResultResponse response = new ResultResponse(ResultCode.SUCCESS_GET_USER_RECIPES_INFO,
-        new MyRecipeInfo(myRecipes, myScrapedRecipes)
+    PageResponse<MyRecipes> myRecipesPage = PageResponse.pagination(myRecipes, MYRECIPEID);
+    PageResponse<MyScrapedRecipes> myScrapedRecipesPage = PageResponse.pagination(myScrapedRecipes, MYSCRAPEDRECIPEID);
+
+    ResultResponse expectedResponse = new ResultResponse(ResultCode.SUCCESS_GET_USER_RECIPES_INFO,
+        new MyRecipeInfo(myRecipesPage, myScrapedRecipesPage)
     );
 
     // when
-    ResultResponse actualResponse = userServiceimpl.getUserRecipes(request);
+    ResultResponse actualResponse = userServiceimpl.getUserRecipes(MYSCRAPEDRECIPEID, MYRECIPEID, request);
 
-    MyRecipeInfo recipeInfo = (MyRecipeInfo) response.getData();
+    MyRecipeInfo expectedRecipeInfo = (MyRecipeInfo) expectedResponse.getData();
     MyRecipeInfo actualRecipeInfo = (MyRecipeInfo) actualResponse.getData();
 
     // then
-    assertEquals(response.getCode(), actualResponse.getCode());
+    assertEquals(expectedResponse.getCode(), actualResponse.getCode());
 
-    for (int i = 0; i < recipeInfo.getMyRecipes().size(); i++) {
-      MyRecipes myRecipes = recipeInfo.getMyRecipes().get(i);
-      MyRecipes actualRecipe = actualRecipeInfo.getMyRecipes().get(i);
+    assertEquals(expectedRecipeInfo.getMyRecipes().getTotalPage(), actualRecipeInfo.getMyRecipes().getTotalPage());
+    assertEquals(expectedRecipeInfo.getMyScrapedRecipes().getTotalPage(), actualRecipeInfo.getMyScrapedRecipes().getTotalPage());
 
-      assertEquals(myRecipes.getMyRecipeId(), actualRecipe.getMyRecipeId());
-      assertEquals(myRecipes.getMyRecipeName(), actualRecipe.getMyRecipeName());
-      assertEquals(myRecipes.getMyRecipeThumbnail(), actualRecipe.getMyRecipeThumbnail());
+    assertEquals(expectedRecipeInfo.getMyRecipes().getTotalData(), actualRecipeInfo.getMyRecipes().getTotalData());
+    assertEquals(expectedRecipeInfo.getMyScrapedRecipes().getTotalData(), actualRecipeInfo.getMyScrapedRecipes().getTotalData());
+
+    for (int i = 0; i < expectedRecipeInfo.getMyRecipes().getDataList().size(); i++) {
+      MyRecipes expectedMyRecipe = expectedRecipeInfo.getMyRecipes().getDataList().get(i);
+      MyRecipes actualMyRecipe = actualRecipeInfo.getMyRecipes().getDataList().get(i);
+      assertEquals(expectedMyRecipe.getMyRecipeId(), actualMyRecipe.getMyRecipeId());
+      assertEquals(expectedMyRecipe.getMyRecipeName(), actualMyRecipe.getMyRecipeName());
+      assertEquals(expectedMyRecipe.getMyRecipeThumbnail(), actualMyRecipe.getMyRecipeThumbnail());
     }
 
-    for (int i = 0; i < recipeInfo.getMyScrapedRecipes().size(); i++) {
-      MyScrapedRecipes myScrapedRecipes = recipeInfo.getMyScrapedRecipes().get(i);
-      MyScrapedRecipes actualScraped = actualRecipeInfo.getMyScrapedRecipes().get(i);
-
-      assertEquals(myScrapedRecipes.getRecipeId(), actualScraped.getRecipeId());
-      assertEquals(myScrapedRecipes.getRecipeName(), actualScraped.getRecipeName());
-      assertEquals(myScrapedRecipes.getRecipeAuthor(), actualScraped.getRecipeAuthor());
-      assertEquals(myScrapedRecipes.getRecipeThumbnail(), actualScraped.getRecipeThumbnail());
+    for (int i = 0; i < expectedRecipeInfo.getMyScrapedRecipes().getDataList().size(); i++) {
+      MyScrapedRecipes expectedScrapedRecipe = expectedRecipeInfo.getMyScrapedRecipes().getDataList().get(i);
+      MyScrapedRecipes actualScrapedRecipe = actualRecipeInfo.getMyScrapedRecipes().getDataList().get(i);
+      assertEquals(expectedScrapedRecipe.getRecipeId(), actualScrapedRecipe.getRecipeId());
+      assertEquals(expectedScrapedRecipe.getRecipeName(), actualScrapedRecipe.getRecipeName());
+      assertEquals(expectedScrapedRecipe.getRecipeAuthor(), actualScrapedRecipe.getRecipeAuthor());
+      assertEquals(expectedScrapedRecipe.getRecipeThumbnail(), actualScrapedRecipe.getRecipeThumbnail());
     }
   }
 
@@ -524,12 +534,14 @@ class UserServiceImplTest {
   @DisplayName("마이페이지 레시피 정보 조회 실패 : 사용자 없음")
   void getUserRecipeInfo_UserNotFound() {
     // given
-    when(jwtUtil.getUserId(request.getHeader("access-token"))).thenReturn(USERID);
+    when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(USERID);
     when(userAccessHandler.findByUserId(USERID)).thenThrow(new UserNotFoundException());
 
     // when then
     assertThrows(UserNotFoundException.class,
-        () -> userServiceimpl.getUserRecipes(request));
+        () -> userServiceimpl.getUserRecipes(MYSCRAPEDRECIPEID, MYRECIPEID, request));
   }
-
 }
+
+
+
