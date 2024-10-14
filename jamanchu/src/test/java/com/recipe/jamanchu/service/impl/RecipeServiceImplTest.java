@@ -15,6 +15,7 @@ import com.recipe.jamanchu.entity.IngredientEntity;
 import com.recipe.jamanchu.entity.ManualEntity;
 import com.recipe.jamanchu.entity.RecipeEntity;
 import com.recipe.jamanchu.entity.RecipeRatingEntity;
+import com.recipe.jamanchu.entity.ScrapedRecipeEntity;
 import com.recipe.jamanchu.entity.UserEntity;
 import com.recipe.jamanchu.exceptions.exception.RecipeNotFoundException;
 import com.recipe.jamanchu.exceptions.exception.UnmatchedUserException;
@@ -29,6 +30,7 @@ import com.recipe.jamanchu.model.dto.response.recipes.RecipesManual;
 import com.recipe.jamanchu.model.dto.response.recipes.RecipesSummary;
 import com.recipe.jamanchu.model.type.CookingTimeType;
 import com.recipe.jamanchu.model.type.LevelType;
+import com.recipe.jamanchu.model.type.ScrapedType;
 import com.recipe.jamanchu.model.type.TokenType;
 import com.recipe.jamanchu.model.type.UserRole;
 import com.recipe.jamanchu.repository.IngredientRepository;
@@ -482,20 +484,77 @@ class RecipeServiceImplTest {
   }
 
   @Test
-  @DisplayName("레시피 스크랩 성공")
-  void scrapedRecipe_Success() {
+  @DisplayName("레시피 스크랩 취소 - SCRAPED -> CANCELED")
+  void scrapedRecipe_Success_ScrapedToCanceled() {
     // given
+    ScrapedRecipeEntity scrapedRecipe = ScrapedRecipeEntity.builder()
+        .user(user)
+        .recipe(recipe)
+        .scrapedType(ScrapedType.SCRAPED)
+        .build();
+
     when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(user.getUserId());
     when(userAccessHandler.findByUserId(user.getUserId())).thenReturn(user);
     when(recipeRepository.findById(recipe.getId())).thenReturn(Optional.of(recipe));
+    when(scrapedRecipeRepository.findByUserAndRecipe(user, recipe)).thenReturn(scrapedRecipe);
+
+    // when
+    ResultResponse result = recipeService.scrapedRecipe(request, recipe.getId());
+
+    // then
+    assertEquals("레시피 찜하기 취소 성공", result.getMessage());
+    assertEquals(ScrapedType.CANCELED, result.getData()); // SCRAPED -> CANCELED
+
+    // verify
+    verify(scrapedRecipeRepository, times(1)).findByUserAndRecipe(any(), any());
+    verify(scrapedRecipeRepository, times(1)).save(any());
+  }
+
+  @Test
+  @DisplayName("레시피 스크랩 성공 - CANCELED -> SCRAPED")
+  void scrapedRecipe_Success_CanceledToScraped() {
+    // given
+    ScrapedRecipeEntity scrapedRecipe = ScrapedRecipeEntity.builder()
+        .user(user)
+        .recipe(recipe)
+        .scrapedType(ScrapedType.CANCELED)
+        .build();
+
+    when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(user.getUserId());
+    when(userAccessHandler.findByUserId(user.getUserId())).thenReturn(user);
+    when(recipeRepository.findById(recipe.getId())).thenReturn(Optional.of(recipe));
+    when(scrapedRecipeRepository.findByUserAndRecipe(user, recipe)).thenReturn(scrapedRecipe);
 
     // when
     ResultResponse result = recipeService.scrapedRecipe(request, recipe.getId());
 
     // then
     assertEquals("레시피 찜하기 성공", result.getMessage());
+    assertEquals(ScrapedType.SCRAPED, result.getData());
 
     // verify
+    verify(scrapedRecipeRepository, times(1)).findByUserAndRecipe(any(), any());
+    verify(scrapedRecipeRepository, times(1)).save(any());
+  }
+
+  @Test
+  @DisplayName("레시피 스크랩 성공 - 기존 스크랩 없음")
+  void scrapedRecipe_Success_NewScraped() {
+    // given
+    when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(user.getUserId());
+    when(userAccessHandler.findByUserId(user.getUserId())).thenReturn(user);
+    when(recipeRepository.findById(recipe.getId())).thenReturn(Optional.of(recipe));
+    when(scrapedRecipeRepository.findByUserAndRecipe(user, recipe)).thenReturn(null); // 기존 스크랩 없음
+
+    // when
+    ResultResponse result = recipeService.scrapedRecipe(request, recipe.getId());
+
+    // then
+    assertEquals("레시피 찜하기 성공", result.getMessage());
+    assertEquals(ScrapedType.SCRAPED, result.getData());
+
+    // verify
+    verify(scrapedRecipeRepository, times(1)).findByUserAndRecipe(any(), any());
     verify(scrapedRecipeRepository, times(1)).save(any());
   }
 }
