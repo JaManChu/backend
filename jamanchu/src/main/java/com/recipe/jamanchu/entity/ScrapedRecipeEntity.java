@@ -44,4 +44,7 @@ public class ScrapedRecipeEntity extends BaseTimeEntity{
   @Enumerated(EnumType.STRING)
   private ScrapedType scrapedType;
 
+  public void updateScrapedType(ScrapedType scrapedType) {
+    this.scrapedType = scrapedType;
+  }
 }
