@@ -1,6 +1,7 @@
 package com.recipe.jamanchu.auth.jwt;
 
 import com.recipe.jamanchu.auth.service.CustomUserDetailService;
+import com.recipe.jamanchu.model.type.TokenType;
 import com.recipe.jamanchu.model.type.UserRole;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
@@ -14,6 +15,7 @@ import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -32,6 +34,12 @@ public class JwtFilter extends OncePerRequestFilter {
       FilterChain filterChain)
       throws ServletException, IOException {
 
+    // Options 요청시 jwt 검증 제외
+    if(request.getMethod().equals(HttpMethod.OPTIONS.name())) {
+      filterChain.doFilter(request, response);
+      return;
+    }
+
     String requestURI = request.getRequestURI();
     logger.info("requestURI -> {}", requestURI);
 
@@ -41,7 +49,8 @@ public class JwtFilter extends OncePerRequestFilter {
       return;
     }
 
-    String authorizationHeader = request.getHeader("access-token");
+    String authorizationHeader = request.getHeader(TokenType.ACCESS.getValue());
+    logger.info("authorizationHeader -> {}", authorizationHeader);
 
     // Bearer 토큰이 헤더에 있는지 확인
     if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
@@ -66,7 +75,7 @@ public class JwtFilter extends OncePerRequestFilter {
   }
 
   private void setAuthenticationFromToken(HttpServletResponse response, String token) {
-    response.addHeader("access-token", "Bearer " + token);
+    response.addHeader(TokenType.ACCESS.getValue(), "Bearer " + token);
 
     Authentication authToken = getAuthToken(token);
     SecurityContextHolder.getContext().setAuthentication(authToken);
@@ -96,8 +105,10 @@ public class JwtFilter extends OncePerRequestFilter {
 
   // refresh 토큰 반환
   private String getRefreshTokenFromCookies(HttpServletRequest request) {
+    Cookie[] cookies = request.getCookies();
+    logger.info("cookies.length -> {}", cookies.length);
     return Arrays.stream(request.getCookies())
-        .filter(cookie -> "refresh-token".equals(cookie.getName()))
+        .filter(cookie -> TokenType.REFRESH.getValue().equals(cookie.getName()))
         .map(Cookie::getValue)
         .findFirst()
         .orElse(null);
