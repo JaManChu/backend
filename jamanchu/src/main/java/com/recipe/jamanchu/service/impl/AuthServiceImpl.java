@@ -17,4 +17,9 @@ public class AuthServiceImpl implements AuthService {
 
     return userAccessHandler.existsByEmail(email);
   }
+
+  @Override
+  public ResultCode checkNickname(String nickname) {
+    return userAccessHandler.existsByNickname(nickname);
+  }
 }
