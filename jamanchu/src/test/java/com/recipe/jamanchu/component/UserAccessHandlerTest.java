@@ -15,6 +15,7 @@ import com.recipe.jamanchu.entity.UserEntity;
 import com.recipe.jamanchu.exceptions.exception.PasswordMismatchException;
 import com.recipe.jamanchu.exceptions.exception.SocialAccountException;
 import com.recipe.jamanchu.exceptions.exception.UserNotFoundException;
+import com.recipe.jamanchu.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.model.type.ResultCode;
 import com.recipe.jamanchu.repository.UserRepository;
 import java.util.HashMap;
@@ -187,10 +188,10 @@ class UserAccessHandlerTest {
     when(userRepository.existsByEmail(email)).thenReturn(true);
 
     // when
-    ResultCode resultCode = userAccessHandler.existsByEmail(email);
+    ResultResponse resultResponse = userAccessHandler.existsByEmail(email);
 
     // then
-    assertEquals(ResultCode.EMAIL_ALREADY_IN_USE, resultCode);
+    assertEquals(ResultCode.EMAIL_ALREADY_IN_USE.getStatusCode(), resultResponse.getCode());
   }
 
   @Test
@@ -201,10 +202,10 @@ class UserAccessHandlerTest {
     when(userRepository.existsByEmail(email)).thenReturn(false);
 
     // when
-    ResultCode resultCode = userAccessHandler.existsByEmail(email);
+    ResultResponse resultResponse = userAccessHandler.existsByEmail(email);
 
     // then
-    assertEquals(ResultCode.EMAIL_AVAILABLE, resultCode);
+    assertEquals(ResultCode.EMAIL_AVAILABLE.getStatusCode(), resultResponse.getCode());
   }
 
   @Test
@@ -215,10 +216,10 @@ class UserAccessHandlerTest {
     when(userRepository.existsByNickname(nickname)).thenReturn(true);
 
     // when
-    ResultCode resultCode = userAccessHandler.existsByNickname(nickname);
+    ResultResponse resultResponse = userAccessHandler.existsByNickname(nickname);
 
     // then
-    assertEquals(ResultCode.NICKNAME_ALREADY_IN_USE, resultCode);
+    assertEquals(ResultCode.NICKNAME_ALREADY_IN_USE.getStatusCode(), resultResponse.getCode());
   }
 
   @Test
@@ -229,10 +230,10 @@ class UserAccessHandlerTest {
     when(userRepository.existsByNickname(nickname)).thenReturn(false);
 
     // when
-    ResultCode resultCode = userAccessHandler.existsByNickname(nickname);
+    ResultResponse resultResponse = userAccessHandler.existsByNickname(nickname);
 
     // then
-    assertEquals(ResultCode.NICKNAME_AVAILABLE, resultCode);
+    assertEquals(ResultCode.NICKNAME_AVAILABLE.getStatusCode(), resultResponse.getCode());
   }
 
   @Test
