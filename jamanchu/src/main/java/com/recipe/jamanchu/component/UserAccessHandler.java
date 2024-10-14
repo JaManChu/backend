@@ -5,6 +5,7 @@ import com.recipe.jamanchu.entity.UserEntity;
 import com.recipe.jamanchu.exceptions.exception.PasswordMismatchException;
 import com.recipe.jamanchu.exceptions.exception.SocialAccountException;
 import com.recipe.jamanchu.exceptions.exception.UserNotFoundException;
+import com.recipe.jamanchu.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.model.type.ResultCode;
 import com.recipe.jamanchu.model.type.UserRole;
 import com.recipe.jamanchu.repository.UserRepository;
@@ -63,23 +64,23 @@ public class UserAccessHandler {
   }
 
   // 이메일 중복 체크
-  public ResultCode existsByEmail(String email){
+  public ResultResponse existsByEmail(String email){
 
     if (userRepository.existsByEmail(email)) {
-      return ResultCode.EMAIL_ALREADY_IN_USE;
+      return ResultResponse.of(ResultCode.EMAIL_ALREADY_IN_USE);
     }
 
-    return ResultCode.EMAIL_AVAILABLE;
+    return ResultResponse.of(ResultCode.EMAIL_AVAILABLE);
   }
 
   // 닉네임 중복 체크
-  public ResultCode existsByNickname(String nickname){
+  public ResultResponse existsByNickname(String nickname){
 
     if (userRepository.existsByNickname(nickname)) {
-      return ResultCode.NICKNAME_ALREADY_IN_USE;
+      return ResultResponse.of(ResultCode.NICKNAME_ALREADY_IN_USE);
     }
 
-    return ResultCode.NICKNAME_AVAILABLE;
+    return ResultResponse.of(ResultCode.NICKNAME_AVAILABLE);
   }
 
   // 소셜 계정 정보 체크
