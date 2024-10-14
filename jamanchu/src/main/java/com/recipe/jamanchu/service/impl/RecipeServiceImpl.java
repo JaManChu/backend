@@ -338,6 +338,9 @@ public class RecipeServiceImpl implements RecipeService {
 
     scrapedRecipeRepository.save(scrapedRecipe);
 
-    return ResultResponse.of(ResultCode.SUCCESS_SCRAPED_RECIPE, scrapedRecipe.getScrapedType());
+    return ResultResponse.of(
+        scrapedRecipe.getScrapedType() == ScrapedType.SCRAPED
+            ? ResultCode.SUCCESS_SCRAPED_RECIPE
+            : ResultCode.SUCCESS_CANCELED_SCRAP_RECIPE, scrapedRecipe.getScrapedType());
   }
 }
