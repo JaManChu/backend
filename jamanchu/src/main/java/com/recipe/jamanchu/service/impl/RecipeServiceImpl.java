@@ -16,8 +16,7 @@ import com.recipe.jamanchu.model.dto.request.recipe.RecipesDeleteDTO;
 import com.recipe.jamanchu.model.dto.request.recipe.RecipesSearchDTO;
 import com.recipe.jamanchu.model.dto.request.recipe.RecipesUpdateDTO;
 import com.recipe.jamanchu.model.dto.response.ResultResponse;
-import com.recipe.jamanchu.model.dto.response.comments.Comment;
-import com.recipe.jamanchu.model.dto.response.ingredients.IngredientCoupang;
+import com.recipe.jamanchu.model.dto.response.ingredients.Ingredient;
 import com.recipe.jamanchu.model.dto.response.recipes.RecipesInfo;
 import com.recipe.jamanchu.model.dto.response.recipes.RecipesManual;
 import com.recipe.jamanchu.model.dto.response.recipes.RecipesSummary;
@@ -253,14 +252,11 @@ public class RecipeServiceImpl implements RecipeService {
     RecipeEntity recipe = recipeRepository.findById(recipeId)
         .orElseThrow(RecipeNotFoundException::new);
 
-    // 추후에 이 부분 추가 개발 필요
-    String tempCoupangLink = "Coupang Link";
-
-    List<IngredientCoupang> ingredientCoupangList = recipe.getIngredients().stream()
-        .map(ingredient -> new IngredientCoupang(
+    List<Ingredient> ingredients = recipe.getIngredients().stream()
+        .map(ingredient -> new Ingredient(
             ingredient.getName(),
-            ingredient.getQuantity(),
-            tempCoupangLink))
+            ingredient.getQuantity()
+        ))
         .toList();
 
     List<RecipesManual> recipesManuals = recipe.getManuals().stream()
@@ -270,10 +266,6 @@ public class RecipeServiceImpl implements RecipeService {
             ))
             .toList();
 
-    List<Comment> comments = recipe.getComments().stream()
-            .map(Comment::new)
-            .toList();
-
     RecipesInfo recipesInfo = new RecipesInfo(
         recipe.getId(),
         recipe.getUser().getNickname(),
@@ -281,9 +273,8 @@ public class RecipeServiceImpl implements RecipeService {
         recipe.getLevel(),
         recipe.getTime(),
         recipe.getThumbnail(),
-        ingredientCoupangList,
+        ingredients,
         recipesManuals,
-        comments,
         Optional.ofNullable(recipeRatingRepository.findAverageRatingByRecipeId(recipe.getId()))
             .orElse(0.0)
     );
