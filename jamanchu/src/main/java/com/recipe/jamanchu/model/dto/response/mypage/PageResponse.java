@@ -20,7 +20,7 @@ public class PageResponse<T> {
   public static <T> PageResponse<T> pagination(List<T> list, int pageNumber) {
     // pagination 처리
 
-    Pageable pageable = PageRequest.of(pageNumber, 4);
+    Pageable pageable = PageRequest.of(pageNumber - 1, 4);
     int start = (int) pageable.getOffset();
     int end = Math.min((start + pageable.getPageSize()), list.size());
 
