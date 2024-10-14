@@ -1,7 +1,10 @@
 package com.recipe.jamanchu.entity;
 
+import com.recipe.jamanchu.model.type.ScrapedType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -37,4 +40,11 @@ public class ScrapedRecipeEntity extends BaseTimeEntity{
   @JoinColumn(name = "usr_id")
   private UserEntity user;
 
+  @NotNull
+  @Enumerated(EnumType.STRING)
+  private ScrapedType scrapedType;
+
+  public void updateScrapedType(ScrapedType scrapedType) {
+    this.scrapedType = scrapedType;
+  }
 }
