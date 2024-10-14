@@ -1,10 +1,10 @@
 package com.recipe.jamanchu.service;
 
-import com.recipe.jamanchu.model.type.ResultCode;
+import com.recipe.jamanchu.model.dto.response.ResultResponse;
 
 public interface AuthService {
 
-  ResultCode checkEmail(String email);
+  ResultResponse checkEmail(String email);
 
-  ResultCode checkNickname(String nickname);
+  ResultResponse checkNickname(String nickname);
 }
