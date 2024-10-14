@@ -24,7 +24,7 @@ public class AuthController {
     if (email == null) {
       throw new MissingEmailException();
     }
-    return ResponseEntity.ok(ResultResponse.of(authService.checkEmail(email)));
+    return ResponseEntity.ok(authService.checkEmail(email));
   }
 
   @GetMapping("/nickname-check")
@@ -32,6 +32,6 @@ public class AuthController {
     if (nickname == null) {
       throw new MissingNicknameException();
     }
-    return ResponseEntity.ok(ResultResponse.of(authService.checkNickname(nickname)));
+    return ResponseEntity.ok(authService.checkNickname(nickname));
   }
 }
