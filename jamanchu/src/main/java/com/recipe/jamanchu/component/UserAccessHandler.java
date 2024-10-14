@@ -2,7 +2,6 @@ package com.recipe.jamanchu.component;
 
 import com.recipe.jamanchu.auth.oauth2.KakaoUserDetails;
 import com.recipe.jamanchu.entity.UserEntity;
-import com.recipe.jamanchu.exceptions.exception.DuplicatedNicknameException;
 import com.recipe.jamanchu.exceptions.exception.PasswordMismatchException;
 import com.recipe.jamanchu.exceptions.exception.SocialAccountException;
 import com.recipe.jamanchu.exceptions.exception.UserNotFoundException;
@@ -74,14 +73,13 @@ public class UserAccessHandler {
   }
 
   // 닉네임 중복 체크
-  public void existsByNickname(String nickname){
+  public ResultCode existsByNickname(String nickname){
 
-    log.info("existsByNickname -> nickname : {}", nickname);
     if (userRepository.existsByNickname(nickname)) {
-
-      log.info("Nickname is Duplicated!");
-      throw new DuplicatedNicknameException();
+      return ResultCode.NICKNAME_ALREADY_IN_USE;
     }
+
+    return ResultCode.NICKNAME_AVAILABLE;
   }
 
   // 소셜 계정 정보 체크
