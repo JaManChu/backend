@@ -29,6 +29,7 @@ public enum ResultCode {
   SUCCESS_LOGIN(HttpStatus.OK, "로그인 성공"),
   EMAIL_AVAILABLE(HttpStatus.NO_CONTENT, "사용할 수 있는 이메일입니다."),
   EMAIL_ALREADY_IN_USE(HttpStatus.CONFLICT, "이미 사용 중인 이메일입니다."),
+  SUCCESS_GET_USER_RECIPES_INFO(HttpStatus.OK, "회원 레시피 정보 조회 성공!"),
   ;
 
   private final HttpStatus statusCode;
