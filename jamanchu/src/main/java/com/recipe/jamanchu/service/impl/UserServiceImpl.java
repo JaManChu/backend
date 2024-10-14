@@ -42,9 +42,6 @@ public class UserServiceImpl implements UserService {
   @Override
   public ResultCode signup(SignupDTO signupDTO) {
 
-    // 닉네임 중복 체크
-    userAccessHandler.existsByNickname(signupDTO.getNickname());
-
     // 회원 정보 저장
     userAccessHandler.saveUser(UserEntity.builder()
         .email(signupDTO.getEmail())
