@@ -89,9 +89,13 @@ public class UserController {
 
   // 마이페이지 레시피 정보 조회
   @GetMapping("/recipes")
-  public ResponseEntity<ResultResponse> getUserRecipes(HttpServletRequest request) {
+  public ResponseEntity<ResultResponse> getUserRecipes(
+      @RequestParam(name = "myRecipePage") int myRecipePage,
+      @RequestParam(name = "scrapRecipePage") int scrapRecipePage,
+      HttpServletRequest request) {
 
-    return ResponseEntity.ok().body(userService.getUserRecipes(request));
+    return ResponseEntity.ok()
+        .body(userService.getUserRecipes(scrapRecipePage, myRecipePage, request));
   }
 }
 
