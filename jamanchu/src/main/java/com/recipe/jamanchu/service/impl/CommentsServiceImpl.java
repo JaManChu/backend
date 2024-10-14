@@ -16,7 +16,6 @@ import com.recipe.jamanchu.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.model.dto.response.comments.Comment;
 import com.recipe.jamanchu.model.dto.response.comments.Comments;
 import com.recipe.jamanchu.model.dto.response.notify.Notify;
-import com.recipe.jamanchu.model.type.RecipeProvider;
 import com.recipe.jamanchu.model.type.ResultCode;
 import com.recipe.jamanchu.repository.CommentRepository;
 import com.recipe.jamanchu.repository.RecipeRepository;
@@ -66,6 +65,7 @@ public class CommentsServiceImpl implements CommentsService {
 
     commentRepository.save(userComment);
 
+    //알림 전송 부분
     if(recipe.getProvider() != SCRAP){
       Notify notify = Notify.of(recipe.getName(),commentsDTO.getComment(),commentsDTO.getRating(), user.getNickname());
       notifyService.notifyUser(recipe.getUser().getUserId(), notify);
