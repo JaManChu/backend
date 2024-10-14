@@ -86,5 +86,12 @@ public class UserController {
     return ResponseEntity.ok()
         .body(userService.getUserInfo(request));
   }
+
+  // 마이페이지 레시피 정보 조회
+  @GetMapping("/recipes")
+  public ResponseEntity<ResultResponse> getUserRecipes(HttpServletRequest request) {
+
+    return ResponseEntity.ok().body(userService.getUserRecipes(request));
+  }
 }
 
