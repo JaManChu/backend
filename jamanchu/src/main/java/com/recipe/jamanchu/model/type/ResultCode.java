@@ -28,10 +28,10 @@ public enum ResultCode {
   SUCCESS_SCRAPED_RECIPE(HttpStatus.OK, "레시피 찜하기 성공"),
   SUCCESS_CANCELED_SCRAP_RECIPE(HttpStatus.OK, "레시피 찜하기 취소 성공"),
   SUCCESS_LOGIN(HttpStatus.OK, "로그인 성공"),
-  EMAIL_AVAILABLE(HttpStatus.NO_CONTENT, "사용할 수 있는 이메일 입니다."),
-  EMAIL_ALREADY_IN_USE(HttpStatus.CONFLICT, "이미 사용 중인 이메일 입니다."),
-  NICKNAME_AVAILABLE(HttpStatus.NO_CONTENT, "사용할 수 있는 닉네임 입니다."),
-  NICKNAME_ALREADY_IN_USE(HttpStatus.CONFLICT, "이미 사용 중인 닉내임 입니다."),
+  EMAIL_AVAILABLE(HttpStatus.OK, "사용할 수 있는 이메일 입니다."),
+  EMAIL_ALREADY_IN_USE(HttpStatus.OK, "이미 사용 중인 이메일 입니다."),
+  NICKNAME_AVAILABLE(HttpStatus.OK, "사용할 수 있는 닉네임 입니다."),
+  NICKNAME_ALREADY_IN_USE(HttpStatus.OK, "이미 사용 중인 닉내임 입니다."),
   ;
 
   private final HttpStatus statusCode;
