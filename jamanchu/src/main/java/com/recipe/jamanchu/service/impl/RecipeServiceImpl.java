@@ -7,6 +7,7 @@ import com.recipe.jamanchu.component.UserAccessHandler;
 import com.recipe.jamanchu.entity.IngredientEntity;
 import com.recipe.jamanchu.entity.ManualEntity;
 import com.recipe.jamanchu.entity.RecipeEntity;
+import com.recipe.jamanchu.entity.RecipeIngredientMappingEntity;
 import com.recipe.jamanchu.entity.ScrapedRecipeEntity;
 import com.recipe.jamanchu.entity.UserEntity;
 import com.recipe.jamanchu.exceptions.exception.RecipeNotFoundException;
@@ -25,6 +26,7 @@ import com.recipe.jamanchu.model.type.ScrapedType;
 import com.recipe.jamanchu.model.type.TokenType;
 import com.recipe.jamanchu.repository.IngredientRepository;
 import com.recipe.jamanchu.repository.ManualRepository;
+import com.recipe.jamanchu.repository.RecipeIngredientMappingRepository;
 import com.recipe.jamanchu.repository.RecipeRatingRepository;
 import com.recipe.jamanchu.repository.RecipeRepository;
 import com.recipe.jamanchu.repository.ScrapedRecipeRepository;
@@ -51,6 +53,7 @@ public class RecipeServiceImpl implements RecipeService {
   private final ManualRepository manualRepository;
   private final ScrapedRecipeRepository scrapedRecipeRepository;
   private final RecipeRatingRepository recipeRatingRepository;
+  private final RecipeIngredientMappingRepository recipeIngredientMappingRepository;
   private final UserAccessHandler userAccessHandler;
   private final JwtUtil jwtUtil;
 
@@ -84,6 +87,18 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     ingredientRepository.saveAll(ingredients);
+
+    List<RecipeIngredientMappingEntity> recipeIngredientMappings = new ArrayList<>();
+    for (IngredientEntity ingredient : ingredients) {
+      RecipeIngredientMappingEntity mapping = RecipeIngredientMappingEntity.builder()
+          .recipe(recipe)
+          .ingredient(ingredient)
+          .build();
+
+      recipeIngredientMappings.add(mapping);
+    }
+
+    recipeIngredientMappingRepository.saveAll(recipeIngredientMappings);
 
     List<ManualEntity> manuals = new ArrayList<>();
     for (int i = 0; i < recipesDTO.getRecipeOrderContents().size(); i++) {
@@ -122,10 +137,8 @@ public class RecipeServiceImpl implements RecipeService {
         recipesUpdateDTO.getRecipeLevel(), recipesUpdateDTO.getRecipeCookingTime(),
         String.valueOf(recipesUpdateDTO.getRecipeThumbnail()));
 
-    // 기존 recipeId로 저장된 재료 확인
-    ingredientRepository.findAllByRecipeId(recipeId)
-        .orElseThrow(RecipeNotFoundException::new);
-    // 기존 recipeId로 저장된 재료 리스트 삭제
+    // 기존 recipeId로 저장된 재료 삭제
+    recipeIngredientMappingRepository.deleteAllByRecipeId(recipeId);
     ingredientRepository.deleteAllByRecipeId(recipeId);
 
     List<IngredientEntity> ingredients = new ArrayList<>();
@@ -141,8 +154,17 @@ public class RecipeServiceImpl implements RecipeService {
 
     ingredientRepository.saveAll(ingredients);
 
-    manualRepository.findAllByRecipeId(recipeId)
-        .orElseThrow(RecipeNotFoundException::new);
+    List<RecipeIngredientMappingEntity> recipeIngredientMappings = new ArrayList<>();
+    for (IngredientEntity ingredient : ingredients) {
+      RecipeIngredientMappingEntity mapping = RecipeIngredientMappingEntity.builder()
+          .recipe(recipe)
+          .ingredient(ingredient)
+          .build();
+
+      recipeIngredientMappings.add(mapping);
+    }
+
+    recipeIngredientMappingRepository.saveAll(recipeIngredientMappings);
 
     manualRepository.deleteAllByRecipeId(recipeId);
 
