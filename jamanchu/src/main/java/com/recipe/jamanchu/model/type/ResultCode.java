@@ -32,6 +32,7 @@ public enum ResultCode {
   EMAIL_ALREADY_IN_USE(HttpStatus.OK, "이미 사용 중인 이메일 입니다."),
   NICKNAME_AVAILABLE(HttpStatus.OK, "사용할 수 있는 닉네임 입니다."),
   NICKNAME_ALREADY_IN_USE(HttpStatus.OK, "이미 사용 중인 닉네임 입니다."),
+  SUCCESS_GET_USER_RECIPES_INFO(HttpStatus.OK, "회원 레시피 정보 조회 성공"),
   ;
 
   private final HttpStatus statusCode;
