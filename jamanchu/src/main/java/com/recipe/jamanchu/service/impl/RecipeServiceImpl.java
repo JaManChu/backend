@@ -210,24 +210,7 @@ public class RecipeServiceImpl implements RecipeService {
   @Override
   public ResultResponse getRecipes(HttpServletRequest request, int page, int size) {
     Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
-    Long userId = null;
-
-    // Token이 있는지 확인하고, 있다면 userId를 추출
-    try {
-      String token = request.getHeader(TokenType.ACCESS.getValue());
-      if (token != null) {
-        userId = jwtUtil.getUserId(token);
-      }
-    } catch (Exception e) {
-      // Token이 없거나 유효하지 않으면 userId를 null로 유지
-    }
-
-    List<Long> scrapedRecipeIds = Collections.emptyList();
-
-    // userId가 존재하면 해당 사용자가 SCRAPED한 레시피 ID들을 조회
-    if (userId != null) {
-      scrapedRecipeIds = scrapedRecipeRepository.findRecipeIdsByUserIdAndScrapedType(userId, ScrapedType.SCRAPED);
-    }
+    List<Long> scrapedRecipeIds = getScrapedRecipeIds(request);
 
     // 만약 scrapedRecipeIds가 비어있지 않다면 SCRAPED한 레시피를 제외한 나머지 레시피 조회
     Page<RecipeEntity> recipes;
@@ -243,19 +226,7 @@ public class RecipeServiceImpl implements RecipeService {
       throw new RecipeNotFoundException();
     }
 
-    // 레시피 정보를 RecipesSummary로 변환
-    List<RecipesSummary> recipesSummaries = recipes.stream().map(
-        recipeEntity -> new RecipesSummary(
-            recipeEntity.getId(),
-            recipeEntity.getName(),
-            recipeEntity.getUser().getNickname(),
-            recipeEntity.getLevel(),
-            recipeEntity.getTime(),
-            recipeEntity.getThumbnail(),
-            Optional.ofNullable(recipeRatingRepository.findAverageRatingByRecipeId(recipeEntity.getId()))
-                .orElse(0.0)
-        )
-    ).toList();
+    List<RecipesSummary> recipesSummaries = convertToRecipesSummary(recipes);
 
     // 결과 반환
     return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_ALL_RECIPES, recipesSummaries);
@@ -264,29 +235,26 @@ public class RecipeServiceImpl implements RecipeService {
   @Override
   public ResultResponse searchRecipes(HttpServletRequest request, RecipesSearchDTO recipesSearchDTO, int page, int size) {
     Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
-    Long userId = null;
+    List<Long> scrapedRecipeIds = getScrapedRecipeIds(request);
 
-    // Token이 있는지 확인하고, 있다면 userId를 추출
-    try {
-      String token = request.getHeader(TokenType.ACCESS.getValue());
-      if (token != null) {
-        userId = jwtUtil.getUserId(token);
-      }
-    } catch (Exception e) {
-      // Token이 없거나 유효하지 않으면 userId를 null로 유지
+    Page<RecipeEntity> recipes = searchAndRecipes(recipesSearchDTO, scrapedRecipeIds, pageable);
+
+    if (recipes.isEmpty()) {
+      recipes = searchOrRecipes(recipesSearchDTO, scrapedRecipeIds, pageable);
     }
 
-    List<Long> scrapedRecipeIds = Collections.emptyList();
-
-    // userId가 존재하면 해당 사용자가 SCRAPED한 레시피 ID들을 조회
-    if (userId != null) {
-      scrapedRecipeIds = scrapedRecipeRepository.findRecipeIdsByUserIdAndScrapedType(userId, ScrapedType.SCRAPED);
+    if (recipes.isEmpty()) {
+      throw new RecipeNotFoundException();
     }
 
-    // 만약 scrapedRecipeIds가 비어있지 않다면 SCRAPED한 레시피를 제외한 나머지 레시피 조회
-    Page<RecipeEntity> recipes;
+    List<RecipesSummary> recipesSummaries = convertToRecipesSummary(recipes);
+
+    return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_RECIPES, recipesSummaries);
+  }
+
+  private Page<RecipeEntity> searchAndRecipes(RecipesSearchDTO recipesSearchDTO, List<Long> scrapedRecipeIds, Pageable pageable) {
     if (!scrapedRecipeIds.isEmpty()) {
-      recipes = recipeRepository.searchAndRecipesIdNotIn(
+      return recipeRepository.searchAndRecipesIdNotIn(
           recipesSearchDTO.getRecipeLevel(),
           recipesSearchDTO.getRecipeCookingTime(),
           recipesSearchDTO.getIngredients(),
@@ -294,51 +262,37 @@ public class RecipeServiceImpl implements RecipeService {
           scrapedRecipeIds,
           pageable
       );
-
-      if (recipes.isEmpty()) {
-        recipes = recipeRepository.searchOrRecipesIdNotIn(
-            recipesSearchDTO.getRecipeLevel(),
-            recipesSearchDTO.getRecipeCookingTime(),
-            recipesSearchDTO.getIngredients(),
-            scrapedRecipeIds,
-            pageable);
-      }
     } else {
-      // SCRAPED한 레시피가 없거나 Token이 없으면 모든 레시피를 조회
-      recipes = recipeRepository.searchAndRecipes(
-        recipesSearchDTO.getRecipeLevel(),
-        recipesSearchDTO.getRecipeCookingTime(),
-        recipesSearchDTO.getIngredients(),
-        (long) recipesSearchDTO.getIngredients().size(),
-        pageable
+      // SCRAPED한 레시피가 없거나 Token이 없으면 And 조건으로 레시피를 조회
+      return recipeRepository.searchAndRecipes(
+          recipesSearchDTO.getRecipeLevel(),
+          recipesSearchDTO.getRecipeCookingTime(),
+          recipesSearchDTO.getIngredients(),
+          (long) recipesSearchDTO.getIngredients().size(),
+          pageable
       );
-
-      if (recipes.isEmpty()) {
-        recipes = recipeRepository.searchOrRecipes(
-            recipesSearchDTO.getRecipeLevel(),
-            recipesSearchDTO.getRecipeCookingTime(),
-            recipesSearchDTO.getIngredients(),
-            pageable);
-      }
     }
+  }
 
-    if (recipes.isEmpty()) {
-      throw new RecipeNotFoundException();
+  private Page<RecipeEntity> searchOrRecipes(RecipesSearchDTO recipesSearchDTO,
+      List<Long> scrapedRecipeIds, Pageable pageable) {
+    if (!scrapedRecipeIds.isEmpty()) {
+      return recipeRepository.searchOrRecipesIdNotIn(
+          recipesSearchDTO.getRecipeLevel(),
+          recipesSearchDTO.getRecipeCookingTime(),
+          recipesSearchDTO.getIngredients(),
+          scrapedRecipeIds,
+          pageable
+      );
+    } else {
+      // SCRAPED한 레시피가 없거나 Token이 없으면 Or 조건으로 레시피를 조회
+      return recipeRepository.searchOrRecipes(
+          recipesSearchDTO.getRecipeLevel(),
+          recipesSearchDTO.getRecipeCookingTime(),
+          recipesSearchDTO.getIngredients(),
+          pageable
+      );
     }
-
-    List<RecipesSummary> recipesSummaries = recipes.stream().map(
-        recipeEntity -> new RecipesSummary(
-            recipeEntity.getId(),
-            recipeEntity.getName(),
-            recipeEntity.getUser().getNickname(),
-            recipeEntity.getLevel(),
-            recipeEntity.getTime(),
-            recipeEntity.getThumbnail(),
-            Optional.ofNullable(recipeRatingRepository.findAverageRatingByRecipeId(recipeEntity.getId()))
-                .orElse(0.0)
-        )).toList();
-
-    return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_RECIPES, recipesSummaries);
   }
 
   @Override
@@ -354,11 +308,11 @@ public class RecipeServiceImpl implements RecipeService {
         .toList();
 
     List<RecipesManual> recipesManuals = recipe.getManuals().stream()
-            .map(manual -> new RecipesManual(
-                manual.getManualContent(),
-                manual.getManualPicture()
-            ))
-            .toList();
+        .map(manual -> new RecipesManual(
+            manual.getManualContent(),
+            manual.getManualPicture()
+        ))
+        .toList();
 
     RecipesInfo recipesInfo = new RecipesInfo(
         recipe.getId(),
@@ -379,24 +333,7 @@ public class RecipeServiceImpl implements RecipeService {
   @Override
   public ResultResponse getRecipesByRating(HttpServletRequest request, int page, int size) {
     Pageable pageable = PageRequest.of(page, size);
-    Long userId = null;
-
-    // Token이 있는지 확인하고, 있다면 userId를 추출
-    try {
-      String token = request.getHeader(TokenType.ACCESS.getValue());
-      if (token != null) {
-        userId = jwtUtil.getUserId(token);
-      }
-    } catch (Exception e) {
-      // Token이 없거나 유효하지 않으면 userId를 null로 유지
-    }
-
-    List<Long> scrapedRecipeIds = Collections.emptyList();
-
-    // userId가 존재하면 해당 사용자가 SCRAPED한 레시피 ID들을 조회
-    if (userId != null) {
-      scrapedRecipeIds = scrapedRecipeRepository.findRecipeIdsByUserIdAndScrapedType(userId, ScrapedType.SCRAPED);
-    }
+    List<Long> scrapedRecipeIds = getScrapedRecipeIds(request);
 
     // 만약 scrapedRecipeIds가 비어있지 않다면 SCRAPED한 레시피를 제외한 나머지 레시피를 평점순으로 조회
     Page<RecipeEntity> recipes;
@@ -411,17 +348,7 @@ public class RecipeServiceImpl implements RecipeService {
       throw new RecipeNotFoundException();
     }
 
-    List<RecipesSummary> recipesSummaries = recipes.stream().map(
-        recipeEntity -> new RecipesSummary(
-            recipeEntity.getId(),
-            recipeEntity.getName(),
-            recipeEntity.getUser().getNickname(),
-            recipeEntity.getLevel(),
-            recipeEntity.getTime(),
-            recipeEntity.getThumbnail(),
-            Optional.ofNullable(recipeRatingRepository.findAverageRatingByRecipeId(recipeEntity.getId()))
-                .orElse(0.0)
-        )).toList();
+    List<RecipesSummary> recipesSummaries = convertToRecipesSummary(recipes);
 
     return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_ALL_RECIPES_BY_RATING, recipesSummaries);
   }
@@ -455,5 +382,43 @@ public class RecipeServiceImpl implements RecipeService {
         scrapedRecipe.getScrapedType() == ScrapedType.SCRAPED
             ? ResultCode.SUCCESS_SCRAPED_RECIPE
             : ResultCode.SUCCESS_CANCELED_SCRAP_RECIPE, scrapedRecipe.getScrapedType());
+  }
+
+  // 유저의 scrapedRecipeIds를 가져오는 메서드
+  private List<Long> getScrapedRecipeIds(HttpServletRequest request) {
+    Long userId = null;
+    List<Long> scrapedRecipeIds = Collections.emptyList();
+    try {
+      String token = request.getHeader(TokenType.ACCESS.getValue());
+      if (token != null) {
+        userId = jwtUtil.getUserId(token);
+      }
+    } catch (Exception e) {
+      // Token이 없거나 유효하지 않은 경우
+    }
+
+    if (userId != null) {
+      scrapedRecipeIds = scrapedRecipeRepository.findRecipeIdsByUserIdAndScrapedType(userId,
+          ScrapedType.SCRAPED);
+    }
+
+    return scrapedRecipeIds;
+  }
+
+  // RecipeEntity 리스트를 RecipesSummary로 변환하는 메서드
+  private List<RecipesSummary> convertToRecipesSummary(Page<RecipeEntity> recipes) {
+    return recipes.stream().map(
+        recipeEntity -> new RecipesSummary(
+            recipeEntity.getId(),
+            recipeEntity.getName(),
+            recipeEntity.getUser().getNickname(),
+            recipeEntity.getLevel(),
+            recipeEntity.getTime(),
+            recipeEntity.getThumbnail(),
+            Optional.ofNullable(
+                    recipeRatingRepository.findAverageRatingByRecipeId(recipeEntity.getId()))
+                .orElse(0.0)
+        )
+    ).toList();
   }
 }
