@@ -430,7 +430,7 @@ class RecipeServiceImplTest {
         any(Pageable.class))).thenReturn(recipePage);
 
     // when
-    ResultResponse result = recipeService.searchRecipes(searchDTO, 0, 10);
+    ResultResponse result = recipeService.searchRecipes(request, searchDTO, 0, 10);
 
     // then
     assertEquals("레시피 조회 성공!", result.getMessage());
@@ -457,7 +457,7 @@ class RecipeServiceImplTest {
 
     // when & then
     assertThrows(RecipeNotFoundException.class,
-        () -> recipeService.searchRecipes(searchDTO, 0, 10));
+        () -> recipeService.searchRecipes(request, searchDTO, 0, 10));
   }
 
   @Test
