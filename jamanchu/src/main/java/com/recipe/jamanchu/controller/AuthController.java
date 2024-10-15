@@ -4,6 +4,8 @@ import com.recipe.jamanchu.exceptions.exception.MissingEmailException;
 import com.recipe.jamanchu.exceptions.exception.MissingNicknameException;
 import com.recipe.jamanchu.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.service.AuthService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,7 +22,9 @@ public class AuthController {
 
 
   @GetMapping("/email-check")
-  public ResponseEntity<ResultResponse> checkEmail(@RequestParam(name = "email", required = false) String email) {
+  public ResponseEntity<ResultResponse> checkEmail(
+      @RequestParam(name = "email", required = false) String email) {
+
     if (email == null) {
       throw new MissingEmailException();
     }
@@ -28,10 +32,20 @@ public class AuthController {
   }
 
   @GetMapping("/nickname-check")
-  public ResponseEntity<ResultResponse> checkNickname(@RequestParam(name = "nickname", required = false) String nickname) {
+  public ResponseEntity<ResultResponse> checkNickname(
+      @RequestParam(name = "nickname", required = false) String nickname) {
+
     if (nickname == null) {
       throw new MissingNicknameException();
     }
     return ResponseEntity.ok(authService.checkNickname(nickname));
   }
+
+  @GetMapping("/token/refresh")
+  public ResponseEntity<ResultResponse> refreshToken(HttpServletRequest request,
+      HttpServletResponse response) {
+
+    return ResponseEntity.ok(authService.refreshToken(request, response));
+  }
+
 }

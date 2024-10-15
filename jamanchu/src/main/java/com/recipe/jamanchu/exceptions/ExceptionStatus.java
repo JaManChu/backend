@@ -18,6 +18,8 @@ public enum ExceptionStatus {
   ACCESS_TOKEN_RETRIEVAL(HttpStatus.UNAUTHORIZED, "액세스 토큰을 가져오는 데 실패했습니다."),
   USER_INFO_RETRIEVAL(HttpStatus.UNAUTHORIZED, "사용자 정보를 가져오는 데 실패했습니다."),
   MISSING_NICKNAME(HttpStatus.BAD_REQUEST, "닉네임을 입력해주세요!"),
+  REFRESH_TOKEN_EXPIRED(HttpStatus.GONE, "다시 로그인을 해주세요!"),
+  COOKIE_NOT_FOUND(HttpStatus.NOT_FOUND, "다시 로그인을 해주세요!"),
   ;
 
   private final HttpStatus statusCode;
