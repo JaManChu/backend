@@ -117,6 +117,8 @@ public class RecipeDivideServiceImpl implements RecipeDivideService {
 
   public void saveIngredientDetails(RecipeEntity recipe, TenThousandRecipeEntity scrapedRecipe) {
     String[] ingredients = scrapedRecipe.getIngredients().split(",");  // 재료 분리 로직
+    List<IngredientEntity> ingredientEntities = new ArrayList<>();
+    List<RecipeIngredientMappingEntity> recipeIngredientMappingEntities = new ArrayList<>();
     for (String ingredient : ingredients) {
       ingredient = ingredient.trim();
       if (ingredient.isEmpty()) {
@@ -143,7 +145,16 @@ public class RecipeDivideServiceImpl implements RecipeDivideService {
           .quantity(quantity)
           .build();
 
-      ingredientRepository.save(ingredientEntity);
+      ingredientEntities.add(ingredientEntity);
+
+      RecipeIngredientMappingEntity recipeIngredientMappingEntity = RecipeIngredientMappingEntity.builder()
+          .recipe(recipe)
+          .ingredient(ingredientEntity)
+          .build();
+
+      recipeIngredientMappingEntities.add(recipeIngredientMappingEntity);
     }
+    ingredientRepository.saveAll(ingredientEntities);
+    recipeIngredientMappingRepository.saveAll(recipeIngredientMappingEntities);
   }
 }
