@@ -53,16 +53,17 @@ public class SecurityConfig {
             .requestMatchers("/",
                 "/api/v1/users/signup",
                 "/api/v1/users/login",
-                "/api/v1/users/test",
                 "/api/v1/auth/email-check",
+                "/api/v1/auth/nickname-check",
                 "/favicon.ico",
-                "/api/v1/users/login/auth/kakao").permitAll()
+                "/api/v1/users/login/auth/kakao",
+                "/api/v1/auth/token/refresh").permitAll()
             .requestMatchers(HttpMethod.GET,
                 "/api/v1/recipes",
                 "/api/v1/recipes/**").permitAll()
             .anyRequest().authenticated());
     http
-        .addFilterBefore(new JwtFilter(jwtUtil, userDetailService),
+        .addFilterBefore(new JwtFilter(jwtUtil),
             UsernamePasswordAuthenticationFilter.class);
     http
         .sessionManagement(session -> session
