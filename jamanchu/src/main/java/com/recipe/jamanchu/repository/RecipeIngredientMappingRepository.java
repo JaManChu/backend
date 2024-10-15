@@ -13,8 +13,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface RecipeIngredientMappingRepository extends JpaRepository<RecipeIngredientMappingEntity, RecipeIngredientMappingId> {
 
-  Optional<List<RecipeIngredientMappingEntity>> findAllByRecipeId(Long recipeId);
-
   @Modifying
   @Query("DELETE FROM RecipeIngredientMappingEntity r WHERE r.recipe.id = :recipeId")
   void deleteAllByRecipeId(@Param("recipeId") Long recipeId);

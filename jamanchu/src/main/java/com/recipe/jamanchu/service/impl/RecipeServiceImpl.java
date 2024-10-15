@@ -137,13 +137,8 @@ public class RecipeServiceImpl implements RecipeService {
         recipesUpdateDTO.getRecipeLevel(), recipesUpdateDTO.getRecipeCookingTime(),
         String.valueOf(recipesUpdateDTO.getRecipeThumbnail()));
 
-    // 기존 recipeId로 저장된 재료 확인 및 삭제
-    recipeIngredientMappingRepository.findAllByRecipeId(recipeId)
-        .orElseThrow(RecipeNotFoundException::new);
+    // 기존 recipeId로 저장된 재료 삭제
     recipeIngredientMappingRepository.deleteAllByRecipeId(recipeId);
-
-    ingredientRepository.findAllByRecipeId(recipeId)
-        .orElseThrow(RecipeNotFoundException::new);
     ingredientRepository.deleteAllByRecipeId(recipeId);
 
     List<IngredientEntity> ingredients = new ArrayList<>();
@@ -170,9 +165,6 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     recipeIngredientMappingRepository.saveAll(recipeIngredientMappings);
-
-    manualRepository.findAllByRecipeId(recipeId)
-        .orElseThrow(RecipeNotFoundException::new);
 
     manualRepository.deleteAllByRecipeId(recipeId);
 

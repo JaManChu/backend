@@ -12,8 +12,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface IngredientRepository extends JpaRepository<IngredientEntity, Long> {
 
-  Optional<List<IngredientEntity>> findAllByRecipeId(Long recipeId);
-
   @Modifying
   @Query("DELETE FROM IngredientEntity i WHERE i.recipe.id = :recipeId")
   void deleteAllByRecipeId(@Param("recipeId") Long recipeId);
