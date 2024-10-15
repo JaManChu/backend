@@ -2,8 +2,10 @@ package com.recipe.jamanchu.service.impl;
 
 import com.recipe.jamanchu.auth.jwt.JwtUtil;
 import com.recipe.jamanchu.component.UserAccessHandler;
+import com.recipe.jamanchu.entity.UserEntity;
 import com.recipe.jamanchu.exceptions.exception.CookieNotFoundException;
 import com.recipe.jamanchu.exceptions.exception.RefreshTokenExpiredException;
+import com.recipe.jamanchu.model.dto.request.auth.PasswordCheckDTO;
 import com.recipe.jamanchu.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.model.type.ResultCode;
 import com.recipe.jamanchu.model.type.TokenType;
@@ -69,5 +71,15 @@ public class AuthServiceImpl implements AuthService {
     response.addHeader(TokenType.ACCESS.getValue(), "Bearer " + access);
 
     return ResultResponse.of(ResultCode.SUCCESS_REISSUE_REFRESH_TOKEN);
+  }
+
+  @Override
+  public ResultResponse checkPassword(PasswordCheckDTO passwordCheckDTO,
+      HttpServletRequest request) {
+
+    UserEntity user = userAccessHandler
+        .findByUserId(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue())));
+
+    return userAccessHandler.validateBeforePW(user.getPassword(), passwordCheckDTO.getPassword());
   }
 }
