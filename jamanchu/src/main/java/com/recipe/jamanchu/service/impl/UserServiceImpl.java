@@ -118,7 +118,7 @@ public class UserServiceImpl implements UserService {
     userAccessHandler.saveUser(UserEntity.builder()
         .userId(user.getUserId())
         .email(user.getEmail())
-        .password(passwordEncoder.encode(userUpdateDTO.getAfterPassword()))
+        .password(passwordEncoder.encode(userUpdateDTO.getPassword()))
         .nickname(userUpdateDTO.getNickname())
         .role(user.getRole())
         .build());

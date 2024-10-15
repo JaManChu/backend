@@ -13,18 +13,13 @@ public class UserUpdateDTO {
   @JsonProperty("nickname")
   private String nickname;
 
-  @NotEmpty(message = "기존 비밀번호를 입력해주세요.")
-  @JsonProperty("beforePassword")
-  private String beforePassword;
-
   @NotEmpty(message = "변경할 비밀번호를 입력해주세요.")
-  @JsonProperty("afterPassword")
-  private String afterPassword;
+  @JsonProperty("password")
+  private String password;
 
   @JsonCreator
-  public UserUpdateDTO(String nickname, String beforePassword, String afterPassword) {
+  public UserUpdateDTO(String nickname, String password) {
     this.nickname = nickname;
-    this.beforePassword = beforePassword;
-    this.afterPassword = afterPassword;
+    this.password = password;
   }
 }
