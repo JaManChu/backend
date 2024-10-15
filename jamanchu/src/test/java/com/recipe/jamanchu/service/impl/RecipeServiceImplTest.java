@@ -221,9 +221,6 @@ class RecipeServiceImplTest {
     when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(user.getUserId());
     when(userAccessHandler.findByUserId(1L)).thenReturn(user);
     when(recipeRepository.findById(1L)).thenReturn(Optional.of(recipe));
-    when(ingredientRepository.findAllByRecipeId(1L)).thenReturn(Optional.of(ingredientEntities));
-    when(recipeIngredientMappingRepository.findAllByRecipeId(1L)).thenReturn(Optional.of(recipeIngredientMappings));
-    when(manualRepository.findAllByRecipeId(1L)).thenReturn(Optional.of(manualEntities));
 
     // When
     ResultResponse result = recipeService.updateRecipe(request, recipesUpdateDTO);
@@ -233,10 +230,8 @@ class RecipeServiceImplTest {
 
     // verify
     verify(recipeRepository, times(1)).findById(1L);
-    verify(ingredientRepository, times(1)).findAllByRecipeId(1L);
     verify(ingredientRepository, times(1)).deleteAllByRecipeId(1L);
     verify(ingredientRepository, times(1)).saveAll(anyList());
-    verify(recipeIngredientMappingRepository, times(1)).findAllByRecipeId(1L);
     verify(recipeIngredientMappingRepository, times(1)).deleteAllByRecipeId(1L);
     verify(recipeIngredientMappingRepository, times(1)).saveAll(anyList());
     verify(manualRepository, times(1)).deleteAllByRecipeId(1L);
