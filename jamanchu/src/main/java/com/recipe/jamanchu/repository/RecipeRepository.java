@@ -54,4 +54,6 @@ public interface RecipeRepository extends JpaRepository<RecipeEntity, Long> {
   Optional<List<RecipeEntity>> findScrapRecipeByUser(UserEntity user, ScrapedType scrapedType);
 
   Optional<List<RecipeEntity>> findAllByUser(UserEntity user);
+
+  Page<RecipeEntity> findByIdNotIn(List<Long> ids, Pageable pageable);
 }
