@@ -2,10 +2,10 @@ package com.recipe.jamanchu.component;
 
 import com.recipe.jamanchu.auth.oauth2.KakaoUserDetails;
 import com.recipe.jamanchu.entity.UserEntity;
-import com.recipe.jamanchu.exceptions.exception.DuplicatedNicknameException;
 import com.recipe.jamanchu.exceptions.exception.PasswordMismatchException;
 import com.recipe.jamanchu.exceptions.exception.SocialAccountException;
 import com.recipe.jamanchu.exceptions.exception.UserNotFoundException;
+import com.recipe.jamanchu.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.model.type.ResultCode;
 import com.recipe.jamanchu.model.type.UserRole;
 import com.recipe.jamanchu.repository.UserRepository;

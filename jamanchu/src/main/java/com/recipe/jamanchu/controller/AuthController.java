@@ -1,9 +1,9 @@
 package com.recipe.jamanchu.controller;
 
 import com.recipe.jamanchu.exceptions.exception.MissingEmailException;
+import com.recipe.jamanchu.exceptions.exception.MissingNicknameException;
 import com.recipe.jamanchu.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.service.AuthService;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,6 +24,14 @@ public class AuthController {
     if (email == null) {
       throw new MissingEmailException();
     }
-    return ResponseEntity.ok(ResultResponse.of(authService.checkEmail(email)));
+    return ResponseEntity.ok(authService.checkEmail(email));
+  }
+
+  @GetMapping("/nickname-check")
+  public ResponseEntity<ResultResponse> checkNickname(@RequestParam(name = "nickname", required = false) String nickname) {
+    if (nickname == null) {
+      throw new MissingNicknameException();
+    }
+    return ResponseEntity.ok(authService.checkNickname(nickname));
   }
 }
