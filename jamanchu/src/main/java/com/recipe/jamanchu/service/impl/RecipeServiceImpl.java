@@ -262,23 +262,64 @@ public class RecipeServiceImpl implements RecipeService {
   }
 
   @Override
-  public ResultResponse searchRecipes(RecipesSearchDTO recipesSearchDTO, int page, int size) {
+  public ResultResponse searchRecipes(HttpServletRequest request, RecipesSearchDTO recipesSearchDTO, int page, int size) {
     Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+    Long userId = null;
 
-    Page<RecipeEntity> recipes = recipeRepository.searchAndRecipes(
+    // Token이 있는지 확인하고, 있다면 userId를 추출
+    try {
+      String token = request.getHeader(TokenType.ACCESS.getValue());
+      if (token != null) {
+        userId = jwtUtil.getUserId(token);
+      }
+    } catch (Exception e) {
+      // Token이 없거나 유효하지 않으면 userId를 null로 유지
+    }
+
+    List<Long> scrapedRecipeIds = Collections.emptyList();
+
+    // userId가 존재하면 해당 사용자가 SCRAPED한 레시피 ID들을 조회
+    if (userId != null) {
+      scrapedRecipeIds = scrapedRecipeRepository.findRecipeIdsByUserIdAndScrapedType(userId, ScrapedType.SCRAPED);
+    }
+
+    // 만약 scrapedRecipeIds가 비어있지 않다면 SCRAPED한 레시피를 제외한 나머지 레시피 조회
+    Page<RecipeEntity> recipes;
+    if (!scrapedRecipeIds.isEmpty()) {
+      recipes = recipeRepository.searchAndRecipesIdNotIn(
+          recipesSearchDTO.getRecipeLevel(),
+          recipesSearchDTO.getRecipeCookingTime(),
+          recipesSearchDTO.getIngredients(),
+          (long) recipesSearchDTO.getIngredients().size(),
+          scrapedRecipeIds,
+          pageable
+      );
+
+      if (recipes.isEmpty()) {
+        recipes = recipeRepository.searchOrRecipesIdNotIn(
+            recipesSearchDTO.getRecipeLevel(),
+            recipesSearchDTO.getRecipeCookingTime(),
+            recipesSearchDTO.getIngredients(),
+            scrapedRecipeIds,
+            pageable);
+      }
+    } else {
+      // SCRAPED한 레시피가 없거나 Token이 없으면 모든 레시피를 조회
+      recipes = recipeRepository.searchAndRecipes(
         recipesSearchDTO.getRecipeLevel(),
         recipesSearchDTO.getRecipeCookingTime(),
         recipesSearchDTO.getIngredients(),
         (long) recipesSearchDTO.getIngredients().size(),
         pageable
-    );
+      );
 
-    if (recipes.isEmpty()) {
-      recipes = recipeRepository.searchOrRecipes(
-          recipesSearchDTO.getRecipeLevel(),
-          recipesSearchDTO.getRecipeCookingTime(),
-          recipesSearchDTO.getIngredients(),
-          pageable);
+      if (recipes.isEmpty()) {
+        recipes = recipeRepository.searchOrRecipes(
+            recipesSearchDTO.getRecipeLevel(),
+            recipesSearchDTO.getRecipeCookingTime(),
+            recipesSearchDTO.getIngredients(),
+            pageable);
+      }
     }
 
     if (recipes.isEmpty()) {

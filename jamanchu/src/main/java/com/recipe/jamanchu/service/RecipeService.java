@@ -19,7 +19,7 @@ public interface RecipeService {
   ResultResponse getRecipes(HttpServletRequest request, int page, int size);
 
   // 특정 조건 레시피 조회 API
-  ResultResponse searchRecipes(RecipesSearchDTO recipesSearchDTO, int page, int size);
+  ResultResponse searchRecipes(HttpServletRequest request, RecipesSearchDTO recipesSearchDTO, int page, int size);
 
   // 레시피 상세 페이지 조회 API
   ResultResponse getRecipeDetail(Long recipesId);
