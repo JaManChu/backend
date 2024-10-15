@@ -177,7 +177,7 @@ class RecipeServiceImplTest {
     // given
     when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(user.getUserId());
     when(userAccessHandler.findByUserId(user.getUserId())).thenReturn(user);
-    when(ingredientRepository.saveAllAndFlush(anyList())).thenReturn(new ArrayList<>());
+    when(ingredientRepository.saveAll(anyList())).thenReturn(new ArrayList<>());
     when(recipeIngredientMappingRepository.saveAll(anyList())).thenReturn(new ArrayList<>());
 
     // when
@@ -188,7 +188,7 @@ class RecipeServiceImplTest {
 
     // verify
     verify(recipeRepository, times(1)).save(any(RecipeEntity.class));
-    verify(ingredientRepository, times(1)).saveAllAndFlush(anyList());
+    verify(ingredientRepository, times(1)).saveAll(anyList());
     verify(recipeIngredientMappingRepository, times(1)).saveAll(anyList());
     verify(manualRepository, times(1)).saveAll(anyList());
   }
@@ -235,7 +235,7 @@ class RecipeServiceImplTest {
     verify(recipeRepository, times(1)).findById(1L);
     verify(ingredientRepository, times(1)).findAllByRecipeId(1L);
     verify(ingredientRepository, times(1)).deleteAllByRecipeId(1L);
-    verify(ingredientRepository, times(1)).saveAllAndFlush(anyList());
+    verify(ingredientRepository, times(1)).saveAll(anyList());
     verify(recipeIngredientMappingRepository, times(1)).findAllByRecipeId(1L);
     verify(recipeIngredientMappingRepository, times(1)).deleteAllByRecipeId(1L);
     verify(recipeIngredientMappingRepository, times(1)).saveAll(anyList());
