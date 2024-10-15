@@ -14,34 +14,21 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class EmailCheckDTOTest {
+class PasswordCheckDTOTest {
 
   private final ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
   private final Validator validator = factory.getValidator();
 
-  @DisplayName("이메일은 반드시 있어야한다")
+  @DisplayName("비밀번호는 반드시 있어야한다")
   @Test
   void EmailIsNotEmpty() {
     //given
-    EmailCheckDTO emailCheckDTO = new EmailCheckDTO("");
+    PasswordCheckDTO passwordCheckDTO = new PasswordCheckDTO("");
     //when
-    Set<ConstraintViolation<EmailCheckDTO>> violations = validator.validate(emailCheckDTO);
+    Set<ConstraintViolation<PasswordCheckDTO>> violations = validator.validate(passwordCheckDTO);
     //then
     assertEquals(violations.size(), 1);
     assertFalse(violations.isEmpty());
-    assertEquals("이메일을 입력해주세요.",violations.iterator().next().getMessage());
-  }
-
-  @DisplayName("반드시 이메일 형식이여야한다.")
-  @Test
-  void MustMatchEmailPattern() {
-    //given
-    EmailCheckDTO emailCheckDTO = new EmailCheckDTO("test");
-    //when
-    Set<ConstraintViolation<EmailCheckDTO>> violations = validator.validate(emailCheckDTO);
-    //then
-    assertEquals(violations.size(), 1);
-    assertFalse(violations.isEmpty());
-    assertEquals("이메일 형식이 아닙니다.", violations.iterator().next().getMessage());
+    assertEquals("비밀번호를 입력해주세요.",violations.iterator().next().getMessage());
   }
 }
