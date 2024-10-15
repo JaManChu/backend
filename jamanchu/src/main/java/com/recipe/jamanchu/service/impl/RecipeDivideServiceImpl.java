@@ -124,13 +124,18 @@ public class RecipeDivideServiceImpl implements RecipeDivideService {
       }
 
       String[] parts = ingredient.split(" ");  // 재료명과 수량 분리
-      String name = parts[0];
+      StringBuilder sb = new StringBuilder();
       String quantity = "";
+      if (parts.length == 1) {
+        sb.append(parts[0]);
+      } else {
+        for (int i = 0; i < parts.length - 1; i++) {
+          sb.append(parts[i]).append(" ");
+        }
 
-      // 수량이 있을 경우에만 parts[1]에 접근
-      if (parts.length > 1) {
-        quantity = parts[1];
+        quantity = parts[parts.length - 1];
       }
+      String name = sb.toString().trim();
 
       IngredientEntity ingredientEntity = IngredientEntity.builder()
           .recipe(recipe)
