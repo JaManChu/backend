@@ -86,7 +86,7 @@ public class RecipeServiceImpl implements RecipeService {
       ingredients.add(ingredient);
     }
 
-    ingredientRepository.saveAllAndFlush(ingredients);
+    ingredientRepository.saveAll(ingredients);
 
     List<RecipeIngredientMappingEntity> recipeIngredientMappings = new ArrayList<>();
     for (IngredientEntity ingredient : ingredients) {
@@ -157,7 +157,7 @@ public class RecipeServiceImpl implements RecipeService {
       ingredients.add(ingredient);
     }
 
-    ingredientRepository.saveAllAndFlush(ingredients);
+    ingredientRepository.saveAll(ingredients);
 
     List<RecipeIngredientMappingEntity> recipeIngredientMappings = new ArrayList<>();
     for (IngredientEntity ingredient : ingredients) {
