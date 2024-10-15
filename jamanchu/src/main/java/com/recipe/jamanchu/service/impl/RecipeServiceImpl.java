@@ -33,6 +33,7 @@ import com.recipe.jamanchu.repository.ScrapedRecipeRepository;
 import com.recipe.jamanchu.service.RecipeService;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -207,27 +208,56 @@ public class RecipeServiceImpl implements RecipeService {
   }
 
   @Override
-  public ResultResponse getRecipes(int page, int size) {
+  public ResultResponse getRecipes(HttpServletRequest request, int page, int size) {
     Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+    Long userId = null;
 
-    Page<RecipeEntity> recipes = recipeRepository.findAll(pageable);
+    // Token이 있는지 확인하고, 있다면 userId를 추출
+    try {
+      String token = request.getHeader(TokenType.ACCESS.getValue());
+      if (token != null) {
+        userId = jwtUtil.getUserId(token);
+      }
+    } catch (Exception e) {
+      // Token이 없거나 유효하지 않으면 userId를 null로 유지
+    }
 
+    List<Long> scrapedRecipeIds = Collections.emptyList();
+
+    // userId가 존재하면 해당 사용자가 SCRAPED한 레시피 ID들을 조회
+    if (userId != null) {
+      scrapedRecipeIds = scrapedRecipeRepository.findRecipeIdsByUserIdAndScrapedType(userId, ScrapedType.SCRAPED);
+    }
+
+    // 만약 scrapedRecipeIds가 비어있지 않다면 SCRAPED한 레시피를 제외한 나머지 레시피 조회
+    Page<RecipeEntity> recipes;
+    if (!scrapedRecipeIds.isEmpty()) {
+      recipes = recipeRepository.findByIdNotIn(scrapedRecipeIds, pageable);
+    } else {
+      // SCRAPED한 레시피가 없거나 Token이 없으면 모든 레시피를 조회
+      recipes = recipeRepository.findAll(pageable);
+    }
+
+    // 레시피가 없는 경우 예외 처리
     if (recipes.isEmpty()) {
       throw new RecipeNotFoundException();
     }
 
+    // 레시피 정보를 RecipesSummary로 변환
     List<RecipesSummary> recipesSummaries = recipes.stream().map(
         recipeEntity -> new RecipesSummary(
-        recipeEntity.getId(),
-        recipeEntity.getName(),
-        recipeEntity.getUser().getNickname(),
-        recipeEntity.getLevel(),
-        recipeEntity.getTime(),
-        recipeEntity.getThumbnail(),
-        Optional.ofNullable(recipeRatingRepository.findAverageRatingByRecipeId(recipeEntity.getId()))
-            .orElse(0.0)
-    )).toList();
+            recipeEntity.getId(),
+            recipeEntity.getName(),
+            recipeEntity.getUser().getNickname(),
+            recipeEntity.getLevel(),
+            recipeEntity.getTime(),
+            recipeEntity.getThumbnail(),
+            Optional.ofNullable(recipeRatingRepository.findAverageRatingByRecipeId(recipeEntity.getId()))
+                .orElse(0.0)
+        )
+    ).toList();
 
+    // 결과 반환
     return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_ALL_RECIPES, recipesSummaries);
   }
 
