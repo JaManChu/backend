@@ -31,6 +31,7 @@ import com.recipe.jamanchu.model.type.CookingTimeType;
 import com.recipe.jamanchu.model.type.LevelType;
 import com.recipe.jamanchu.model.type.RecipeProvider;
 import com.recipe.jamanchu.model.type.ResultCode;
+import com.recipe.jamanchu.model.type.ScrapedType;
 import com.recipe.jamanchu.model.type.TokenType;
 import com.recipe.jamanchu.model.type.UserRole;
 import com.recipe.jamanchu.repository.RecipeRepository;
@@ -488,7 +489,7 @@ class UserServiceImplTest {
     when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(USERID);
     when(userAccessHandler.findByUserId(USERID)).thenReturn(user);
     when(recipeRepository.findAllByUser(user)).thenReturn(Optional.of(myRecipeList));
-    when(recipeRepository.findScrapRecipeByUser(user)).thenReturn(Optional.of(myScrapRecipeList));
+    when(recipeRepository.findScrapRecipeByUser(user, ScrapedType.SCRAPED)).thenReturn(Optional.of(myScrapRecipeList));
 
     PageResponse<MyRecipes> myRecipesPage = PageResponse.pagination(myRecipes, MYRECIPEID);
     PageResponse<MyScrapedRecipes> myScrapedRecipesPage = PageResponse.pagination(myScrapedRecipes, MYSCRAPEDRECIPEID);
@@ -498,7 +499,7 @@ class UserServiceImplTest {
     );
 
     // when
-    ResultResponse actualResponse = userServiceimpl.getUserRecipes(MYSCRAPEDRECIPEID, MYRECIPEID, request);
+    ResultResponse actualResponse = userServiceimpl.getUserRecipes(MYRECIPEID, MYSCRAPEDRECIPEID, request);
 
     MyRecipeInfo expectedRecipeInfo = (MyRecipeInfo) expectedResponse.getData();
     MyRecipeInfo actualRecipeInfo = (MyRecipeInfo) actualResponse.getData();
@@ -539,7 +540,7 @@ class UserServiceImplTest {
 
     // when then
     assertThrows(UserNotFoundException.class,
-        () -> userServiceimpl.getUserRecipes(MYSCRAPEDRECIPEID, MYRECIPEID, request));
+        () -> userServiceimpl.getUserRecipes(MYRECIPEID, MYSCRAPEDRECIPEID, request));
   }
 }
 
