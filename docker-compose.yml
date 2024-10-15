@@ -21,6 +21,26 @@ services:
     networks:
       - jamanchu_network
     restart: on-failure
+  
+  npm:
+    image: 'jc21/nginx-proxy-manager:2.11.3'
+    container_name: npm
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '81:81'
+      - '443:443'
+    environment:
+      - DB_MYSQL_HOST = mysql
+      - DB_MYSQL_PORT =  3306
+      - DB_MYSQL_USER = jamanchu
+      - DB_MYSQL_PASSWORD = jamanchu
+      - DB_MYSQL_NAME = home
+    volumes:
+      - ./data/npm/data:/data
+      - ./data/npm/letsencrypt:/etc/letsencrypt
+    networks:
+      - jamanchu_network
 
 networks:
   jamanchu_network:
