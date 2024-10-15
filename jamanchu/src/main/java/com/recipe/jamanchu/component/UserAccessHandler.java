@@ -67,20 +67,20 @@ public class UserAccessHandler {
   public ResultResponse existsByEmail(String email){
 
     if (userRepository.existsByEmail(email)) {
-      return ResultResponse.of(ResultCode.EMAIL_ALREADY_IN_USE);
+      return ResultResponse.of(ResultCode.EMAIL_ALREADY_IN_USE, false);
     }
 
-    return ResultResponse.of(ResultCode.EMAIL_AVAILABLE);
+    return ResultResponse.of(ResultCode.EMAIL_AVAILABLE, true);
   }
 
   // 닉네임 중복 체크
   public ResultResponse existsByNickname(String nickname){
 
     if (userRepository.existsByNickname(nickname)) {
-      return ResultResponse.of(ResultCode.NICKNAME_ALREADY_IN_USE);
+      return ResultResponse.of(ResultCode.NICKNAME_ALREADY_IN_USE, false);
     }
 
-    return ResultResponse.of(ResultCode.NICKNAME_AVAILABLE);
+    return ResultResponse.of(ResultCode.NICKNAME_AVAILABLE, true);
   }
 
   // 소셜 계정 정보 체크
@@ -91,13 +91,6 @@ public class UserAccessHandler {
 
       log.info("is Social User!");
       throw new SocialAccountException();
-    }
-  }
-
-  // 비밀번호 일치 여부 체크
-  public void validatePassword(String enPassword, String password) {
-    if (!passwordEncoder.matches(password, enPassword)) {
-      throw new PasswordMismatchException();
     }
   }
 
@@ -112,6 +105,21 @@ public class UserAccessHandler {
   @Transactional
   public void deleteUser(UserEntity user) {
     userRepository.delete(user);
+  }
+
+  // 비밀번호 일치 여부 체크
+  public void validatePassword(String enPassword, String password) {
+    if (!passwordEncoder.matches(password, enPassword)) {
+      throw new PasswordMismatchException();
+    }
+  }
+
+  // 비밀번호 일치 여부 체크
+  public ResultResponse validateBeforePW(String enPassword, String password) {
+    if (!passwordEncoder.matches(password, enPassword)) {
+      return ResultResponse.of(ResultCode.PASSWORD_MISMATCH, false);
+    }
+    return ResultResponse.of(ResultCode.PASSWORD_MATCH, true);
   }
 }
 
