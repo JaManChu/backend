@@ -10,10 +10,10 @@ import static org.mockito.Mockito.when;
 
 import com.recipe.jamanchu.auth.jwt.JwtUtil;
 import com.recipe.jamanchu.component.UserAccessHandler;
-import com.recipe.jamanchu.entity.CommentEntity;
 import com.recipe.jamanchu.entity.IngredientEntity;
 import com.recipe.jamanchu.entity.ManualEntity;
 import com.recipe.jamanchu.entity.RecipeEntity;
+import com.recipe.jamanchu.entity.RecipeIngredientMappingEntity;
 import com.recipe.jamanchu.entity.RecipeRatingEntity;
 import com.recipe.jamanchu.entity.ScrapedRecipeEntity;
 import com.recipe.jamanchu.entity.UserEntity;
@@ -35,6 +35,7 @@ import com.recipe.jamanchu.model.type.TokenType;
 import com.recipe.jamanchu.model.type.UserRole;
 import com.recipe.jamanchu.repository.IngredientRepository;
 import com.recipe.jamanchu.repository.ManualRepository;
+import com.recipe.jamanchu.repository.RecipeIngredientMappingRepository;
 import com.recipe.jamanchu.repository.RecipeRatingRepository;
 import com.recipe.jamanchu.repository.RecipeRepository;
 import com.recipe.jamanchu.repository.ScrapedRecipeRepository;
@@ -62,6 +63,9 @@ class RecipeServiceImplTest {
 
   @Mock
   private IngredientRepository ingredientRepository;
+
+  @Mock
+  private RecipeIngredientMappingRepository recipeIngredientMappingRepository;
 
   @Mock
   private ManualRepository manualRepository;
@@ -173,6 +177,8 @@ class RecipeServiceImplTest {
     // given
     when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(user.getUserId());
     when(userAccessHandler.findByUserId(user.getUserId())).thenReturn(user);
+    when(ingredientRepository.saveAllAndFlush(anyList())).thenReturn(new ArrayList<>());
+    when(recipeIngredientMappingRepository.saveAll(anyList())).thenReturn(new ArrayList<>());
 
     // when
     ResultResponse result = recipeService.registerRecipe(request, recipesDTO);
@@ -182,7 +188,8 @@ class RecipeServiceImplTest {
 
     // verify
     verify(recipeRepository, times(1)).save(any(RecipeEntity.class));
-    verify(ingredientRepository, times(1)).saveAll(anyList());
+    verify(ingredientRepository, times(1)).saveAllAndFlush(anyList());
+    verify(recipeIngredientMappingRepository, times(1)).saveAll(anyList());
     verify(manualRepository, times(1)).saveAll(anyList());
   }
 
@@ -201,10 +208,21 @@ class RecipeServiceImplTest {
         .manuals(manualEntities)
         .build();
 
+    List<RecipeIngredientMappingEntity> recipeIngredientMappings = new ArrayList<>();
+    for (IngredientEntity ingredient : ingredientEntities) {
+      RecipeIngredientMappingEntity mapping = RecipeIngredientMappingEntity.builder()
+          .recipe(recipe)
+          .ingredient(ingredient)
+          .build();
+
+      recipeIngredientMappings.add(mapping);
+    }
+
     when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(user.getUserId());
     when(userAccessHandler.findByUserId(1L)).thenReturn(user);
     when(recipeRepository.findById(1L)).thenReturn(Optional.of(recipe));
     when(ingredientRepository.findAllByRecipeId(1L)).thenReturn(Optional.of(ingredientEntities));
+    when(recipeIngredientMappingRepository.findAllByRecipeId(1L)).thenReturn(Optional.of(recipeIngredientMappings));
     when(manualRepository.findAllByRecipeId(1L)).thenReturn(Optional.of(manualEntities));
 
     // When
@@ -215,8 +233,12 @@ class RecipeServiceImplTest {
 
     // verify
     verify(recipeRepository, times(1)).findById(1L);
+    verify(ingredientRepository, times(1)).findAllByRecipeId(1L);
     verify(ingredientRepository, times(1)).deleteAllByRecipeId(1L);
-    verify(ingredientRepository, times(1)).saveAll(anyList());
+    verify(ingredientRepository, times(1)).saveAllAndFlush(anyList());
+    verify(recipeIngredientMappingRepository, times(1)).findAllByRecipeId(1L);
+    verify(recipeIngredientMappingRepository, times(1)).deleteAllByRecipeId(1L);
+    verify(recipeIngredientMappingRepository, times(1)).saveAll(anyList());
     verify(manualRepository, times(1)).deleteAllByRecipeId(1L);
     verify(manualRepository, times(1)).saveAll(anyList());
   }
