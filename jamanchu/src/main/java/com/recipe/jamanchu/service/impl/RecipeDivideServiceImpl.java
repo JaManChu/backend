@@ -4,6 +4,7 @@ import com.recipe.jamanchu.component.UserAccessHandler;
 import com.recipe.jamanchu.entity.IngredientEntity;
 import com.recipe.jamanchu.entity.ManualEntity;
 import com.recipe.jamanchu.entity.RecipeEntity;
+import com.recipe.jamanchu.entity.RecipeIngredientMappingEntity;
 import com.recipe.jamanchu.entity.RecipeRatingEntity;
 import com.recipe.jamanchu.entity.TenThousandRecipeEntity;
 import com.recipe.jamanchu.entity.UserEntity;
@@ -12,10 +13,12 @@ import com.recipe.jamanchu.model.type.RecipeProvider;
 import com.recipe.jamanchu.model.type.ResultCode;
 import com.recipe.jamanchu.repository.IngredientRepository;
 import com.recipe.jamanchu.repository.ManualRepository;
+import com.recipe.jamanchu.repository.RecipeIngredientMappingRepository;
 import com.recipe.jamanchu.repository.RecipeRatingRepository;
 import com.recipe.jamanchu.repository.RecipeRepository;
 import com.recipe.jamanchu.repository.TenThousandRecipeRepository;
 import com.recipe.jamanchu.service.RecipeDivideService;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -30,6 +33,7 @@ public class RecipeDivideServiceImpl implements RecipeDivideService {
   private final RecipeRatingRepository recipeRatingRepository;
   private final ManualRepository manualRepository;
   private final IngredientRepository ingredientRepository;
+  private final RecipeIngredientMappingRepository recipeIngredientMappingRepository;
   private final TenThousandRecipeRepository tenThousandRecipeRepository;
 
   @Override
@@ -99,6 +103,7 @@ public class RecipeDivideServiceImpl implements RecipeDivideService {
   public void saveManualData(RecipeEntity recipe, TenThousandRecipeEntity scrapedRecipe) {
     String[] contents = scrapedRecipe.getCrManualContents().split("\\$%\\^");
     String[] pictures;
+    List<ManualEntity> manualEntities = new ArrayList<>();
     if(scrapedRecipe.getCrManualPictures() == null || scrapedRecipe.getCrManualPictures().isEmpty()) {
       pictures = new String[contents.length];
     } else {
@@ -111,8 +116,9 @@ public class RecipeDivideServiceImpl implements RecipeDivideService {
           .manualPicture(pictures[i] != null ? pictures[i] : "")
           .build();
 
-      manualRepository.save(manual);
+      manualEntities.add(manual);
     }
+    manualRepository.saveAll(manualEntities);
   }
 
   public void saveIngredientDetails(RecipeEntity recipe, TenThousandRecipeEntity scrapedRecipe) {
