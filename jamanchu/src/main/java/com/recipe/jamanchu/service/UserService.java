@@ -23,6 +23,6 @@ public interface UserService {
 
   String kakaoLogin(String code, HttpServletResponse response);
 
-  ResultResponse getUserRecipes(int scrapRecipePage, int myRecipePage, HttpServletRequest request);
+  ResultResponse getUserRecipes(int myRecipePage, int scrapRecipePage, HttpServletRequest request);
 }
 

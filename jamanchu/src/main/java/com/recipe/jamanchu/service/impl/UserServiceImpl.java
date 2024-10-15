@@ -18,6 +18,7 @@ import com.recipe.jamanchu.model.dto.response.mypage.MyRecipes;
 import com.recipe.jamanchu.model.dto.response.mypage.MyScrapedRecipes;
 import com.recipe.jamanchu.model.dto.response.mypage.PageResponse;
 import com.recipe.jamanchu.model.type.ResultCode;
+import com.recipe.jamanchu.model.type.ScrapedType;
 import com.recipe.jamanchu.model.type.TokenType;
 import com.recipe.jamanchu.model.type.UserRole;
 import com.recipe.jamanchu.repository.RecipeRepository;
@@ -165,7 +166,7 @@ public class UserServiceImpl implements UserService {
 
   // 내가 찜한 레시피 & 내가 스크랩한 레시피 조회
   @Override
-  public ResultResponse getUserRecipes(int scrapRecipePage, int myRecipePage, HttpServletRequest request) {
+  public ResultResponse getUserRecipes(int myRecipePage, int scrapRecipePage, HttpServletRequest request) {
     UserEntity user = userAccessHandler
         .findByUserId(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue())));
 
@@ -178,7 +179,7 @@ public class UserServiceImpl implements UserService {
             )).toList())
         .orElse(new ArrayList<>());
 
-    List<MyScrapedRecipes> myScrapedRecipes = recipeRepository.findScrapRecipeByUser(user)
+    List<MyScrapedRecipes> myScrapedRecipes = recipeRepository.findScrapRecipeByUser(user, ScrapedType.SCRAPED)
         .map(recipeEntities -> recipeEntities.stream()
             .map(scraped -> new MyScrapedRecipes(
                 scraped.getId(),
@@ -190,7 +191,7 @@ public class UserServiceImpl implements UserService {
 
     MyRecipeInfo myRecipeInfo = new MyRecipeInfo(
         PageResponse.pagination(myRecipes, myRecipePage),
-        PageResponse.pagination(myScrapedRecipes, myRecipePage)
+        PageResponse.pagination(myScrapedRecipes, scrapRecipePage)
     );
 
     return new ResultResponse(ResultCode.SUCCESS_GET_USER_RECIPES_INFO, myRecipeInfo);

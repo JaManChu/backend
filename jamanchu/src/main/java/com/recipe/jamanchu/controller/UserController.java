@@ -95,7 +95,7 @@ public class UserController {
       HttpServletRequest request) {
 
     return ResponseEntity.ok()
-        .body(userService.getUserRecipes(scrapRecipePage, myRecipePage, request));
+        .body(userService.getUserRecipes(myRecipePage, scrapRecipePage, request));
   }
 }
 

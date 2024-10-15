@@ -4,6 +4,7 @@ import com.recipe.jamanchu.entity.RecipeEntity;
 import com.recipe.jamanchu.entity.UserEntity;
 import com.recipe.jamanchu.model.type.CookingTimeType;
 import com.recipe.jamanchu.model.type.LevelType;
+import com.recipe.jamanchu.model.type.ScrapedType;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -49,8 +50,8 @@ public interface RecipeRepository extends JpaRepository<RecipeEntity, Long> {
 
   @Query(value = "SELECT r FROM RecipeEntity r " +
       "JOIN ScrapedRecipeEntity s ON s.recipe.id = r.id " +
-      "WHERE s.user = :user")
-  Optional<List<RecipeEntity>> findScrapRecipeByUser(UserEntity user);
+      "WHERE s.user = :user AND (s.scrapedType = :scrapedType)")
+  Optional<List<RecipeEntity>> findScrapRecipeByUser(UserEntity user, ScrapedType scrapedType);
 
   Optional<List<RecipeEntity>> findAllByUser(UserEntity user);
 }
