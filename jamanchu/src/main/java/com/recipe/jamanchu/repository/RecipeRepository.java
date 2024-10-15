@@ -56,4 +56,11 @@ public interface RecipeRepository extends JpaRepository<RecipeEntity, Long> {
   Optional<List<RecipeEntity>> findAllByUser(UserEntity user);
 
   Page<RecipeEntity> findByIdNotIn(List<Long> ids, Pageable pageable);
+
+  @Query("SELECT r FROM RecipeEntity r " +
+      "LEFT JOIN r.rating rat " +
+      "WHERE r.id NOT IN :ids " +
+      "GROUP BY r.id " +
+      "ORDER BY AVG(rat.rating) DESC")
+  Page<RecipeEntity> findByIdNotInOrderByRating(@Param("ids") List<Long> ids, Pageable pageable);
 }
