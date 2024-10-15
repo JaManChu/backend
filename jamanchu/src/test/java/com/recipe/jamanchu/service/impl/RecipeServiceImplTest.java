@@ -516,7 +516,7 @@ class RecipeServiceImplTest {
     when(recipeRepository.findAllOrderByRating(pageable)).thenReturn(recipePage);
 
     // when
-    ResultResponse result = recipeService.getRecipesByRating(0, 10);
+    ResultResponse result = recipeService.getRecipesByRating(request, 0, 10);
 
     // then
     assertEquals("인기 레시피 조회 성공", result.getMessage());
@@ -543,7 +543,7 @@ class RecipeServiceImplTest {
 
     // when & Then
     assertThrows(RecipeNotFoundException.class,
-        () -> recipeService.getRecipesByRating(page, size));
+        () -> recipeService.getRecipesByRating(request, page, size));
   }
 
   @Test
