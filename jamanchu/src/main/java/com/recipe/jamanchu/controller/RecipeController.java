@@ -38,11 +38,12 @@ public class RecipeController {
 
   @GetMapping("/search")
   public ResponseEntity<ResultResponse> searchRecipes(
+      HttpServletRequest request,
       @Valid @RequestBody RecipesSearchDTO recipesSearchDTO,
       @RequestParam(value = "page", defaultValue = "0") int page,
       @RequestParam(value = "size", defaultValue = "15") int size
   ) {
-    return ResponseEntity.ok(recipeService.searchRecipes(recipesSearchDTO, page, size));
+    return ResponseEntity.ok(recipeService.searchRecipes(request, recipesSearchDTO, page, size));
   }
 
   @GetMapping("/{recipeId}")
