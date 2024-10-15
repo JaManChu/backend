@@ -144,7 +144,6 @@ public class JwtFilter extends OncePerRequestFilter {
         || requestURI.equals("/api/v1/users/login")
         || requestURI.equals("/api/v1/users/signup")
         || requestURI.equals("/api/v1/users/test")
-        || Pattern.matches("/api/v1/notify/.*", requestURI)
         || requestURI.equals("/api/v1/auth/email-check")
         || requestURI.equals("/api/v1/users/login/auth/kakao");
   }

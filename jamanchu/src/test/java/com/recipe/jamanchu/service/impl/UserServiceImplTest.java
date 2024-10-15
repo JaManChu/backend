@@ -12,7 +12,6 @@ import com.recipe.jamanchu.auth.oauth2.KakaoUserDetails;
 import com.recipe.jamanchu.component.UserAccessHandler;
 import com.recipe.jamanchu.entity.UserEntity;
 import com.recipe.jamanchu.exceptions.exception.AccessTokenRetrievalException;
-import com.recipe.jamanchu.exceptions.exception.DuplicatedNicknameException;
 import com.recipe.jamanchu.exceptions.exception.PasswordMismatchException;
 import com.recipe.jamanchu.exceptions.exception.SocialAccountException;
 import com.recipe.jamanchu.exceptions.exception.UserNotFoundException;
@@ -133,25 +132,12 @@ class UserServiceImplTest {
   @Test
   @DisplayName("회원가입 성공")
   void signup_Success() {
-    // given
-    doNothing().when(userAccessHandler).existsByNickname(signup.getNickname());
 
     // when
     ResultCode result = userServiceimpl.signup(signup);
 
     // then
     assertEquals(ResultCode.SUCCESS_SIGNUP, result);
-  }
-
-  @Test
-  @DisplayName("회원가입 실패 : 중복된 닉네임")
-  void signup_DuplicationNickname() {
-    // given
-    doThrow(new DuplicatedNicknameException()).when(userAccessHandler)
-        .existsByNickname(signup.getNickname());
-
-    // when then
-    assertThrows(DuplicatedNicknameException.class, () -> userServiceimpl.signup(signup));
   }
 
   @Test
@@ -249,26 +235,7 @@ class UserServiceImplTest {
 
     doNothing().when(userAccessHandler).validatePassword(user.getPassword(), BEFORE_PASSWORD);
     doNothing().when(userAccessHandler).isSocialUser(user.getProvider());
-    doNothing().when(userAccessHandler).existsByNickname(userUpdateDTO.getNickname());
 
-    // when
-    ResultCode result = userServiceimpl.updateUserInfo(request, userUpdateDTO);
-
-    // then
-    assertEquals(ResultCode.SUCCESS_UPDATE_USER_INFO, result);
-  }
-
-  @Test
-  @DisplayName("회원정보 수정 성공 - 패스워드만 변경")
-  void updateUserInfo_SuccessForPassword() {
-    // given
-    UserUpdateDTO userUpdateDTO = new UserUpdateDTO("nickname", BEFORE_PASSWORD, AFTER_PASSWORD);
-
-    when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(USERID);
-    when(userAccessHandler.findByUserId(USERID)).thenReturn(user);
-
-    doNothing().when(userAccessHandler).validatePassword(user.getPassword(), BEFORE_PASSWORD);
-    doNothing().when(userAccessHandler).isSocialUser(user.getProvider());
     // when
     ResultCode result = userServiceimpl.updateUserInfo(request, userUpdateDTO);
 
@@ -316,24 +283,6 @@ class UserServiceImplTest {
 
     // when then
     assertThrows(SocialAccountException.class,
-        () -> userServiceimpl.updateUserInfo(request, userUpdateDTO));
-  }
-
-  @Test
-  @DisplayName("회원정보 수정 실패 : 닉네임이 중복인 경우")
-  void updateUserInfo_DuplicationNickname() {
-    // given
-    when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(USERID);
-    when(userAccessHandler.findByUserId(USERID)).thenReturn(user);
-
-    doNothing().when(userAccessHandler).validatePassword(user.getPassword(), BEFORE_PASSWORD);
-    doNothing().when(userAccessHandler).isSocialUser(user.getProvider());
-
-    doThrow(new DuplicatedNicknameException()).when(userAccessHandler)
-        .existsByNickname(userUpdateDTO.getNickname());
-
-    // when then
-    assertThrows(DuplicatedNicknameException.class,
         () -> userServiceimpl.updateUserInfo(request, userUpdateDTO));
   }
 
