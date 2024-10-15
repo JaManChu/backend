@@ -336,10 +336,35 @@ public class RecipeServiceImpl implements RecipeService {
   }
 
   @Override
-  public ResultResponse getRecipesByRating(int page, int size) {
+  public ResultResponse getRecipesByRating(HttpServletRequest request, int page, int size) {
     Pageable pageable = PageRequest.of(page, size);
+    Long userId = null;
 
-    Page<RecipeEntity> recipes = recipeRepository.findAllOrderByRating(pageable);
+    // Token이 있는지 확인하고, 있다면 userId를 추출
+    try {
+      String token = request.getHeader(TokenType.ACCESS.getValue());
+      if (token != null) {
+        userId = jwtUtil.getUserId(token);
+      }
+    } catch (Exception e) {
+      // Token이 없거나 유효하지 않으면 userId를 null로 유지
+    }
+
+    List<Long> scrapedRecipeIds = Collections.emptyList();
+
+    // userId가 존재하면 해당 사용자가 SCRAPED한 레시피 ID들을 조회
+    if (userId != null) {
+      scrapedRecipeIds = scrapedRecipeRepository.findRecipeIdsByUserIdAndScrapedType(userId, ScrapedType.SCRAPED);
+    }
+
+    // 만약 scrapedRecipeIds가 비어있지 않다면 SCRAPED한 레시피를 제외한 나머지 레시피를 평점순으로 조회
+    Page<RecipeEntity> recipes;
+    if (!scrapedRecipeIds.isEmpty()) {
+      recipes = recipeRepository.findByIdNotInOrderByRating(scrapedRecipeIds, pageable);
+    } else {
+      // SCRAPED한 레시피가 없거나 Token이 없으면 모든 레시피를 평점순으로 조회
+      recipes = recipeRepository.findAllOrderByRating(pageable);
+    }
 
     if (recipes.isEmpty()) {
       throw new RecipeNotFoundException();
