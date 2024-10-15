@@ -64,24 +64,23 @@ public class UserAccessHandler {
   }
 
   // 이메일 중복 체크
-  public ResultCode existsByEmail(String email){
+  public ResultResponse existsByEmail(String email){
 
     if (userRepository.existsByEmail(email)) {
-      return ResultCode.EMAIL_ALREADY_IN_USE;
+      return ResultResponse.of(ResultCode.EMAIL_ALREADY_IN_USE);
     }
 
-    return ResultCode.EMAIL_AVAILABLE;
+    return ResultResponse.of(ResultCode.EMAIL_AVAILABLE);
   }
 
   // 닉네임 중복 체크
-  public void existsByNickname(String nickname){
+  public ResultResponse existsByNickname(String nickname){
 
-    log.info("existsByNickname -> nickname : {}", nickname);
     if (userRepository.existsByNickname(nickname)) {
-
-      log.info("Nickname is Duplicated!");
-      throw new DuplicatedNicknameException();
+      return ResultResponse.of(ResultCode.NICKNAME_ALREADY_IN_USE);
     }
+
+    return ResultResponse.of(ResultCode.NICKNAME_AVAILABLE);
   }
 
   // 소셜 계정 정보 체크
