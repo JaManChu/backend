@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -309,7 +311,7 @@ class RecipeServiceImplTest {
   }
 
   @Test
-  @DisplayName("전체 레시피 목록 조회 성공")
+  @DisplayName("전체 레시피 목록 조회 성공 - token이 없을 때")
   void getRecipes_Success() {
     // given
     List<RecipeEntity> recipeEntities = List.of(
@@ -333,10 +335,11 @@ class RecipeServiceImplTest {
 
     Page<RecipeEntity> recipePage = new PageImpl<>(recipeEntities);
 
+    when(request.getHeader(TokenType.ACCESS.getValue())).thenReturn(null);
     when(recipeRepository.findAll(any(Pageable.class))).thenReturn(recipePage);
 
     // when
-    ResultResponse result = recipeService.getRecipes(0, 10);
+    ResultResponse result = recipeService.getRecipes(request, 0, 10);
 
     // then
     assertEquals("전체 레시피 조회 성공!", result.getMessage());
@@ -344,6 +347,49 @@ class RecipeServiceImplTest {
     assertEquals(2, summaries.size());
     assertEquals("Recipe1", summaries.get(0).getRecipeName());
     assertEquals("Recipe2", summaries.get(1).getRecipeName());
+
+    // verify
+    verify(recipeRepository, times(1)).findAll(any(Pageable.class));
+    verify(scrapedRecipeRepository, never()).findRecipeIdsByUserIdAndScrapedType(anyLong(), any());
+  }
+
+  @Test
+  @DisplayName("SCRAPED한 레시피 제외하고 목록 조회 성공")
+  void getRecipes_WithScrapedExclusion_Success() {
+    // given
+    List<RecipeEntity> recipeEntities = List.of(
+        RecipeEntity.builder()
+            .id(2L)
+            .name("Recipe2")
+            .user(user)
+            .level(LevelType.MEDIUM)
+            .time(CookingTimeType.TWENTY_MINUTES)
+            .thumbnail("thumbnail2")
+            .build()
+    );
+    Page<RecipeEntity> recipePage = new PageImpl<>(recipeEntities);
+
+    String token = "access-token";
+    Long userId = 1L;
+    List<Long> scrapedRecipeIds = List.of(1L);
+
+    when(request.getHeader(TokenType.ACCESS.getValue())).thenReturn(token);
+    when(jwtUtil.getUserId(token)).thenReturn(userId);
+    when(scrapedRecipeRepository.findRecipeIdsByUserIdAndScrapedType(userId, ScrapedType.SCRAPED)).thenReturn(scrapedRecipeIds);
+    when(recipeRepository.findByIdNotIn(eq(scrapedRecipeIds), any(Pageable.class))).thenReturn(recipePage);
+
+    // when
+    ResultResponse result = recipeService.getRecipes(request, 0, 10);
+
+    // then
+    assertEquals("전체 레시피 조회 성공!", result.getMessage());
+    List<RecipesSummary> summaries = (List<RecipesSummary>) result.getData();
+    assertEquals(1, summaries.size());
+    assertEquals("Recipe2", summaries.get(0).getRecipeName());
+
+    // verify
+    verify(scrapedRecipeRepository, times(1)).findRecipeIdsByUserIdAndScrapedType(user.getUserId(), ScrapedType.SCRAPED);
+    verify(recipeRepository, times(1)).findByIdNotIn(eq(scrapedRecipeIds), any(Pageable.class));
   }
 
   @Test
@@ -356,7 +402,7 @@ class RecipeServiceImplTest {
 
     // when & then
     assertThrows(RecipeNotFoundException.class,
-        () -> recipeService.getRecipes(0, 10));
+        () -> recipeService.getRecipes(request, 0, 10));
   }
 
   @Test
