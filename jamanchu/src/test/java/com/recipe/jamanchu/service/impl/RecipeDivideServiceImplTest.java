@@ -4,6 +4,7 @@ import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -22,6 +23,7 @@ import com.recipe.jamanchu.model.type.RecipeProvider;
 import com.recipe.jamanchu.model.type.UserRole;
 import com.recipe.jamanchu.repository.IngredientRepository;
 import com.recipe.jamanchu.repository.ManualRepository;
+import com.recipe.jamanchu.repository.RecipeIngredientMappingRepository;
 import com.recipe.jamanchu.repository.RecipeRatingRepository;
 import com.recipe.jamanchu.repository.RecipeRepository;
 import com.recipe.jamanchu.repository.TenThousandRecipeRepository;
@@ -59,6 +61,9 @@ class RecipeDivideServiceImplTest {
 
   @Mock
   private TenThousandRecipeRepository tenThousandRecipeRepository;
+
+  @Mock
+  RecipeIngredientMappingRepository recipeIngredientMappingRepository;
 
   @InjectMocks
   private RecipeDivideServiceImpl recipeDivideService;
@@ -118,8 +123,9 @@ class RecipeDivideServiceImplTest {
     // verify
     verify(recipeRepository, times(1)).save(any(RecipeEntity.class));
     verify(recipeRatingRepository, times(1)).save(any(RecipeRatingEntity.class));
-    verify(manualRepository, times(2)).save(any(ManualEntity.class)); // 2개의 매뉴얼 단계가 있음
-    verify(ingredientRepository, times(2)).save(any(IngredientEntity.class)); // 2개의 재료가 있음
+    verify(manualRepository, times(1)).saveAll(anyList()); // 2개의 매뉴얼 단계가 있음
+    verify(ingredientRepository, times(1)).saveAll(anyList());
+    verify(recipeIngredientMappingRepository, times(1)).saveAll(anyList());
   }
 
   @Test
@@ -328,7 +334,14 @@ class RecipeDivideServiceImplTest {
     assertEquals("pic1.jpg,pic2.jpg", scrapRecipe.getCrManualPictures());
 
     // verify
-    verify(manualRepository, times(2)).save(any(ManualEntity.class));
+    ArgumentCaptor<List<ManualEntity>> manualCaptor = ArgumentCaptor.forClass(List.class);
+    verify(manualRepository, times(1)).saveAll(manualCaptor.capture());
+
+    List<ManualEntity> savedManuals = manualCaptor.getValue();
+    assertEquals("Step 1", savedManuals.get(0).getManualContent());
+    assertEquals("pic1.jpg", savedManuals.get(0).getManualPicture());
+    assertEquals("Step 2", savedManuals.get(1).getManualContent());
+    assertEquals("pic2.jpg", savedManuals.get(1).getManualPicture());
   }
 
   @Test
@@ -348,13 +361,10 @@ class RecipeDivideServiceImplTest {
     recipeDivideService.saveManualData(recipe, scrapedRecipe);
 
     // then
-    verify(manualRepository, times(2)).save(any(ManualEntity.class));
+    ArgumentCaptor<List<ManualEntity>> manualCaptor = ArgumentCaptor.forClass(List.class);
+    verify(manualRepository, times(1)).saveAll(manualCaptor.capture());
 
-    // 저장된 메뉴얼 내용 검증
-    ArgumentCaptor<ManualEntity> manualCaptor = forClass(ManualEntity.class);
-    verify(manualRepository, times(2)).save(manualCaptor.capture());
-
-    List<ManualEntity> savedManuals = manualCaptor.getAllValues();
+    List<ManualEntity> savedManuals = manualCaptor.getValue();
     assertEquals("Step 1", savedManuals.get(0).getManualContent());
     assertEquals("", savedManuals.get(0).getManualPicture());
     assertEquals("Step 2", savedManuals.get(1).getManualContent());
@@ -378,13 +388,10 @@ class RecipeDivideServiceImplTest {
     recipeDivideService.saveManualData(recipe, scrapedRecipe);
 
     // then
-    verify(manualRepository, times(2)).save(any(ManualEntity.class));
+    ArgumentCaptor<List<ManualEntity>> manualCaptor = ArgumentCaptor.forClass(List.class);
+    verify(manualRepository, times(1)).saveAll(manualCaptor.capture());
 
-    // 저장된 메뉴얼 내용 검증
-    ArgumentCaptor<ManualEntity> manualCaptor = forClass(ManualEntity.class);
-    verify(manualRepository, times(2)).save(manualCaptor.capture());
-
-    List<ManualEntity> savedManuals = manualCaptor.getAllValues();
+    List<ManualEntity> savedManuals = manualCaptor.getValue();
     assertEquals("Step 1", savedManuals.get(0).getManualContent());
     assertEquals("", savedManuals.get(0).getManualPicture());
     assertEquals("Step 2", savedManuals.get(1).getManualContent());
@@ -404,8 +411,8 @@ class RecipeDivideServiceImplTest {
     assertEquals("ingredient1 100g,ingredient2 200ml", scrapRecipe.getIngredients());
 
     // verify
-    verify(ingredientRepository, times(2)).save(any(IngredientEntity.class));
-  }
+    verify(ingredientRepository, times(1)).saveAll(anyList());
+    verify(recipeIngredientMappingRepository, times(1)).saveAll(anyList());  }
 
   @Test
   @DisplayName("비어있는 재료 항목은 무시하고 다른 재료는 저장")
@@ -425,16 +432,13 @@ class RecipeDivideServiceImplTest {
     recipeDivideService.saveIngredientDetails(recipe, scrapedRecipe);
 
     // then
-    // save 메소드가 2번 호출되었는지 확인 (Tomato와 Onion만 저장됨)
-    verify(ingredientRepository, times(2)).save(any(IngredientEntity.class));
+    ArgumentCaptor<List<IngredientEntity>> ingredientCaptor = ArgumentCaptor.forClass((Class) List.class);
+    verify(ingredientRepository, times(1)).saveAll(ingredientCaptor.capture());
 
-    // 추가로 저장된 재료의 내용 검증
-    ArgumentCaptor<IngredientEntity> ingredientCaptor = forClass(IngredientEntity.class);
-    verify(ingredientRepository, times(2)).save(ingredientCaptor.capture());
-
-    List<IngredientEntity> savedIngredients = ingredientCaptor.getAllValues();
+    List<IngredientEntity> savedIngredients = ingredientCaptor.getValue();
 
     // Tomato와 Onion이 올바르게 저장되었는지 확인
+    assertEquals(2, savedIngredients.size());
     assertEquals("Tomato", savedIngredients.get(0).getName());
     assertEquals("2", savedIngredients.get(0).getQuantity());
     assertEquals("Onion", savedIngredients.get(1).getName());
@@ -459,16 +463,12 @@ class RecipeDivideServiceImplTest {
     recipeDivideService.saveIngredientDetails(recipe, scrapedRecipe);
 
     // then
-    // save 메소드가 2번 호출되었는지 확인 (Tomato와 Onion만 저장됨)
-    verify(ingredientRepository, times(3)).save(any(IngredientEntity.class));
+    ArgumentCaptor<List<IngredientEntity>> ingredientCaptor = ArgumentCaptor.forClass((Class) List.class);
+    verify(ingredientRepository, times(1)).saveAll(ingredientCaptor.capture());
 
-    // 추가로 저장된 재료의 내용 검증
-    ArgumentCaptor<IngredientEntity> ingredientCaptor = forClass(IngredientEntity.class);
-    verify(ingredientRepository, times(3)).save(ingredientCaptor.capture());
+    List<IngredientEntity> savedIngredients = ingredientCaptor.getValue();
 
-    List<IngredientEntity> savedIngredients = ingredientCaptor.getAllValues();
-
-    // Tomato와 Onion이 올바르게 저장되었는지 확인
+    assertEquals(3, savedIngredients.size());
     assertEquals("Tomato", savedIngredients.get(0).getName());
     assertEquals("2", savedIngredients.get(0).getQuantity());
     assertEquals("Potato", savedIngredients.get(1).getName());

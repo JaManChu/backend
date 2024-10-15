@@ -4,6 +4,7 @@ import com.recipe.jamanchu.component.UserAccessHandler;
 import com.recipe.jamanchu.entity.IngredientEntity;
 import com.recipe.jamanchu.entity.ManualEntity;
 import com.recipe.jamanchu.entity.RecipeEntity;
+import com.recipe.jamanchu.entity.RecipeIngredientMappingEntity;
 import com.recipe.jamanchu.entity.RecipeRatingEntity;
 import com.recipe.jamanchu.entity.TenThousandRecipeEntity;
 import com.recipe.jamanchu.entity.UserEntity;
@@ -12,10 +13,12 @@ import com.recipe.jamanchu.model.type.RecipeProvider;
 import com.recipe.jamanchu.model.type.ResultCode;
 import com.recipe.jamanchu.repository.IngredientRepository;
 import com.recipe.jamanchu.repository.ManualRepository;
+import com.recipe.jamanchu.repository.RecipeIngredientMappingRepository;
 import com.recipe.jamanchu.repository.RecipeRatingRepository;
 import com.recipe.jamanchu.repository.RecipeRepository;
 import com.recipe.jamanchu.repository.TenThousandRecipeRepository;
 import com.recipe.jamanchu.service.RecipeDivideService;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -30,6 +33,7 @@ public class RecipeDivideServiceImpl implements RecipeDivideService {
   private final RecipeRatingRepository recipeRatingRepository;
   private final ManualRepository manualRepository;
   private final IngredientRepository ingredientRepository;
+  private final RecipeIngredientMappingRepository recipeIngredientMappingRepository;
   private final TenThousandRecipeRepository tenThousandRecipeRepository;
 
   @Override
@@ -99,6 +103,7 @@ public class RecipeDivideServiceImpl implements RecipeDivideService {
   public void saveManualData(RecipeEntity recipe, TenThousandRecipeEntity scrapedRecipe) {
     String[] contents = scrapedRecipe.getCrManualContents().split("\\$%\\^");
     String[] pictures;
+    List<ManualEntity> manualEntities = new ArrayList<>();
     if(scrapedRecipe.getCrManualPictures() == null || scrapedRecipe.getCrManualPictures().isEmpty()) {
       pictures = new String[contents.length];
     } else {
@@ -111,12 +116,15 @@ public class RecipeDivideServiceImpl implements RecipeDivideService {
           .manualPicture(pictures[i] != null ? pictures[i] : "")
           .build();
 
-      manualRepository.save(manual);
+      manualEntities.add(manual);
     }
+    manualRepository.saveAll(manualEntities);
   }
 
   public void saveIngredientDetails(RecipeEntity recipe, TenThousandRecipeEntity scrapedRecipe) {
     String[] ingredients = scrapedRecipe.getIngredients().split(",");  // 재료 분리 로직
+    List<IngredientEntity> ingredientEntities = new ArrayList<>();
+    List<RecipeIngredientMappingEntity> recipeIngredientMappingEntities = new ArrayList<>();
     for (String ingredient : ingredients) {
       ingredient = ingredient.trim();
       if (ingredient.isEmpty()) {
@@ -124,13 +132,18 @@ public class RecipeDivideServiceImpl implements RecipeDivideService {
       }
 
       String[] parts = ingredient.split(" ");  // 재료명과 수량 분리
-      String name = parts[0];
+      StringBuilder sb = new StringBuilder();
       String quantity = "";
+      if (parts.length == 1) {
+        sb.append(parts[0]);
+      } else {
+        for (int i = 0; i < parts.length - 1; i++) {
+          sb.append(parts[i]).append(" ");
+        }
 
-      // 수량이 있을 경우에만 parts[1]에 접근
-      if (parts.length > 1) {
-        quantity = parts[1];
+        quantity = parts[parts.length - 1];
       }
+      String name = sb.toString().trim();
 
       IngredientEntity ingredientEntity = IngredientEntity.builder()
           .recipe(recipe)
@@ -138,7 +151,16 @@ public class RecipeDivideServiceImpl implements RecipeDivideService {
           .quantity(quantity)
           .build();
 
-      ingredientRepository.save(ingredientEntity);
+      ingredientEntities.add(ingredientEntity);
+
+      RecipeIngredientMappingEntity recipeIngredientMappingEntity = RecipeIngredientMappingEntity.builder()
+          .recipe(recipe)
+          .ingredient(ingredientEntity)
+          .build();
+
+      recipeIngredientMappingEntities.add(recipeIngredientMappingEntity);
     }
+    ingredientRepository.saveAll(ingredientEntities);
+    recipeIngredientMappingRepository.saveAll(recipeIngredientMappingEntities);
   }
 }
