@@ -112,7 +112,7 @@ class UserServiceImplTest {
   @BeforeEach
   void setUp() {
     signup = new SignupDTO(EMAIL, PASSWORD, NICKNAME);
-    userUpdateDTO = new UserUpdateDTO(NEW_NICKNAME, BEFORE_PASSWORD, AFTER_PASSWORD);
+    userUpdateDTO = new UserUpdateDTO(NEW_NICKNAME, PASSWORD);
     deleteUserDTO = new DeleteUserDTO(PASSWORD);
     userInfoDTO = new UserInfoDTO(EMAIL, NICKNAME);
     loginDTO = new LoginDTO(EMAIL, PASSWORD);
