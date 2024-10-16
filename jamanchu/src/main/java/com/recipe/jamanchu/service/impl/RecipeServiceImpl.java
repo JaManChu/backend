@@ -386,16 +386,12 @@ public class RecipeServiceImpl implements RecipeService {
 
   // 유저의 scrapedRecipeIds를 가져오는 메서드
   private List<Long> getScrapedRecipeIds(HttpServletRequest request) {
-    Long userId = null;
+    Long userId;
     List<Long> scrapedRecipeIds = Collections.emptyList();
-    try {
-      String token = request.getHeader(TokenType.ACCESS.getValue());
-      if (token != null) {
-        userId = jwtUtil.getUserId(token);
-      }
-    } catch (Exception e) {
-      // Token이 없거나 유효하지 않은 경우
-      // emptyList() 로 반환
+    String token = request.getHeader(TokenType.ACCESS.getValue());
+    if (token != null) {
+      userId = jwtUtil.getUserId(token);
+    } else {
       return scrapedRecipeIds;
     }
 
