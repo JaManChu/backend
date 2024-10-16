@@ -111,9 +111,6 @@ public class UserServiceImpl implements UserService {
     UserEntity user = userAccessHandler
         .findByUserId(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue())));
 
-    // 비밀번호 중복 체크
-    userAccessHandler.validatePassword(user.getPassword(), userUpdateDTO.getBeforePassword());
-
     // 소셜 계정 체크
     userAccessHandler.isSocialUser(user.getProvider());
 
@@ -121,7 +118,7 @@ public class UserServiceImpl implements UserService {
     userAccessHandler.saveUser(UserEntity.builder()
         .userId(user.getUserId())
         .email(user.getEmail())
-        .password(passwordEncoder.encode(userUpdateDTO.getAfterPassword()))
+        .password(passwordEncoder.encode(userUpdateDTO.getPassword()))
         .nickname(userUpdateDTO.getNickname())
         .role(user.getRole())
         .build());

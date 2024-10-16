@@ -5,8 +5,11 @@ import static org.mockito.Mockito.when;
 
 import com.recipe.jamanchu.auth.jwt.JwtUtil;
 import com.recipe.jamanchu.component.UserAccessHandler;
+import com.recipe.jamanchu.entity.UserEntity;
 import com.recipe.jamanchu.exceptions.exception.CookieNotFoundException;
 import com.recipe.jamanchu.exceptions.exception.RefreshTokenExpiredException;
+import com.recipe.jamanchu.exceptions.exception.UserNotFoundException;
+import com.recipe.jamanchu.model.dto.request.auth.PasswordCheckDTO;
 import com.recipe.jamanchu.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.model.type.ResultCode;
 import com.recipe.jamanchu.model.type.TokenType;
@@ -21,6 +24,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceImplTest {
@@ -37,13 +41,20 @@ class AuthServiceImplTest {
   @Mock
   private HttpServletResponse response;
 
+  @Mock
+  private PasswordEncoder passwordEncoder;
+
   private static final Long USERID = 1L;
   private static final String STR_ROLE = "USER";
   private static final String TOKEN_TYPE = "access";
   private static final String REFRESH_TOKEN = "refresh-token";
   private static final String NEW_ACCESS_TOKEN = "new-access-token";
+  private static final String ACCESS_TOKEN = "access-token";
+  private static final String PASSWORD = "password";
 
   private Cookie[] cookies;
+  private UserEntity user;
+  private PasswordCheckDTO passwordCheckDTO;
 
   @InjectMocks
   private AuthServiceImpl authService;
@@ -52,6 +63,13 @@ class AuthServiceImplTest {
   void setUp() {
     Cookie refreshCookie = new Cookie(TokenType.REFRESH.getValue(), REFRESH_TOKEN);
     cookies = new Cookie[] {refreshCookie};
+
+    user = UserEntity.builder()
+        .userId(USERID)
+        .password(PASSWORD)
+        .build();
+
+    passwordCheckDTO = new PasswordCheckDTO("password");
   }
 
   @Test
@@ -60,13 +78,13 @@ class AuthServiceImplTest {
 
     // given
     String email = "test@example.com";
-    ResultResponse resultCode = ResultResponse.of(ResultCode.EMAIL_ALREADY_IN_USE);
-    when(userAccessHandler.existsByEmail(email)).thenReturn(resultCode);
+    ResultResponse response = ResultResponse.of(ResultCode.EMAIL_ALREADY_IN_USE, false);
+    when(userAccessHandler.existsByEmail(email)).thenReturn(response);
 
     // when
     ResultResponse result = authService.checkEmail(email);
 
-    assertEquals(resultCode, result);
+    assertEquals(response, result);
 
   }
 
@@ -76,13 +94,13 @@ class AuthServiceImplTest {
 
     // given
     String email = "test@example.com";
-    ResultResponse resultCode = ResultResponse.of(ResultCode.EMAIL_AVAILABLE);
-    when(userAccessHandler.existsByEmail(email)).thenReturn(resultCode);
+    ResultResponse response = ResultResponse.of(ResultCode.EMAIL_AVAILABLE, true);
+    when(userAccessHandler.existsByEmail(email)).thenReturn(response);
 
     // when
     ResultResponse result = authService.checkEmail(email);
 
-    assertEquals(resultCode, result);
+    assertEquals(response, result);
   }
 
   @Test
@@ -91,13 +109,13 @@ class AuthServiceImplTest {
 
     // given
     String nickname = "nickname";
-    ResultResponse resultCode = ResultResponse.of(ResultCode.NICKNAME_ALREADY_IN_USE);
-    when(userAccessHandler.existsByNickname(nickname)).thenReturn(resultCode);
+    ResultResponse response = ResultResponse.of(ResultCode.NICKNAME_ALREADY_IN_USE, false);
+    when(userAccessHandler.existsByNickname(nickname)).thenReturn(response);
 
     // when
     ResultResponse result = authService.checkNickname(nickname);
 
-    assertEquals(resultCode, result);
+    assertEquals(response, result);
 
   }
 
@@ -107,7 +125,7 @@ class AuthServiceImplTest {
 
     // given
     String nickname = "nickname";
-    ResultResponse resultCode = ResultResponse.of(ResultCode.NICKNAME_AVAILABLE);
+    ResultResponse resultCode = ResultResponse.of(ResultCode.NICKNAME_AVAILABLE, true);
     when(userAccessHandler.existsByNickname(nickname)).thenReturn(resultCode);
 
     // when
@@ -154,5 +172,56 @@ class AuthServiceImplTest {
     // when & then
     assertThrows(RefreshTokenExpiredException.class, () -> authService.refreshToken(request, response));
 
+  }
+
+  @Test
+  @DisplayName("checkPassword : 비밀번호가 일치 합니다.")
+  void checkPassword_Match() {
+
+    // given
+    when(request.getHeader(TokenType.ACCESS.getValue())).thenReturn(ACCESS_TOKEN);
+    when(jwtUtil.getUserId(ACCESS_TOKEN)).thenReturn(USERID);
+    when(userAccessHandler.findByUserId(USERID)).thenReturn(user);
+
+    ResultResponse response = ResultResponse.of(ResultCode.PASSWORD_MATCH, true);
+    when(userAccessHandler.validateBeforePW(user.getPassword(), passwordCheckDTO.getPassword())).thenReturn(response);
+
+    // when
+    ResultResponse resultResponse = authService.checkPassword(passwordCheckDTO, request);
+
+    // then
+    assertEquals(response.getCode(), resultResponse.getCode());
+  }
+
+  @Test
+  @DisplayName("checkPassword : 비밀번호가 일치하지 않습니다..")
+  void checkPassword_MisMatch() {
+
+    // given
+    when(request.getHeader(TokenType.ACCESS.getValue())).thenReturn(ACCESS_TOKEN);
+    when(jwtUtil.getUserId(ACCESS_TOKEN)).thenReturn(USERID);
+    when(userAccessHandler.findByUserId(USERID)).thenReturn(user);
+
+    ResultResponse response = ResultResponse.of(ResultCode.PASSWORD_MISMATCH, false);
+    when(userAccessHandler.validateBeforePW(user.getPassword(), passwordCheckDTO.getPassword())).thenReturn(response);
+
+    // when
+    ResultResponse resultResponse = authService.checkPassword(passwordCheckDTO, request);
+
+    // then
+    assertEquals(response.getCode(), resultResponse.getCode());
+  }
+
+  @Test
+  @DisplayName("checkPassword : 존재하지 않는 회원")
+  void checkPassword_NotFoundUser() {
+    // given
+    when(request.getHeader(TokenType.ACCESS.getValue())).thenReturn(ACCESS_TOKEN);
+    when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(USERID);
+    when(userAccessHandler.findByUserId(USERID)).thenThrow(new UserNotFoundException());
+
+    // when then
+    assertThrows(UserNotFoundException.class,
+        () -> authService.checkPassword(passwordCheckDTO, request));
   }
 }

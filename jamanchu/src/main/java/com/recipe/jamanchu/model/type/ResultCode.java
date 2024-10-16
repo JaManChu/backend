@@ -34,6 +34,8 @@ public enum ResultCode {
   NICKNAME_ALREADY_IN_USE(HttpStatus.OK, "이미 사용 중인 닉네임 입니다."),
   SUCCESS_GET_USER_RECIPES_INFO(HttpStatus.OK, "회원 레시피 정보 조회 성공"),
   SUCCESS_REISSUE_REFRESH_TOKEN(HttpStatus.OK, "access-token 재발급 성공"),
+  PASSWORD_MATCH(HttpStatus.OK, "비밀번호가 일치 합니다."),
+  PASSWORD_MISMATCH(HttpStatus.OK, "비밀번호가 일치하지 않습니다."),
   ;
 
   private final HttpStatus statusCode;

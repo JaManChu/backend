@@ -2,13 +2,17 @@ package com.recipe.jamanchu.controller;
 
 import com.recipe.jamanchu.exceptions.exception.MissingEmailException;
 import com.recipe.jamanchu.exceptions.exception.MissingNicknameException;
+import com.recipe.jamanchu.model.dto.request.auth.PasswordCheckDTO;
 import com.recipe.jamanchu.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -48,4 +52,11 @@ public class AuthController {
     return ResponseEntity.ok(authService.refreshToken(request, response));
   }
 
+  @PostMapping("/password-check")
+  public ResponseEntity<ResultResponse> checkPassword(
+      @Valid @RequestBody PasswordCheckDTO passwordCheckDTO,
+      HttpServletRequest request) {
+
+    return ResponseEntity.ok(authService.checkPassword(passwordCheckDTO, request));
+  }
 }

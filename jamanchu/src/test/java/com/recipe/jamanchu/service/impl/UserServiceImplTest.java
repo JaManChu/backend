@@ -290,7 +290,6 @@ class UserServiceImplTest {
     when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(USERID);
     when(userAccessHandler.findByUserId(USERID)).thenReturn(user);
 
-    doNothing().when(userAccessHandler).validatePassword(user.getPassword(), BEFORE_PASSWORD);
     doNothing().when(userAccessHandler).isSocialUser(user.getProvider());
 
     // when
@@ -313,28 +312,11 @@ class UserServiceImplTest {
   }
 
   @Test
-  @DisplayName("회원정보 수정 실패 : 비밀번호가 일치하지 않은 경우")
-  void updateUserInfo_PasswordMisMatch() {
-    // given
-    when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(USERID);
-    when(userAccessHandler.findByUserId(USERID)).thenReturn(user);
-
-    doThrow(new PasswordMismatchException()).when(userAccessHandler)
-        .validatePassword(user.getPassword(), BEFORE_PASSWORD);
-
-    // when then
-    assertThrows(PasswordMismatchException.class,
-        () -> userServiceimpl.updateUserInfo(request, userUpdateDTO));
-  }
-
-  @Test
   @DisplayName("회원정보 수정 실패 : 카카오로 로그인을 한 회원")
   void updateUserInfo_SocialAccountException() {
     // given
     when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(USERID);
     when(userAccessHandler.findByUserId(USERID)).thenReturn(kakaoUser);
-
-    doNothing().when(userAccessHandler).validatePassword(user.getPassword(), BEFORE_PASSWORD);
 
     doThrow(new SocialAccountException()).when(userAccessHandler).isSocialUser(kakaoUser.getProvider());
 

@@ -295,4 +295,34 @@ class UserAccessHandlerTest {
     assertEquals(newUser.getNickname(), user.getNickname());
   }
 
+  @Test
+  @DisplayName("validatePassword : 비밀번호가 일치 하지 않습니다.")
+  void validateBeforePW_MisMatch() {
+    // given
+    String rawPassword = "password";
+    String encodedPassword = passwordEncoder.encode("otherPassword");
+    when(passwordEncoder.matches(rawPassword, encodedPassword)).thenReturn(false);
+
+    // when
+    ResultResponse resultResponse = userAccessHandler.validateBeforePW(encodedPassword, rawPassword);
+
+    // then
+    assertEquals(ResultCode.PASSWORD_MISMATCH.getStatusCode(), resultResponse.getCode());
+  }
+
+  @Test
+  @DisplayName("validatePassword : 비밀번호가 일치 합니다.")
+  void validateBeforePW_Match() {
+    // given
+    String rawPassword = "password";
+    String encodedPassword = passwordEncoder.encode("password");
+    when(passwordEncoder.matches(rawPassword, encodedPassword)).thenReturn(true);
+
+    // when
+    ResultResponse resultResponse = userAccessHandler.validateBeforePW(encodedPassword, rawPassword);
+
+    // then
+    assertEquals(ResultCode.PASSWORD_MATCH.getStatusCode(), resultResponse.getCode());
+  }
+
 }
