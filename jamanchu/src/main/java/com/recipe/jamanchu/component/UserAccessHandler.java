@@ -108,13 +108,18 @@ public class UserAccessHandler {
   }
 
   // 비밀번호 일치 여부 체크
+  // 회원 탈퇴시 사용하는 메서드
+  // 아직 회원 탈퇴 부분은 협의를 하지 않아서,
+  // 해당 메서드는 추후에 수정할 예정
   public void validatePassword(String enPassword, String password) {
     if (!passwordEncoder.matches(password, enPassword)) {
       throw new PasswordMismatchException();
     }
   }
 
-  // 비밀번호 일치 여부 체크
+  // 비밀번호 일치 여부 체크 (회원 정보 수정)
+  // 회원정보 수정 하기 전 기존 비밀번호를 확인 하는 메서드
+  // 비밀 번호 일치 여부 반환
   public ResultResponse validateBeforePW(String enPassword, String password) {
     if (!passwordEncoder.matches(password, enPassword)) {
       return ResultResponse.of(ResultCode.PASSWORD_MISMATCH, false);
