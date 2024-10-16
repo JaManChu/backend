@@ -395,6 +395,8 @@ public class RecipeServiceImpl implements RecipeService {
       }
     } catch (Exception e) {
       // Token이 없거나 유효하지 않은 경우
+      // emptyList() 로 반환
+      return scrapedRecipeIds;
     }
 
     if (userId != null) {
