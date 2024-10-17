@@ -1,6 +1,7 @@
 package com.recipe.jamanchu.auth.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.recipe.jamanchu.model.type.ConstantsType;
 import com.recipe.jamanchu.model.type.TokenType;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -71,6 +72,13 @@ public class JwtFilter extends OncePerRequestFilter {
     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
     response.setContentType("application/json");
     response.setCharacterEncoding("UTF-8");
+
+    // CORS 헤더 추가
+    response.setHeader("Access-Control-Allow-Origin", ConstantsType.WEB_URL);
+    response.setHeader("Access-Control-Allow-Credentials", "true");
+    response.setHeader("Access-Control-Allow-Methods", "GET,HEAD,POST,DELETE,TRACE,OPTIONS,PATCH,PUT");
+    response.setHeader("Access-Control-Allow-Headers", "*");
+    response.setHeader("Access-Control-Expose-Headers", "access-token, Location");
 
     Map<String, String> body = Map.of("message", "access-token 만료");
     response.getWriter().write(objectMapper.writeValueAsString(body));
