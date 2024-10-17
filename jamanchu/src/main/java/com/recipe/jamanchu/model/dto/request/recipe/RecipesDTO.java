@@ -3,7 +3,6 @@ package com.recipe.jamanchu.model.dto.request.recipe;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.recipe.jamanchu.model.dto.response.ingredients.Ingredient;
-import com.recipe.jamanchu.model.dto.response.recipes.RecipesManual;
 import com.recipe.jamanchu.model.type.CookingTimeType;
 import com.recipe.jamanchu.model.type.LevelType;
 import jakarta.validation.constraints.NotEmpty;
@@ -36,10 +35,10 @@ public class RecipesDTO {
 
   @NotNull(message = "레시피 순서를 입력해주세요.")
   @JsonProperty("recipeOrderContents")
-  private final List<RecipesManual> recipeOrderContents;
+  private final List<RecipesManualDTO> recipeOrderContents;
 
   @JsonCreator
-  public RecipesDTO(String recipeName, LevelType recipeLevel, CookingTimeType recipeCookingTime, MultipartFile recipeThumbnail, List<Ingredient> recipeIngredients, List<RecipesManual> recipeOrderContents) {
+  public RecipesDTO(String recipeName, LevelType recipeLevel, CookingTimeType recipeCookingTime, MultipartFile recipeThumbnail, List<Ingredient> recipeIngredients, List<RecipesManualDTO> recipeOrderContents) {
     this.recipeName = recipeName;
     this.recipeLevel = recipeLevel;
     this.recipeCookingTime = recipeCookingTime;

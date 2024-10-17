@@ -3,7 +3,6 @@ package com.recipe.jamanchu.model.dto.request.recipe;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.recipe.jamanchu.model.dto.response.ingredients.Ingredient;
-import com.recipe.jamanchu.model.dto.response.recipes.RecipesManual;
 import com.recipe.jamanchu.model.type.CookingTimeType;
 import com.recipe.jamanchu.model.type.LevelType;
 import jakarta.validation.constraints.Min;
@@ -27,7 +26,7 @@ public class RecipesUpdateDTO extends RecipesDTO{
       CookingTimeType cookingTime,
       MultipartFile recipeThumbnail,
       List<Ingredient> ingredients,
-      List<RecipesManual> manuals,
+      List<RecipesManualDTO> manuals,
       Long recipeId) {
     super(recipeName, level, cookingTime, recipeThumbnail, ingredients, manuals);
     this.recipeId = recipeId;
