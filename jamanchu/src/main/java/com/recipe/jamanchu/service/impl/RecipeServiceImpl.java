@@ -21,6 +21,7 @@ import com.recipe.jamanchu.model.dto.response.ingredients.Ingredient;
 import com.recipe.jamanchu.model.dto.response.recipes.RecipesInfo;
 import com.recipe.jamanchu.model.dto.response.recipes.RecipesManual;
 import com.recipe.jamanchu.model.dto.response.recipes.RecipesSummary;
+import com.recipe.jamanchu.model.type.PictureType;
 import com.recipe.jamanchu.model.type.ResultCode;
 import com.recipe.jamanchu.model.type.ScrapedType;
 import com.recipe.jamanchu.model.type.TokenType;
@@ -31,7 +32,9 @@ import com.recipe.jamanchu.repository.RecipeRatingRepository;
 import com.recipe.jamanchu.repository.RecipeRepository;
 import com.recipe.jamanchu.repository.ScrapedRecipeRepository;
 import com.recipe.jamanchu.service.RecipeService;
+import com.recipe.jamanchu.util.PictureManager;
 import jakarta.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -55,22 +58,31 @@ public class RecipeServiceImpl implements RecipeService {
   private final ScrapedRecipeRepository scrapedRecipeRepository;
   private final RecipeRatingRepository recipeRatingRepository;
   private final RecipeIngredientMappingRepository recipeIngredientMappingRepository;
+  private final PictureManager pictureManager;
   private final UserAccessHandler userAccessHandler;
   private final JwtUtil jwtUtil;
 
   @Override
   @Transactional
-  public ResultResponse registerRecipe(HttpServletRequest request, RecipesDTO recipesDTO) {
+  public ResultResponse registerRecipe(HttpServletRequest request, RecipesDTO recipesDTO)
+    throws IOException {
     Long userId = jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()));
 
     UserEntity user = userAccessHandler.findByUserId(userId);
+
+    String uploadedThumbnailUrl = pictureManager.upload(
+        userId,
+        recipesDTO.getRecipeName(),
+        recipesDTO.getRecipeThumbnail(),
+        PictureType.THUMBNAIL
+    );
 
     RecipeEntity recipe = RecipeEntity.builder()
         .user(user)
         .name(recipesDTO.getRecipeName())
         .level(recipesDTO.getRecipeLevel())
         .time(recipesDTO.getRecipeCookingTime())
-        .thumbnail(String.valueOf(recipesDTO.getRecipeThumbnail()))
+        .thumbnail(uploadedThumbnailUrl)
         .provider(USER)
         .build();
 
@@ -102,11 +114,19 @@ public class RecipeServiceImpl implements RecipeService {
     recipeIngredientMappingRepository.saveAll(recipeIngredientMappings);
 
     List<ManualEntity> manuals = new ArrayList<>();
+    String uploadedRecipeOrderPictureUrl;
     for (int i = 0; i < recipesDTO.getRecipeOrderContents().size(); i++) {
+      uploadedRecipeOrderPictureUrl = pictureManager.upload(
+          userId,
+          recipesDTO.getRecipeName(),
+          recipesDTO.getRecipeOrderContents().get(i).getRecipeOrderImage(),
+          PictureType.RECIPE_ORDER_IMAGE
+      );
+
       ManualEntity manual = ManualEntity.builder()
           .recipe(recipe)
           .manualContent(recipesDTO.getRecipeOrderContents().get(i).getRecipeOrderContent())
-          .manualPicture(recipesDTO.getRecipeOrderContents().get(i).getRecipeOrderImage())
+          .manualPicture(uploadedRecipeOrderPictureUrl)
           .build();
 
       manuals.add(manual);
@@ -120,7 +140,7 @@ public class RecipeServiceImpl implements RecipeService {
   @Override
   @Transactional
   public ResultResponse updateRecipe(HttpServletRequest request,
-      RecipesUpdateDTO recipesUpdateDTO) {
+      RecipesUpdateDTO recipesUpdateDTO) throws IOException {
     Long userId = jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()));
 
     UserEntity user = userAccessHandler.findByUserId(userId);
@@ -134,9 +154,19 @@ public class RecipeServiceImpl implements RecipeService {
       throw new UnmatchedUserException();
     }
 
+    if (recipesUpdateDTO.getRecipeThumbnail() != null
+        && !recipesUpdateDTO.getRecipeThumbnail().isEmpty()) {
+      String uploadedThumbnailUrl = pictureManager.upload(
+          userId,
+          recipesUpdateDTO.getRecipeName(),
+          recipesUpdateDTO.getRecipeThumbnail(),
+          PictureType.THUMBNAIL
+      );
+      recipe.updateThumbnail(uploadedThumbnailUrl);
+    }
+
     recipe.updateRecipe(recipesUpdateDTO.getRecipeName(),
-        recipesUpdateDTO.getRecipeLevel(), recipesUpdateDTO.getRecipeCookingTime(),
-        String.valueOf(recipesUpdateDTO.getRecipeThumbnail()));
+        recipesUpdateDTO.getRecipeLevel(), recipesUpdateDTO.getRecipeCookingTime());
 
     // 기존 recipeId로 저장된 재료 삭제
     recipeIngredientMappingRepository.deleteAllByRecipeId(recipeId);
@@ -170,11 +200,18 @@ public class RecipeServiceImpl implements RecipeService {
     manualRepository.deleteAllByRecipeId(recipeId);
 
     List<ManualEntity> manuals = new ArrayList<>();
+    String uploadedRecipeOrderPictureUrl;
     for (int i = 0; i < recipesUpdateDTO.getRecipeOrderContents().size(); i++) {
+      uploadedRecipeOrderPictureUrl = pictureManager.upload(
+          userId,
+          recipesUpdateDTO.getRecipeName(),
+          recipesUpdateDTO.getRecipeOrderContents().get(i).getRecipeOrderImage(),
+          PictureType.RECIPE_ORDER_IMAGE
+      );
       ManualEntity manual = ManualEntity.builder()
           .recipe(recipe)
           .manualContent(recipesUpdateDTO.getRecipeOrderContents().get(i).getRecipeOrderContent())
-          .manualPicture(recipesUpdateDTO.getRecipeOrderContents().get(i).getRecipeOrderImage())
+          .manualPicture(uploadedRecipeOrderPictureUrl)
           .build();
 
       manuals.add(manual);
