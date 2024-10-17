@@ -1,6 +1,7 @@
 package com.recipe.jamanchu.auth.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.recipe.jamanchu.model.type.ConstantsType;
 import com.recipe.jamanchu.model.type.TokenType;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -73,7 +74,7 @@ public class JwtFilter extends OncePerRequestFilter {
     response.setCharacterEncoding("UTF-8");
 
     // CORS 헤더 추가
-    response.setHeader("Access-Control-Allow-Origin", "https://frontend-dun-eight-78.vercel.app");
+    response.setHeader("Access-Control-Allow-Origin", ConstantsType.WEB_URL);
     response.setHeader("Access-Control-Allow-Credentials", "true");
     response.setHeader("Access-Control-Allow-Methods", "GET,HEAD,POST,DELETE,TRACE,OPTIONS,PATCH,PUT");
     response.setHeader("Access-Control-Allow-Headers", "*");
