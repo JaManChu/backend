@@ -8,6 +8,7 @@ import com.recipe.jamanchu.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.service.RecipeService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -65,7 +66,7 @@ public class RecipeController {
   @PostMapping
   public ResponseEntity<ResultResponse> registerRecipe(
       HttpServletRequest request,
-      @Valid @RequestBody RecipesDTO recipesDTO) {
+      @Valid @RequestBody RecipesDTO recipesDTO) throws IOException {
     return ResponseEntity.ok(recipeService.registerRecipe(request, recipesDTO));
   }
 
@@ -79,7 +80,7 @@ public class RecipeController {
   @PutMapping
   public ResponseEntity<ResultResponse> updateRecipe(
       HttpServletRequest request,
-      @Valid @RequestBody RecipesUpdateDTO recipesUpdateDTO) {
+      @Valid @RequestBody RecipesUpdateDTO recipesUpdateDTO) throws IOException {
     return ResponseEntity.ok(recipeService.updateRecipe(request, recipesUpdateDTO));
   }
 
