@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -63,7 +64,7 @@ public class RecipeController {
     return ResponseEntity.ok(recipeService.getRecipesByRating(request, page, size));
   }
 
-  @PostMapping
+  @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<ResultResponse> registerRecipe(
       HttpServletRequest request,
       @Valid @RequestBody RecipesDTO recipesDTO) throws IOException {
@@ -77,7 +78,7 @@ public class RecipeController {
     return ResponseEntity.ok(recipeService.scrapedRecipe(request, recipeId));
   }
 
-  @PutMapping
+  @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<ResultResponse> updateRecipe(
       HttpServletRequest request,
       @Valid @RequestBody RecipesUpdateDTO recipesUpdateDTO) throws IOException {
