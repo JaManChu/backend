@@ -14,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -67,7 +68,7 @@ public class RecipeController {
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<ResultResponse> registerRecipe(
       HttpServletRequest request,
-      @Valid @RequestBody RecipesDTO recipesDTO) throws IOException {
+      @Valid @ModelAttribute RecipesDTO recipesDTO) throws IOException {
     return ResponseEntity.ok(recipeService.registerRecipe(request, recipesDTO));
   }
 
@@ -81,7 +82,7 @@ public class RecipeController {
   @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<ResultResponse> updateRecipe(
       HttpServletRequest request,
-      @Valid @RequestBody RecipesUpdateDTO recipesUpdateDTO) throws IOException {
+      @Valid @ModelAttribute RecipesUpdateDTO recipesUpdateDTO) throws IOException {
     return ResponseEntity.ok(recipeService.updateRecipe(request, recipesUpdateDTO));
   }
 
