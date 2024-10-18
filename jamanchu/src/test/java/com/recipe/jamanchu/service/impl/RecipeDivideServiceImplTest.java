@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.recipe.jamanchu.component.UserAccessHandler;
+import com.recipe.jamanchu.entity.IngredientEntity;
 import com.recipe.jamanchu.entity.ManualEntity;
 import com.recipe.jamanchu.entity.RecipeEntity;
 import com.recipe.jamanchu.entity.RecipeIngredientEntity;
@@ -31,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -406,6 +408,14 @@ class RecipeDivideServiceImplTest {
   void testSaveIngredientDetails() {
     // given
     RecipeEntity recipe = RecipeEntity.builder().build();
+    IngredientEntity existingIngredient = IngredientEntity.builder()
+        .ingredientId(1L)
+        .ingredientName("ingredient1")
+        .build();
+    when(ingredientRepository.findByIngredientName("ingredient1")).thenReturn(Optional.of(existingIngredient));
+
+    // 새로운 재료가 추가될 경우
+    when(ingredientRepository.findByIngredientName("ingredient2")).thenReturn(Optional.empty());
 
     // when
     recipeDivideService.saveIngredientDetails(recipe, scrapRecipe);
@@ -415,7 +425,11 @@ class RecipeDivideServiceImplTest {
 
     // verify
     verify(recipeIngredientRepository, times(1)).saveAll(anyList());
-    verify(recipeIngredientMappingRepository, times(1)).saveAll(anyList());  }
+    verify(recipeIngredientMappingRepository, times(1)).saveAll(anyList());
+    verify(ingredientRepository, times(1)).findByIngredientName("ingredient1"); // 기존 재료 조회 확인
+    verify(ingredientRepository, times(1)).findByIngredientName("ingredient2"); // 새로운 재료 조회 확인
+    verify(ingredientRepository, times(1)).saveAll(anyList()); // 새로운 재료 저장 확인
+  }
 
   @Test
   @DisplayName("비어있는 재료 항목은 무시하고 다른 재료는 저장")
