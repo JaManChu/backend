@@ -26,6 +26,6 @@ public class IngredientEntity {
   private Long ingredientId;
 
   @NotNull
-  @Column(name = "ing_name")
+  @Column(name = "ing_name", unique = true)
   private String ingredientName;
 }

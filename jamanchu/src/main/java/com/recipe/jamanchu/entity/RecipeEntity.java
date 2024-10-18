@@ -69,7 +69,7 @@ public class RecipeEntity extends BaseTimeEntity{
   private List<ManualEntity> manuals;
 
   @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-  private List<IngredientEntity> ingredients;
+  private List<RecipeIngredientEntity> ingredients;
 
   @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
   private List<RecipeRatingEntity> rating;
