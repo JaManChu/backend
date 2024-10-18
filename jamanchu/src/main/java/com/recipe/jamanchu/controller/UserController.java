@@ -1,6 +1,5 @@
 package com.recipe.jamanchu.controller;
 
-import com.recipe.jamanchu.model.dto.request.auth.DeleteUserDTO;
 import com.recipe.jamanchu.model.dto.request.auth.LoginDTO;
 import com.recipe.jamanchu.model.dto.request.auth.SignupDTO;
 import com.recipe.jamanchu.model.dto.request.auth.UserUpdateDTO;
@@ -72,11 +71,10 @@ public class UserController {
 
   // 회원 탈퇴
   @DeleteMapping
-  public ResponseEntity<ResultResponse> deleteUser(HttpServletRequest request,
-      @Valid @RequestBody DeleteUserDTO deleteUserDTO) {
+  public ResponseEntity<ResultResponse> deleteUser(HttpServletRequest request) {
 
     return ResponseEntity.ok()
-        .body(ResultResponse.of(userService.deleteUser(request, deleteUserDTO)));
+        .body(ResultResponse.of(userService.deleteUser(request)));
   }
 
   // 회원 정보 조회

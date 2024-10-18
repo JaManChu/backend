@@ -7,7 +7,6 @@ import com.recipe.jamanchu.auth.oauth2.CustomOauth2UserService;
 import com.recipe.jamanchu.auth.oauth2.KakaoUserDetails;
 import com.recipe.jamanchu.component.UserAccessHandler;
 import com.recipe.jamanchu.entity.UserEntity;
-import com.recipe.jamanchu.model.dto.request.auth.DeleteUserDTO;
 import com.recipe.jamanchu.model.dto.request.auth.LoginDTO;
 import com.recipe.jamanchu.model.dto.request.auth.SignupDTO;
 import com.recipe.jamanchu.model.dto.request.auth.UserUpdateDTO;
@@ -128,14 +127,9 @@ public class UserServiceImpl implements UserService {
 
   // 회원 탈퇴
   @Override
-  public ResultCode deleteUser(HttpServletRequest request, DeleteUserDTO deleteUserDTO) {
-
+  public ResultCode deleteUser(HttpServletRequest request) {
     UserEntity user = userAccessHandler
         .findByUserId(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue())));
-
-    if (user.getProvider() == null) {
-      userAccessHandler.validatePassword(user.getPassword(), deleteUserDTO.getPassword());
-    }
 
     userAccessHandler.deleteUser(user);
     return ResultCode.SUCCESS_DELETE_USER;
