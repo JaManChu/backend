@@ -32,7 +32,7 @@ class IngredientRatingEntityTest {
 
     IngredientEntity ingredient = IngredientEntity.builder()
         .ingredientId(1L)
-        .name("ingredient")
+        .ingredientName("ingredient")
         .build();
 
     IngredientRatingEntity ingredientRatingEntity = IngredientRatingEntity.builder()

@@ -27,7 +27,7 @@ class RecipeIngredientMappingEntityTest {
 
     IngredientEntity ingredient = IngredientEntity.builder()
         .ingredientId(1L)
-        .name("ingredient")
+        .ingredientName("ingredient")
         .build();
 
     RecipeIngredientMappingEntity recipeIngredientMappingEntity = RecipeIngredientMappingEntity.builder()

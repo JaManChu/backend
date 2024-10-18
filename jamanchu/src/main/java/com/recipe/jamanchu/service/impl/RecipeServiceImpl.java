@@ -5,6 +5,7 @@ import static com.recipe.jamanchu.model.type.RecipeProvider.*;
 import com.recipe.jamanchu.auth.jwt.JwtUtil;
 import com.recipe.jamanchu.component.UserAccessHandler;
 import com.recipe.jamanchu.entity.IngredientEntity;
+import com.recipe.jamanchu.entity.RecipeIngredientEntity;
 import com.recipe.jamanchu.entity.ManualEntity;
 import com.recipe.jamanchu.entity.RecipeEntity;
 import com.recipe.jamanchu.entity.RecipeIngredientMappingEntity;
@@ -27,6 +28,7 @@ import com.recipe.jamanchu.model.type.TokenType;
 import com.recipe.jamanchu.repository.IngredientRepository;
 import com.recipe.jamanchu.repository.ManualRepository;
 import com.recipe.jamanchu.repository.RecipeIngredientMappingRepository;
+import com.recipe.jamanchu.repository.RecipeIngredientRepository;
 import com.recipe.jamanchu.repository.RecipeRatingRepository;
 import com.recipe.jamanchu.repository.RecipeRepository;
 import com.recipe.jamanchu.repository.ScrapedRecipeRepository;
@@ -50,11 +52,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class RecipeServiceImpl implements RecipeService {
 
   private final RecipeRepository recipeRepository;
-  private final IngredientRepository ingredientRepository;
+  private final RecipeIngredientRepository recipeIngredientRepository;
   private final ManualRepository manualRepository;
   private final ScrapedRecipeRepository scrapedRecipeRepository;
   private final RecipeRatingRepository recipeRatingRepository;
   private final RecipeIngredientMappingRepository recipeIngredientMappingRepository;
+  private final IngredientRepository ingredientRepository;
   private final UserAccessHandler userAccessHandler;
   private final JwtUtil jwtUtil;
 
@@ -76,21 +79,31 @@ public class RecipeServiceImpl implements RecipeService {
 
     recipeRepository.save(recipe);
 
-    List<IngredientEntity> ingredients = new ArrayList<>();
+    List<RecipeIngredientEntity> recipeIngredientEntities = new ArrayList<>();
     for (int i = 0; i < recipesDTO.getRecipeIngredients().size(); i++) {
-      IngredientEntity ingredient = IngredientEntity.builder()
+      RecipeIngredientEntity ingredient = RecipeIngredientEntity.builder()
           .recipe(recipe)
           .name(recipesDTO.getRecipeIngredients().get(i).getIngredientName())
           .quantity(recipesDTO.getRecipeIngredients().get(i).getIngredientQuantity())
           .build();
 
-      ingredients.add(ingredient);
+      recipeIngredientEntities.add(ingredient);
     }
 
-    ingredientRepository.saveAll(ingredients);
+    recipeIngredientRepository.saveAll(recipeIngredientEntities);
 
+    List<IngredientEntity> ingredientEntities = new ArrayList<>();
     List<RecipeIngredientMappingEntity> recipeIngredientMappings = new ArrayList<>();
-    for (IngredientEntity ingredient : ingredients) {
+    for (RecipeIngredientEntity recipeIngredient : recipeIngredientEntities) {
+      IngredientEntity ingredient = ingredientRepository.findByIngredientName(recipeIngredient.getName())
+          .orElseGet(() -> {
+            IngredientEntity newIngredient = IngredientEntity.builder()
+                .ingredientName(recipeIngredient.getName())
+                .build();
+            ingredientEntities.add(newIngredient);
+            return newIngredient;
+          });
+
       RecipeIngredientMappingEntity mapping = RecipeIngredientMappingEntity.builder()
           .recipe(recipe)
           .ingredient(ingredient)
@@ -99,6 +112,7 @@ public class RecipeServiceImpl implements RecipeService {
       recipeIngredientMappings.add(mapping);
     }
 
+    ingredientRepository.saveAll(ingredientEntities);
     recipeIngredientMappingRepository.saveAll(recipeIngredientMappings);
 
     List<ManualEntity> manuals = new ArrayList<>();
@@ -140,23 +154,33 @@ public class RecipeServiceImpl implements RecipeService {
 
     // 기존 recipeId로 저장된 재료 삭제
     recipeIngredientMappingRepository.deleteAllByRecipeId(recipeId);
-    ingredientRepository.deleteAllByRecipeId(recipeId);
+    recipeIngredientRepository.deleteAllByRecipeId(recipeId);
 
-    List<IngredientEntity> ingredients = new ArrayList<>();
+    List<RecipeIngredientEntity> recipeIngredientEntities = new ArrayList<>();
     for (int i = 0; i < recipesUpdateDTO.getRecipeIngredients().size(); i++) {
-      IngredientEntity ingredient = IngredientEntity.builder()
+      RecipeIngredientEntity ingredient = RecipeIngredientEntity.builder()
           .recipe(recipe)
           .name(recipesUpdateDTO.getRecipeIngredients().get(i).getIngredientName())
           .quantity(recipesUpdateDTO.getRecipeIngredients().get(i).getIngredientQuantity())
           .build();
 
-      ingredients.add(ingredient);
+      recipeIngredientEntities.add(ingredient);
     }
 
-    ingredientRepository.saveAll(ingredients);
+    recipeIngredientRepository.saveAll(recipeIngredientEntities);
 
+    List<IngredientEntity> ingredientEntities = new ArrayList<>();
     List<RecipeIngredientMappingEntity> recipeIngredientMappings = new ArrayList<>();
-    for (IngredientEntity ingredient : ingredients) {
+    for (RecipeIngredientEntity recipeIngredient : recipeIngredientEntities) {
+      IngredientEntity ingredient = ingredientRepository.findByIngredientName(recipeIngredient.getName())
+          .orElseGet(() -> {
+            IngredientEntity newIngredient = IngredientEntity.builder()
+                .ingredientName(recipeIngredient.getName())
+                .build();
+            ingredientEntities.add(newIngredient);
+            return newIngredient;
+          });
+
       RecipeIngredientMappingEntity mapping = RecipeIngredientMappingEntity.builder()
           .recipe(recipe)
           .ingredient(ingredient)
@@ -165,6 +189,7 @@ public class RecipeServiceImpl implements RecipeService {
       recipeIngredientMappings.add(mapping);
     }
 
+    ingredientRepository.saveAll(ingredientEntities);
     recipeIngredientMappingRepository.saveAll(recipeIngredientMappings);
 
     manualRepository.deleteAllByRecipeId(recipeId);
