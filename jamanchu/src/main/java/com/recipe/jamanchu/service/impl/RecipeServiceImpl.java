@@ -95,17 +95,14 @@ public class RecipeServiceImpl implements RecipeService {
     List<IngredientEntity> ingredientEntities = new ArrayList<>();
     List<RecipeIngredientMappingEntity> recipeIngredientMappings = new ArrayList<>();
     for (RecipeIngredientEntity recipeIngredient : recipeIngredientEntities) {
-      Optional<IngredientEntity> existingIngredient = ingredientRepository.findByIngredientName(recipeIngredient.getName());
-
-      IngredientEntity ingredient;
-      if (existingIngredient.isPresent()) {
-        ingredient = existingIngredient.get();
-      } else {
-        ingredient = IngredientEntity.builder()
-            .ingredientName(recipeIngredient.getName())
-            .build();
-        ingredientEntities.add(ingredient);
-      }
+      IngredientEntity ingredient = ingredientRepository.findByIngredientName(recipeIngredient.getName())
+          .orElseGet(() -> {
+            IngredientEntity newIngredient = IngredientEntity.builder()
+                .ingredientName(recipeIngredient.getName())
+                .build();
+            ingredientEntities.add(newIngredient);
+            return newIngredient;
+          });
 
       RecipeIngredientMappingEntity mapping = RecipeIngredientMappingEntity.builder()
           .recipe(recipe)
@@ -175,17 +172,14 @@ public class RecipeServiceImpl implements RecipeService {
     List<IngredientEntity> ingredientEntities = new ArrayList<>();
     List<RecipeIngredientMappingEntity> recipeIngredientMappings = new ArrayList<>();
     for (RecipeIngredientEntity recipeIngredient : recipeIngredientEntities) {
-      Optional<IngredientEntity> existingIngredient = ingredientRepository.findByIngredientName(recipeIngredient.getName());
-
-      IngredientEntity ingredient;
-      if (existingIngredient.isPresent()) {
-        ingredient = existingIngredient.get();
-      } else {
-        ingredient = IngredientEntity.builder()
-            .ingredientName(recipeIngredient.getName())
-            .build();
-        ingredientEntities.add(ingredient);
-      }
+      IngredientEntity ingredient = ingredientRepository.findByIngredientName(recipeIngredient.getName())
+          .orElseGet(() -> {
+            IngredientEntity newIngredient = IngredientEntity.builder()
+                .ingredientName(recipeIngredient.getName())
+                .build();
+            ingredientEntities.add(newIngredient);
+            return newIngredient;
+          });
 
       RecipeIngredientMappingEntity mapping = RecipeIngredientMappingEntity.builder()
           .recipe(recipe)
