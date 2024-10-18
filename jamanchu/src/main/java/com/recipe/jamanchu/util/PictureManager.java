@@ -1,29 +1,19 @@
 package com.recipe.jamanchu.util;
 
+import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
-import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.amazonaws.services.s3.model.S3Object;
-import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.recipe.jamanchu.model.type.PictureType;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -44,14 +34,21 @@ public class PictureManager {
       PictureType pictureType
   ) throws IOException {
 
-    String newFileName =
-        pictureType.getFolderPrefix() +
-            "/" + userId + "_" + recipeName + "." +
-            Objects.requireNonNull(multipartFile.getOriginalFilename()).split("\\.")[1];
+    String originalFilename = multipartFile.getOriginalFilename();
+    if (originalFilename == null || !originalFilename.contains(".")) {
+      log.error("{} : 파일 이름이 없거나 형식이 잘못되었습니다.", originalFilename);
+      return null;
+    }
 
-    File uploadFile = convert(multipartFile).orElseThrow(
-        () -> new IllegalArgumentException("MultipartFile -> File 전환 실패")
-    );
+    String newFileName = pictureType.getFolderPrefix() +
+        "/" + userId + "_" + recipeName + "." +
+        originalFilename.split("\\.")[1];
+
+    File uploadFile = convert(multipartFile).orElse(null);
+    if (uploadFile == null) {
+      log.error("{} -> File 전환 실패 ", multipartFile);
+      return null;
+    }
 
     // 업로드한 사진의 URL 반환
     return upload(newFileName, uploadFile);
@@ -75,21 +72,30 @@ public class PictureManager {
       String fileName
   ) {
 
-    amazonS3.putObject(
-        new PutObjectRequest(bucket, fileName, uploadFile)
-            .withCannedAcl(CannedAccessControlList.PublicRead)  // PublicRead 권한으로 업로드 됨
-    );
-    return amazonS3.getUrl(bucket, fileName).toString();
+    try {
+      amazonS3.putObject(
+          new PutObjectRequest(bucket, fileName, uploadFile)
+              .withCannedAcl(CannedAccessControlList.PublicRead)  // PublicRead 권한으로 업로드
+      );
+      return amazonS3.getUrl(bucket, fileName).toString();
+    } catch (AmazonS3Exception e) {
+      log.error("S3에 파일 업로드 중 오류 발생: {}", e.getMessage(), e);
+      throw new RuntimeException("S3에 파일 업로드 실패", e);
+    } catch (SdkClientException e) {
+      log.error("S3와의 통신 중 오류 발생: {}", e.getMessage(), e);
+      throw new RuntimeException("S3와의 통신 실패", e);
+    } catch (Exception e) {
+      log.error("알 수 없는 오류 발생: {}", e.getMessage(), e);
+      throw new RuntimeException("파일 업로드 중 알 수 없는 오류 발생", e);
+    }
   }
 
   private void removeNewFile(
       File targetFile
   ) {
 
-    if (targetFile.delete()) {
-      log.debug("파일이 삭제되었습니다.");
-    } else {
-      log.error("{} 파일이 삭제되지 못했습니다.", targetFile.getName());
+    if (!targetFile.delete()) {
+      log.warn("{} 파일이 삭제되지 못했습니다.", targetFile.getName());
     }
   }
 
