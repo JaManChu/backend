@@ -98,7 +98,6 @@ class UserServiceImplTest {
   private UserUpdateDTO userUpdateDTO;
   private UserEntity user;
   private UserEntity kakaoUser;
-  private DeleteUserDTO deleteUserDTO;
   private UserInfoDTO userInfoDTO;
   private LoginDTO loginDTO;
   private KakaoUserDetails kakaoUserDetails;
@@ -112,7 +111,6 @@ class UserServiceImplTest {
   void setUp() {
     signup = new SignupDTO(EMAIL, PASSWORD, NICKNAME);
     userUpdateDTO = new UserUpdateDTO(NEW_NICKNAME, PASSWORD);
-    deleteUserDTO = new DeleteUserDTO(PASSWORD);
     userInfoDTO = new UserInfoDTO(EMAIL, NICKNAME);
     loginDTO = new LoginDTO(EMAIL, PASSWORD);
 
@@ -331,11 +329,9 @@ class UserServiceImplTest {
     // given
     when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(USERID);
     when(userAccessHandler.findByUserId(USERID)).thenReturn(user);
-    doNothing().when(userAccessHandler)
-        .validatePassword(user.getPassword(), deleteUserDTO.getPassword());
 
     // when
-    ResultCode result = userServiceimpl.deleteUser(request, deleteUserDTO);
+    ResultCode result = userServiceimpl.deleteUser(request);
 
     // then
     assertEquals(ResultCode.SUCCESS_DELETE_USER, result);
@@ -350,7 +346,7 @@ class UserServiceImplTest {
     when(userAccessHandler.findByUserId(USERID)).thenReturn(kakaoUser);
 
     // when
-    ResultCode result = userServiceimpl.deleteUser(request, deleteUserDTO);
+    ResultCode result = userServiceimpl.deleteUser(request);
 
     // then
     assertEquals(ResultCode.SUCCESS_DELETE_USER, result);
@@ -365,24 +361,9 @@ class UserServiceImplTest {
 
     // when then
     assertThrows(UserNotFoundException.class,
-        () -> userServiceimpl.deleteUser(request, deleteUserDTO));
+        () -> userServiceimpl.deleteUser(request));
   }
 
-  @Test
-  @DisplayName("회원 탈퇴 실패 : 비밀번호가 일치하지 않은 경우")
-  void deleteUser_PasswordMisMatch() {
-
-    // given
-    when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(USERID);
-    when(userAccessHandler.findByUserId(USERID)).thenReturn(user);
-
-    doThrow(new PasswordMismatchException()).when(userAccessHandler)
-        .validatePassword(user.getPassword(), deleteUserDTO.getPassword());
-
-    // when then
-    assertThrows(PasswordMismatchException.class,
-        () -> userServiceimpl.deleteUser(request, deleteUserDTO));
-  }
 
   @Test
   @DisplayName("회원 정보 조회 성공")
