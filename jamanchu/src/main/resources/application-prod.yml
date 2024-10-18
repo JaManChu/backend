@@ -39,3 +39,19 @@ spring:
             scope:
               - ${PROD.AUTH.OAUTH.REGISTRATION.KAKAO.scope[0]}
               - ${PROD.AUTH.OAUTH.REGISTRATION.KAKAO.scope[1]}
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+cloud:
+  aws:
+    s3:
+      bucket: jamanchu
+    region:
+      static: ap-northeast-2
+      auto: false
+    stack:
+      auto: false
+    credentials:
+      access-key: ${DEV.AUTH.S3.access-key}
+      secret-key: ${DEV.AUTH.S3.secret-key}

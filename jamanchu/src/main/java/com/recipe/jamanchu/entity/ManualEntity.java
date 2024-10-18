@@ -38,4 +38,8 @@ public class ManualEntity {
 
   @Column(name = "mn_picture")
   private String manualPicture;
+
+  public void updateManualPicture(String newManualPicture) {
+    this.manualPicture = newManualPicture;
+  }
 }

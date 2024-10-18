@@ -80,10 +80,13 @@ public class RecipeEntity extends BaseTimeEntity{
   @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
   private List<CommentEntity> comments;
 
-  public void updateRecipe(String name, LevelType level, CookingTimeType time, String thumbnail) {
+  public void updateRecipe(String name, LevelType level, CookingTimeType time) {
     this.name = name;
     this.level = level;
     this.time = time;
-    this.thumbnail = thumbnail;
+  }
+
+  public void updateThumbnail(String newThumbnail) {
+    this.thumbnail = newThumbnail;
   }
 }
