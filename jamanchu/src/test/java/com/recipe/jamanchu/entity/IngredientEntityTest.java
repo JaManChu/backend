@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import com.recipe.jamanchu.repository.IngredientRepository;
+import jakarta.persistence.criteria.CriteriaBuilder.In;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,18 +19,12 @@ class IngredientEntityTest {
   private IngredientRepository ingredientRepository;
 
   @Test
-  @DisplayName("Ingredient Entity Builder Test")
+  @DisplayName("Ingredient Entity Builder test")
   void builder() {
-
     // given
-    RecipeEntity recipe = RecipeEntity.builder()
-        .id(1L)
-        .build();
-
     IngredientEntity ingredientEntity = IngredientEntity.builder()
-        .recipe(recipe)
-        .name("양배추")
-        .quantity("1/2개")
+        .ingredientId(1L)
+        .ingredientName("양배추")
         .build();
 
     // when
@@ -39,8 +34,8 @@ class IngredientEntityTest {
     IngredientEntity savedIngredient = ingredientRepository.save(ingredientEntity);
 
     // then
-    assertEquals(ingredientEntity.getRecipe().getId(), savedIngredient.getRecipe().getId());
-    assertEquals(ingredientEntity.getName(), savedIngredient.getName());
-    assertEquals(ingredientEntity.getQuantity(), savedIngredient.getQuantity());
+    assertEquals(ingredientEntity.getIngredientId(), savedIngredient.getIngredientId());
+    assertEquals(ingredientEntity.getIngredientName(), savedIngredient.getIngredientName());
   }
+
 }
