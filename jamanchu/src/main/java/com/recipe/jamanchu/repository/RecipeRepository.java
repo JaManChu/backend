@@ -98,4 +98,6 @@ public interface RecipeRepository extends JpaRepository<RecipeEntity, Long> {
       @Param("ingredients") List<String> ingredients,
       @Param("ids") List<Long> ids,
       Pageable pageable);
+
+  void deleteAllByUser(UserEntity user);
 }

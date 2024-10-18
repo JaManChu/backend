@@ -22,11 +22,8 @@ import org.hibernate.annotations.SQLRestriction;
 @NoArgsConstructor
 @Builder
 @Entity
-@SQLRestriction("deleted_at IS NULL")
 @SQLDelete(sql = "UPDATE user "
-    + "SET deleted_at = now(), "
-    + "usr_nickname = CONCAT('delete_', usr_id), "
-    + "usr_password = CONCAT('delete_', usr_id) "
+    + "SET deleted_at = DATE_ADD(now(), INTERVAL 1 MONTH) "
     + "WHERE usr_id = ?")
 @Table(name = "user")
 public class UserEntity extends BaseTimeEntity {

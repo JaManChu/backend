@@ -8,9 +8,17 @@ import com.recipe.jamanchu.exceptions.exception.UserNotFoundException;
 import com.recipe.jamanchu.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.model.type.ResultCode;
 import com.recipe.jamanchu.model.type.UserRole;
+import com.recipe.jamanchu.repository.CommentRepository;
+import com.recipe.jamanchu.repository.IngredientRatingRepository;
+import com.recipe.jamanchu.repository.RecipeRatingRepository;
+import com.recipe.jamanchu.repository.RecipeRepository;
+import com.recipe.jamanchu.repository.ScrapedRecipeRepository;
 import com.recipe.jamanchu.repository.UserRepository;
+import java.time.LocalDate;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +30,11 @@ public class UserAccessHandler {
 
   private final UserRepository userRepository;
   private final BCryptPasswordEncoder passwordEncoder;
+  private final ScrapedRecipeRepository scrapedRecipeRepository;
+  private final RecipeRepository recipeRepository;
+  private final CommentRepository commentRepository;
+  private final RecipeRatingRepository recipeRatingRepository;
+  private final IngredientRatingRepository ingredientRatingRepository;
 
 
   // userId 값과 일치하는 회원 정보 반환
@@ -125,6 +138,32 @@ public class UserAccessHandler {
       return ResultResponse.of(ResultCode.PASSWORD_MISMATCH, false);
     }
     return ResultResponse.of(ResultCode.PASSWORD_MATCH, true);
+  }
+
+  @Transactional
+  @Scheduled(cron = "0 0 0 * * *")
+  public void deleteAllUserData() {
+    List<UserEntity> users = userRepository.findAllDeletedToday();
+    log.info("today : {}", LocalDate.now());
+
+    users.forEach(user -> {
+      log.info("Delete All User Data -> user : {}", user.getEmail());
+      deleteRelatedUserData(user);
+      userRepository.deleteUserByUserId(user.getUserId());
+    });
+  }
+
+  private void deleteRelatedUserData(UserEntity user) {
+    // 스크랩한 레시피
+    scrapedRecipeRepository.deleteAllByUser(user);
+    // 작성한 댓글
+    commentRepository.deleteAllByUser(user);
+    // 레시피 평점
+    recipeRatingRepository.deleteAllByUser(user);
+    // 재료 평점
+    ingredientRatingRepository.deleteAllByUser(user);
+    // 작성한 레시피
+    recipeRepository.deleteAllByUser(user);
   }
 }
 
