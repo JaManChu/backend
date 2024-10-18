@@ -22,5 +22,7 @@ public interface UserService {
   ResultResponse login(LoginDTO loginDTO, HttpServletResponse response);
 
   String kakaoLogin(String code, HttpServletResponse response);
+
+  ResultResponse getUserRecipes(int myRecipePage, int scrapRecipePage, HttpServletRequest request);
 }
 

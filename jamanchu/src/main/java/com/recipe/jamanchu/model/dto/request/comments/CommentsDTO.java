@@ -21,8 +21,8 @@ public class CommentsDTO {
   @JsonProperty("comment")
   private final String comment;
 
-  @DecimalMin(value = "1.0", inclusive = false, message = "평점은 1.0 이상으로 입력해주세요.")
-  @DecimalMax(value = "5.0", inclusive = false, message = "평점은 5.0 이하로 입력해주세요.")
+  @DecimalMin(value = "1.0", message = "평점은 1.0 이상으로 입력해주세요.")
+  @DecimalMax(value = "5.0", message = "평점은 5.0 이하로 입력해주세요.")
   @JsonProperty("rating")
   private final Double rating;
 

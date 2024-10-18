@@ -4,17 +4,20 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.recipe.jamanchu.auth.jwt.JwtUtil;
 import com.recipe.jamanchu.component.UserAccessHandler;
-import com.recipe.jamanchu.entity.CommentEntity;
 import com.recipe.jamanchu.entity.IngredientEntity;
 import com.recipe.jamanchu.entity.ManualEntity;
 import com.recipe.jamanchu.entity.RecipeEntity;
+import com.recipe.jamanchu.entity.RecipeIngredientMappingEntity;
 import com.recipe.jamanchu.entity.RecipeRatingEntity;
+import com.recipe.jamanchu.entity.ScrapedRecipeEntity;
 import com.recipe.jamanchu.entity.UserEntity;
 import com.recipe.jamanchu.exceptions.exception.RecipeNotFoundException;
 import com.recipe.jamanchu.exceptions.exception.UnmatchedUserException;
@@ -29,10 +32,12 @@ import com.recipe.jamanchu.model.dto.response.recipes.RecipesManual;
 import com.recipe.jamanchu.model.dto.response.recipes.RecipesSummary;
 import com.recipe.jamanchu.model.type.CookingTimeType;
 import com.recipe.jamanchu.model.type.LevelType;
+import com.recipe.jamanchu.model.type.ScrapedType;
 import com.recipe.jamanchu.model.type.TokenType;
 import com.recipe.jamanchu.model.type.UserRole;
 import com.recipe.jamanchu.repository.IngredientRepository;
 import com.recipe.jamanchu.repository.ManualRepository;
+import com.recipe.jamanchu.repository.RecipeIngredientMappingRepository;
 import com.recipe.jamanchu.repository.RecipeRatingRepository;
 import com.recipe.jamanchu.repository.RecipeRepository;
 import com.recipe.jamanchu.repository.ScrapedRecipeRepository;
@@ -60,6 +65,9 @@ class RecipeServiceImplTest {
 
   @Mock
   private IngredientRepository ingredientRepository;
+
+  @Mock
+  private RecipeIngredientMappingRepository recipeIngredientMappingRepository;
 
   @Mock
   private ManualRepository manualRepository;
@@ -171,6 +179,8 @@ class RecipeServiceImplTest {
     // given
     when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(user.getUserId());
     when(userAccessHandler.findByUserId(user.getUserId())).thenReturn(user);
+    when(ingredientRepository.saveAll(anyList())).thenReturn(new ArrayList<>());
+    when(recipeIngredientMappingRepository.saveAll(anyList())).thenReturn(new ArrayList<>());
 
     // when
     ResultResponse result = recipeService.registerRecipe(request, recipesDTO);
@@ -181,6 +191,7 @@ class RecipeServiceImplTest {
     // verify
     verify(recipeRepository, times(1)).save(any(RecipeEntity.class));
     verify(ingredientRepository, times(1)).saveAll(anyList());
+    verify(recipeIngredientMappingRepository, times(1)).saveAll(anyList());
     verify(manualRepository, times(1)).saveAll(anyList());
   }
 
@@ -199,11 +210,19 @@ class RecipeServiceImplTest {
         .manuals(manualEntities)
         .build();
 
+    List<RecipeIngredientMappingEntity> recipeIngredientMappings = new ArrayList<>();
+    for (IngredientEntity ingredient : ingredientEntities) {
+      RecipeIngredientMappingEntity mapping = RecipeIngredientMappingEntity.builder()
+          .recipe(recipe)
+          .ingredient(ingredient)
+          .build();
+
+      recipeIngredientMappings.add(mapping);
+    }
+
     when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(user.getUserId());
     when(userAccessHandler.findByUserId(1L)).thenReturn(user);
     when(recipeRepository.findById(1L)).thenReturn(Optional.of(recipe));
-    when(ingredientRepository.findAllByRecipeId(1L)).thenReturn(Optional.of(ingredientEntities));
-    when(manualRepository.findAllByRecipeId(1L)).thenReturn(Optional.of(manualEntities));
 
     // When
     ResultResponse result = recipeService.updateRecipe(request, recipesUpdateDTO);
@@ -215,6 +234,8 @@ class RecipeServiceImplTest {
     verify(recipeRepository, times(1)).findById(1L);
     verify(ingredientRepository, times(1)).deleteAllByRecipeId(1L);
     verify(ingredientRepository, times(1)).saveAll(anyList());
+    verify(recipeIngredientMappingRepository, times(1)).deleteAllByRecipeId(1L);
+    verify(recipeIngredientMappingRepository, times(1)).saveAll(anyList());
     verify(manualRepository, times(1)).deleteAllByRecipeId(1L);
     verify(manualRepository, times(1)).saveAll(anyList());
   }
@@ -290,7 +311,7 @@ class RecipeServiceImplTest {
   }
 
   @Test
-  @DisplayName("전체 레시피 목록 조회 성공")
+  @DisplayName("전체 레시피 목록 조회 성공 - token이 없을 때")
   void getRecipes_Success() {
     // given
     List<RecipeEntity> recipeEntities = List.of(
@@ -314,10 +335,11 @@ class RecipeServiceImplTest {
 
     Page<RecipeEntity> recipePage = new PageImpl<>(recipeEntities);
 
+    when(request.getHeader(TokenType.ACCESS.getValue())).thenReturn(null);
     when(recipeRepository.findAll(any(Pageable.class))).thenReturn(recipePage);
 
     // when
-    ResultResponse result = recipeService.getRecipes(0, 10);
+    ResultResponse result = recipeService.getRecipes(request, 0, 10);
 
     // then
     assertEquals("전체 레시피 조회 성공!", result.getMessage());
@@ -325,6 +347,49 @@ class RecipeServiceImplTest {
     assertEquals(2, summaries.size());
     assertEquals("Recipe1", summaries.get(0).getRecipeName());
     assertEquals("Recipe2", summaries.get(1).getRecipeName());
+
+    // verify
+    verify(recipeRepository, times(1)).findAll(any(Pageable.class));
+    verify(scrapedRecipeRepository, never()).findRecipeIdsByUserIdAndScrapedType(anyLong(), any());
+  }
+
+  @Test
+  @DisplayName("SCRAPED한 레시피 제외하고 목록 조회 성공")
+  void getRecipes_WithScrapedExclusion_Success() {
+    // given
+    List<RecipeEntity> recipeEntities = List.of(
+        RecipeEntity.builder()
+            .id(2L)
+            .name("Recipe2")
+            .user(user)
+            .level(LevelType.MEDIUM)
+            .time(CookingTimeType.TWENTY_MINUTES)
+            .thumbnail("thumbnail2")
+            .build()
+    );
+    Page<RecipeEntity> recipePage = new PageImpl<>(recipeEntities);
+
+    String token = "access-token";
+    Long userId = 1L;
+    List<Long> scrapedRecipeIds = List.of(1L);
+
+    when(request.getHeader(TokenType.ACCESS.getValue())).thenReturn(token);
+    when(jwtUtil.getUserId(token)).thenReturn(userId);
+    when(scrapedRecipeRepository.findRecipeIdsByUserIdAndScrapedType(userId, ScrapedType.SCRAPED)).thenReturn(scrapedRecipeIds);
+    when(recipeRepository.findByIdNotIn(eq(scrapedRecipeIds), any(Pageable.class))).thenReturn(recipePage);
+
+    // when
+    ResultResponse result = recipeService.getRecipes(request, 0, 10);
+
+    // then
+    assertEquals("전체 레시피 조회 성공!", result.getMessage());
+    List<RecipesSummary> summaries = (List<RecipesSummary>) result.getData();
+    assertEquals(1, summaries.size());
+    assertEquals("Recipe2", summaries.get(0).getRecipeName());
+
+    // verify
+    verify(scrapedRecipeRepository, times(1)).findRecipeIdsByUserIdAndScrapedType(user.getUserId(), ScrapedType.SCRAPED);
+    verify(recipeRepository, times(1)).findByIdNotIn(eq(scrapedRecipeIds), any(Pageable.class));
   }
 
   @Test
@@ -337,18 +402,19 @@ class RecipeServiceImplTest {
 
     // when & then
     assertThrows(RecipeNotFoundException.class,
-        () -> recipeService.getRecipes(0, 10));
+        () -> recipeService.getRecipes(request, 0, 10));
   }
 
   @Test
-  @DisplayName("레시피 조건 검색 성공")
-  void searchRecipes_Success() {
+  @DisplayName("레시피 조건 검색 성공 - 스크랩한 레시피가 없는 경우")
+  void searchRecipes_Success_NoScrapedRecipes() {
     // given
     RecipesSearchDTO searchDTO = new RecipesSearchDTO(
         List.of("돼지고기"),
         LevelType.LOW,
         CookingTimeType.TEN_MINUTES
     );
+
     List<RecipeEntity> recipeEntities = List.of(
         RecipeEntity.builder()
             .id(1L)
@@ -359,19 +425,87 @@ class RecipeServiceImplTest {
             .thumbnail("thumbnail1")
             .build()
     );
+
     Page<RecipeEntity> recipePage = new PageImpl<>(recipeEntities);
 
-    when(recipeRepository.searchAndRecipes(any(), any(), any(), anyLong(),
-        any(Pageable.class))).thenReturn(recipePage);
+    when(recipeRepository.searchAndRecipes(eq(searchDTO.getRecipeLevel()),
+        eq(searchDTO.getRecipeCookingTime()),
+        anyList(),
+        eq((long) searchDTO.getIngredients().size()),
+        any(Pageable.class)))
+        .thenReturn(recipePage);
 
     // when
-    ResultResponse result = recipeService.searchRecipes(searchDTO, 0, 10);
+    ResultResponse result = recipeService.searchRecipes(request, searchDTO, 0, 10);
 
     // then
     assertEquals("레시피 조회 성공!", result.getMessage());
     List<RecipesSummary> summaries = (List<RecipesSummary>) result.getData();
     assertEquals(1, summaries.size());
     assertEquals("Recipe1", summaries.get(0).getRecipeName());
+
+    // verify
+    verify(recipeRepository, times(1)).searchAndRecipes(any(), any(), any(), any(), any(Pageable.class));
+    verify(recipeRepository, never()).searchOrRecipes(any(), any(), any(), any(Pageable.class));
+  }
+
+  @Test
+  @DisplayName("레시피 조건 검색 성공 - 스크랩한 레시피가 있는 경우")
+  void searchRecipes_Success_WithScrapedRecipes() {
+    // given
+    RecipesSearchDTO searchDTO = new RecipesSearchDTO(
+        List.of("돼지고기"),
+        LevelType.LOW,
+        CookingTimeType.TEN_MINUTES
+    );
+
+    List<RecipeEntity> recipeEntities = List.of(
+        RecipeEntity.builder()
+            .id(2L)
+            .name("Recipe2")
+            .user(user)
+            .level(LevelType.LOW)
+            .time(CookingTimeType.TEN_MINUTES)
+            .thumbnail("thumbnail2")
+            .build()
+    );
+
+    Page<RecipeEntity> recipePage = new PageImpl<>(recipeEntities);
+
+    String token = "access-token";
+    Long userId = 1L;
+    List<Long> scrapedRecipeIds = List.of(1L);
+
+    when(request.getHeader(TokenType.ACCESS.getValue())).thenReturn(token);
+    when(jwtUtil.getUserId(token)).thenReturn(userId);
+    when(scrapedRecipeRepository.findRecipeIdsByUserIdAndScrapedType(userId, ScrapedType.SCRAPED)).thenReturn(scrapedRecipeIds);
+    when(recipeRepository.searchAndRecipesIdNotIn(eq(searchDTO.getRecipeLevel()),
+        eq(searchDTO.getRecipeCookingTime()),
+        anyList(),
+        eq((long) searchDTO.getIngredients().size()),
+        eq(scrapedRecipeIds),
+        any(Pageable.class)))
+        .thenReturn(new PageImpl<>(List.of())); // 먼저 AND 쿼리가 비어있도록 설정
+
+    when(recipeRepository.searchOrRecipesIdNotIn(eq(searchDTO.getRecipeLevel()),
+        eq(searchDTO.getRecipeCookingTime()),
+        anyList(),
+        eq(scrapedRecipeIds),
+        any(Pageable.class)))
+        .thenReturn(recipePage); // OR 쿼리에서 결과를 반환하도록 설정
+
+    // when
+    ResultResponse result = recipeService.searchRecipes(request, searchDTO, 0, 10);
+
+    // then
+    assertEquals("레시피 조회 성공!", result.getMessage());
+    List<RecipesSummary> summaries = (List<RecipesSummary>) result.getData();
+    assertEquals(1, summaries.size());
+    assertEquals("Recipe2", summaries.get(0).getRecipeName());
+
+    // verify
+    verify(recipeRepository, times(1)).searchAndRecipesIdNotIn(any(), any(), any(), any(), any(), any(Pageable.class));
+    verify(recipeRepository, times(1)).searchOrRecipesIdNotIn(any(), any(), any(), any(), any(Pageable.class));
   }
 
   @Test
@@ -392,7 +526,7 @@ class RecipeServiceImplTest {
 
     // when & then
     assertThrows(RecipeNotFoundException.class,
-        () -> recipeService.searchRecipes(searchDTO, 0, 10));
+        () -> recipeService.searchRecipes(request, searchDTO, 0, 10));
   }
 
   @Test
@@ -436,28 +570,84 @@ class RecipeServiceImplTest {
   }
 
   @Test
-  @DisplayName("레시피 평점으로 조회 성공")
-  void getRecipesByRating_Success() {
+  @DisplayName("레시피 평점으로 조회 성공 - SCRAPED 레시피 제외")
+  void getRecipesByRating_Success_WithScrapedRecipeIds() {
     // given
-    int page = 0;
-    int size = 10;
+    List<RecipeEntity> recipeEntities = List.of(
+        RecipeEntity.builder()
+            .id(2L)
+            .name("Recipe2")
+            .user(user)
+            .level(LevelType.MEDIUM)
+            .time(CookingTimeType.TWENTY_MINUTES)
+            .thumbnail("thumbnail2")
+            .build()
+    );
+    Page<RecipeEntity> recipePage = new PageImpl<>(recipeEntities);
 
-    List<RecipeEntity> recipeList = new ArrayList<>();
-    recipeList.add(recipe);
+    String token = "access-token";
+    Long userId = 1L;
+    List<Long> scrapedRecipeIds = List.of(2L);
 
-    Pageable pageable = PageRequest.of(page, size);
-    Page<RecipeEntity> recipePage = new PageImpl<>(recipeList);
+    when(request.getHeader(TokenType.ACCESS.getValue())).thenReturn(token);
+    when(jwtUtil.getUserId(token)).thenReturn(userId);
 
-    when(recipeRepository.findAllOrderByRating(pageable)).thenReturn(recipePage);
+    // Mocking repository methods
+    when(scrapedRecipeRepository.findRecipeIdsByUserIdAndScrapedType(userId, ScrapedType.SCRAPED)).thenReturn(scrapedRecipeIds);
+    when(recipeRepository.findByIdNotInOrderByRating(eq(scrapedRecipeIds), any(Pageable.class))).thenReturn(recipePage); // Empty for no scraped case
 
     // when
-    ResultResponse result = recipeService.getRecipesByRating(0, 10);
+    ResultResponse result = recipeService.getRecipesByRating(request, 0, 10);
 
     // then
     assertEquals("인기 레시피 조회 성공", result.getMessage());
     assertNotNull(result.getData());
     List<RecipesSummary> recipesSummaries = (List<RecipesSummary>) result.getData();
     assertEquals(1, recipesSummaries.size());
+    assertEquals(2, recipesSummaries.get(0).getRecipeId());
+    assertEquals("Recipe2", recipesSummaries.get(0).getRecipeName());
+    assertEquals(recipe.getUser().getNickname(), recipesSummaries.get(0).getRecipeAuthor());
+    assertEquals(0.0, recipesSummaries.get(0).getRecipeRating());
+
+    // verify
+    verify(scrapedRecipeRepository, times(1)).findRecipeIdsByUserIdAndScrapedType(user.getUserId(), ScrapedType.SCRAPED);
+    verify(recipeRepository,times(1)).findByIdNotInOrderByRating(eq(scrapedRecipeIds), any(Pageable.class));
+  }
+
+  @Test
+  @DisplayName("레시피 평점으로 조회 성공 - SCRAPED 레시피 없음")
+  void getRecipesByRating_Success_WithoutScrapedRecipeIds() {
+    // given
+    List<RecipeRatingEntity> ratingEntities = new ArrayList<>();
+    ratingEntities.add(RecipeRatingEntity.builder()
+        .recipeRatingId(1L)
+        .user(user)
+        .recipe(recipe)
+        .rating(4.5)
+        .build());
+    List<RecipeEntity> recipeList = new ArrayList<>();
+    RecipeEntity recipe1 = RecipeEntity.builder()
+        .id(2L)
+        .name("recipe2")
+        .user(user)
+        .rating(ratingEntities)
+        .build();
+    recipeList.add(recipe);
+    recipeList.add(recipe1);
+
+    Page<RecipeEntity> recipePage = new PageImpl<>(recipeList);
+
+    // Mocking repository methods
+    when(recipeRepository.findAllOrderByRating(any(Pageable.class))).thenReturn(recipePage);
+
+    // when
+    ResultResponse result = recipeService.getRecipesByRating(request, 0, 10);
+
+    // then
+    assertEquals("인기 레시피 조회 성공", result.getMessage());
+    assertNotNull(result.getData());
+    List<RecipesSummary> recipesSummaries = (List<RecipesSummary>) result.getData();
+    assertEquals(2, recipesSummaries.size());
     assertEquals(recipe.getId(), recipesSummaries.get(0).getRecipeId());
     assertEquals(recipe.getName(), recipesSummaries.get(0).getRecipeName());
     assertEquals(recipe.getUser().getNickname(), recipesSummaries.get(0).getRecipeAuthor());
@@ -478,24 +668,81 @@ class RecipeServiceImplTest {
 
     // when & Then
     assertThrows(RecipeNotFoundException.class,
-        () -> recipeService.getRecipesByRating(page, size));
+        () -> recipeService.getRecipesByRating(request, page, size));
   }
 
   @Test
-  @DisplayName("레시피 스크랩 성공")
-  void scrapedRecipe_Success() {
+  @DisplayName("레시피 스크랩 취소 - SCRAPED -> CANCELED")
+  void scrapedRecipe_Success_ScrapedToCanceled() {
     // given
+    ScrapedRecipeEntity scrapedRecipe = ScrapedRecipeEntity.builder()
+        .user(user)
+        .recipe(recipe)
+        .scrapedType(ScrapedType.SCRAPED)
+        .build();
+
     when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(user.getUserId());
     when(userAccessHandler.findByUserId(user.getUserId())).thenReturn(user);
     when(recipeRepository.findById(recipe.getId())).thenReturn(Optional.of(recipe));
+    when(scrapedRecipeRepository.findByUserAndRecipe(user, recipe)).thenReturn(scrapedRecipe);
+
+    // when
+    ResultResponse result = recipeService.scrapedRecipe(request, recipe.getId());
+
+    // then
+    assertEquals("레시피 찜하기 취소 성공", result.getMessage());
+    assertEquals(ScrapedType.CANCELED, result.getData()); // SCRAPED -> CANCELED
+
+    // verify
+    verify(scrapedRecipeRepository, times(1)).findByUserAndRecipe(any(), any());
+    verify(scrapedRecipeRepository, times(1)).save(any());
+  }
+
+  @Test
+  @DisplayName("레시피 스크랩 성공 - CANCELED -> SCRAPED")
+  void scrapedRecipe_Success_CanceledToScraped() {
+    // given
+    ScrapedRecipeEntity scrapedRecipe = ScrapedRecipeEntity.builder()
+        .user(user)
+        .recipe(recipe)
+        .scrapedType(ScrapedType.CANCELED)
+        .build();
+
+    when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(user.getUserId());
+    when(userAccessHandler.findByUserId(user.getUserId())).thenReturn(user);
+    when(recipeRepository.findById(recipe.getId())).thenReturn(Optional.of(recipe));
+    when(scrapedRecipeRepository.findByUserAndRecipe(user, recipe)).thenReturn(scrapedRecipe);
 
     // when
     ResultResponse result = recipeService.scrapedRecipe(request, recipe.getId());
 
     // then
     assertEquals("레시피 찜하기 성공", result.getMessage());
+    assertEquals(ScrapedType.SCRAPED, result.getData());
 
     // verify
+    verify(scrapedRecipeRepository, times(1)).findByUserAndRecipe(any(), any());
+    verify(scrapedRecipeRepository, times(1)).save(any());
+  }
+
+  @Test
+  @DisplayName("레시피 스크랩 성공 - 기존 스크랩 없음")
+  void scrapedRecipe_Success_NewScraped() {
+    // given
+    when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(user.getUserId());
+    when(userAccessHandler.findByUserId(user.getUserId())).thenReturn(user);
+    when(recipeRepository.findById(recipe.getId())).thenReturn(Optional.of(recipe));
+    when(scrapedRecipeRepository.findByUserAndRecipe(user, recipe)).thenReturn(null); // 기존 스크랩 없음
+
+    // when
+    ResultResponse result = recipeService.scrapedRecipe(request, recipe.getId());
+
+    // then
+    assertEquals("레시피 찜하기 성공", result.getMessage());
+    assertEquals(ScrapedType.SCRAPED, result.getData());
+
+    // verify
+    verify(scrapedRecipeRepository, times(1)).findByUserAndRecipe(any(), any());
     verify(scrapedRecipeRepository, times(1)).save(any());
   }
 }

@@ -29,19 +29,21 @@ public class RecipeController {
 
   @GetMapping
   public ResponseEntity<ResultResponse> getRecipes(
+      HttpServletRequest request,
       @RequestParam(value = "page", defaultValue = "0") int page,
       @RequestParam(value = "size", defaultValue = "15") int size
   ) {
-    return ResponseEntity.ok(recipeService.getRecipes(page, size));
+    return ResponseEntity.ok(recipeService.getRecipes(request, page, size));
   }
 
   @GetMapping("/search")
   public ResponseEntity<ResultResponse> searchRecipes(
+      HttpServletRequest request,
       @Valid @RequestBody RecipesSearchDTO recipesSearchDTO,
       @RequestParam(value = "page", defaultValue = "0") int page,
       @RequestParam(value = "size", defaultValue = "15") int size
   ) {
-    return ResponseEntity.ok(recipeService.searchRecipes(recipesSearchDTO, page, size));
+    return ResponseEntity.ok(recipeService.searchRecipes(request, recipesSearchDTO, page, size));
   }
 
   @GetMapping("/{recipeId}")
@@ -53,10 +55,11 @@ public class RecipeController {
 
   @GetMapping("/popular")
   public ResponseEntity<ResultResponse> getRecipesByRating(
+      HttpServletRequest request,
       @RequestParam(value = "page", defaultValue = "0") int page,
       @RequestParam(value = "size", defaultValue = "15") int size
   ) {
-    return ResponseEntity.ok(recipeService.getRecipesByRating(page, size));
+    return ResponseEntity.ok(recipeService.getRecipesByRating(request, page, size));
   }
 
   @PostMapping

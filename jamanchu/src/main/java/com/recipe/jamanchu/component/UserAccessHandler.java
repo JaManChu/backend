@@ -2,10 +2,10 @@ package com.recipe.jamanchu.component;
 
 import com.recipe.jamanchu.auth.oauth2.KakaoUserDetails;
 import com.recipe.jamanchu.entity.UserEntity;
-import com.recipe.jamanchu.exceptions.exception.DuplicatedNicknameException;
 import com.recipe.jamanchu.exceptions.exception.PasswordMismatchException;
 import com.recipe.jamanchu.exceptions.exception.SocialAccountException;
 import com.recipe.jamanchu.exceptions.exception.UserNotFoundException;
+import com.recipe.jamanchu.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.model.type.ResultCode;
 import com.recipe.jamanchu.model.type.UserRole;
 import com.recipe.jamanchu.repository.UserRepository;
@@ -64,24 +64,23 @@ public class UserAccessHandler {
   }
 
   // 이메일 중복 체크
-  public ResultCode existsByEmail(String email){
+  public ResultResponse existsByEmail(String email){
 
     if (userRepository.existsByEmail(email)) {
-      return ResultCode.EMAIL_ALREADY_IN_USE;
+      return ResultResponse.of(ResultCode.EMAIL_ALREADY_IN_USE, false);
     }
 
-    return ResultCode.EMAIL_AVAILABLE;
+    return ResultResponse.of(ResultCode.EMAIL_AVAILABLE, true);
   }
 
   // 닉네임 중복 체크
-  public void existsByNickname(String nickname){
+  public ResultResponse existsByNickname(String nickname){
 
-    log.info("existsByNickname -> nickname : {}", nickname);
     if (userRepository.existsByNickname(nickname)) {
-
-      log.info("Nickname is Duplicated!");
-      throw new DuplicatedNicknameException();
+      return ResultResponse.of(ResultCode.NICKNAME_ALREADY_IN_USE, false);
     }
+
+    return ResultResponse.of(ResultCode.NICKNAME_AVAILABLE, true);
   }
 
   // 소셜 계정 정보 체크
@@ -92,13 +91,6 @@ public class UserAccessHandler {
 
       log.info("is Social User!");
       throw new SocialAccountException();
-    }
-  }
-
-  // 비밀번호 일치 여부 체크
-  public void validatePassword(String enPassword, String password) {
-    if (!passwordEncoder.matches(password, enPassword)) {
-      throw new PasswordMismatchException();
     }
   }
 
@@ -113,6 +105,26 @@ public class UserAccessHandler {
   @Transactional
   public void deleteUser(UserEntity user) {
     userRepository.delete(user);
+  }
+
+  // 비밀번호 일치 여부 체크
+  // 회원 탈퇴시 사용하는 메서드
+  // 아직 회원 탈퇴 부분은 협의를 하지 않아서,
+  // 해당 메서드는 추후에 수정할 예정
+  public void validatePassword(String enPassword, String password) {
+    if (!passwordEncoder.matches(password, enPassword)) {
+      throw new PasswordMismatchException();
+    }
+  }
+
+  // 비밀번호 일치 여부 체크 (회원 정보 수정)
+  // 회원정보 수정 하기 전 기존 비밀번호를 확인 하는 메서드
+  // 비밀 번호 일치 여부 반환
+  public ResultResponse validateBeforePW(String enPassword, String password) {
+    if (!passwordEncoder.matches(password, enPassword)) {
+      return ResultResponse.of(ResultCode.PASSWORD_MISMATCH, false);
+    }
+    return ResultResponse.of(ResultCode.PASSWORD_MATCH, true);
   }
 }
 

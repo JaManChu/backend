@@ -13,12 +13,20 @@ import com.recipe.jamanchu.model.dto.request.auth.SignupDTO;
 import com.recipe.jamanchu.model.dto.request.auth.UserUpdateDTO;
 import com.recipe.jamanchu.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.model.dto.response.auth.UserInfoDTO;
+import com.recipe.jamanchu.model.dto.response.mypage.MyRecipeInfo;
+import com.recipe.jamanchu.model.dto.response.mypage.MyRecipes;
+import com.recipe.jamanchu.model.dto.response.mypage.MyScrapedRecipes;
+import com.recipe.jamanchu.model.dto.response.mypage.PageResponse;
 import com.recipe.jamanchu.model.type.ResultCode;
+import com.recipe.jamanchu.model.type.ScrapedType;
 import com.recipe.jamanchu.model.type.TokenType;
 import com.recipe.jamanchu.model.type.UserRole;
+import com.recipe.jamanchu.repository.RecipeRepository;
 import com.recipe.jamanchu.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -37,13 +45,11 @@ public class UserServiceImpl implements UserService {
   private final JwtUtil jwtUtil;
   private final CustomOauth2UserService oauth2UserService;
   private final String REDIRECT_URI = "https://frontend-dun-eight-78.vercel.app/users/login/auth/kakao";
+  private final RecipeRepository recipeRepository;
 
   // 회원가입
   @Override
   public ResultCode signup(SignupDTO signupDTO) {
-
-    // 닉네임 중복 체크
-    userAccessHandler.existsByNickname(signupDTO.getNickname());
 
     // 회원 정보 저장
     userAccessHandler.saveUser(UserEntity.builder()
@@ -105,22 +111,14 @@ public class UserServiceImpl implements UserService {
     UserEntity user = userAccessHandler
         .findByUserId(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue())));
 
-    // 비밀번호 중복 체크
-    userAccessHandler.validatePassword(user.getPassword(), userUpdateDTO.getBeforePassword());
-
     // 소셜 계정 체크
     userAccessHandler.isSocialUser(user.getProvider());
-
-    // 닉네임 중복 체크
-    if (!user.getNickname().equals(userUpdateDTO.getNickname())) {
-      userAccessHandler.existsByNickname(userUpdateDTO.getNickname());
-    }
 
     // 회원 정보 저장
     userAccessHandler.saveUser(UserEntity.builder()
         .userId(user.getUserId())
         .email(user.getEmail())
-        .password(passwordEncoder.encode(userUpdateDTO.getAfterPassword()))
+        .password(passwordEncoder.encode(userUpdateDTO.getPassword()))
         .nickname(userUpdateDTO.getNickname())
         .role(user.getRole())
         .build());
@@ -146,12 +144,46 @@ public class UserServiceImpl implements UserService {
   // 회원 정보 조회
   @Override
   public ResultResponse getUserInfo(HttpServletRequest request) {
+    System.out.println("UserServiceImpl.getUserInfo");
 
     UserEntity user = userAccessHandler
         .findByUserId(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue())));
 
     return new ResultResponse(SUCCESS_GET_USER_INFO,
         new UserInfoDTO(user.getEmail(), user.getNickname()));
+  }
+
+  // 내가 찜한 레시피 & 내가 스크랩한 레시피 조회
+  @Override
+  public ResultResponse getUserRecipes(int myRecipePage, int scrapRecipePage, HttpServletRequest request) {
+    UserEntity user = userAccessHandler
+        .findByUserId(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue())));
+
+    List<MyRecipes> myRecipes = recipeRepository.findAllByUser(user)
+        .map(recipeEntities -> recipeEntities.stream()
+            .map(recipe -> new MyRecipes(
+                recipe.getId(),
+                recipe.getName(),
+                recipe.getThumbnail()
+            )).toList())
+        .orElse(new ArrayList<>());
+
+    List<MyScrapedRecipes> myScrapedRecipes = recipeRepository.findScrapRecipeByUser(user, ScrapedType.SCRAPED)
+        .map(recipeEntities -> recipeEntities.stream()
+            .map(scraped -> new MyScrapedRecipes(
+                scraped.getId(),
+                scraped.getName(),
+                scraped.getUser().getNickname(),
+                scraped.getThumbnail()
+            )).toList())
+        .orElse(new ArrayList<>());
+
+    MyRecipeInfo myRecipeInfo = new MyRecipeInfo(
+        PageResponse.pagination(myRecipes, myRecipePage),
+        PageResponse.pagination(myScrapedRecipes, scrapRecipePage)
+    );
+
+    return new ResultResponse(ResultCode.SUCCESS_GET_USER_RECIPES_INFO, myRecipeInfo);
   }
 
 

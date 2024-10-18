@@ -1,12 +1,18 @@
 package com.recipe.jamanchu.controller;
 
 import com.recipe.jamanchu.exceptions.exception.MissingEmailException;
+import com.recipe.jamanchu.exceptions.exception.MissingNicknameException;
+import com.recipe.jamanchu.model.dto.request.auth.PasswordCheckDTO;
 import com.recipe.jamanchu.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.service.AuthService;
-import lombok.Getter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,10 +26,37 @@ public class AuthController {
 
 
   @GetMapping("/email-check")
-  public ResponseEntity<ResultResponse> checkEmail(@RequestParam(name = "email", required = false) String email) {
+  public ResponseEntity<ResultResponse> checkEmail(
+      @RequestParam(name = "email", required = false) String email) {
+
     if (email == null) {
       throw new MissingEmailException();
     }
-    return ResponseEntity.ok(ResultResponse.of(authService.checkEmail(email)));
+    return ResponseEntity.ok(authService.checkEmail(email));
+  }
+
+  @GetMapping("/nickname-check")
+  public ResponseEntity<ResultResponse> checkNickname(
+      @RequestParam(name = "nickname", required = false) String nickname) {
+
+    if (nickname == null) {
+      throw new MissingNicknameException();
+    }
+    return ResponseEntity.ok(authService.checkNickname(nickname));
+  }
+
+  @GetMapping("/token/refresh")
+  public ResponseEntity<ResultResponse> refreshToken(HttpServletRequest request,
+      HttpServletResponse response) {
+
+    return ResponseEntity.ok(authService.refreshToken(request, response));
+  }
+
+  @PostMapping("/password-check")
+  public ResponseEntity<ResultResponse> checkPassword(
+      @Valid @RequestBody PasswordCheckDTO passwordCheckDTO,
+      HttpServletRequest request) {
+
+    return ResponseEntity.ok(authService.checkPassword(passwordCheckDTO, request));
   }
 }

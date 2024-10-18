@@ -10,9 +10,9 @@ import com.recipe.jamanchu.auth.jwt.JwtUtil;
 import com.recipe.jamanchu.auth.oauth2.CustomOauth2UserService;
 import com.recipe.jamanchu.auth.oauth2.KakaoUserDetails;
 import com.recipe.jamanchu.component.UserAccessHandler;
+import com.recipe.jamanchu.entity.RecipeEntity;
 import com.recipe.jamanchu.entity.UserEntity;
 import com.recipe.jamanchu.exceptions.exception.AccessTokenRetrievalException;
-import com.recipe.jamanchu.exceptions.exception.DuplicatedNicknameException;
 import com.recipe.jamanchu.exceptions.exception.PasswordMismatchException;
 import com.recipe.jamanchu.exceptions.exception.SocialAccountException;
 import com.recipe.jamanchu.exceptions.exception.UserNotFoundException;
@@ -22,13 +22,24 @@ import com.recipe.jamanchu.model.dto.request.auth.SignupDTO;
 import com.recipe.jamanchu.model.dto.request.auth.UserUpdateDTO;
 import com.recipe.jamanchu.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.model.dto.response.auth.UserInfoDTO;
+import com.recipe.jamanchu.model.dto.response.mypage.MyRecipeInfo;
+import com.recipe.jamanchu.model.dto.response.mypage.MyRecipes;
+import com.recipe.jamanchu.model.dto.response.mypage.MyScrapedRecipes;
+import com.recipe.jamanchu.model.dto.response.mypage.PageResponse;
+import com.recipe.jamanchu.model.type.CookingTimeType;
+import com.recipe.jamanchu.model.type.LevelType;
+import com.recipe.jamanchu.model.type.RecipeProvider;
 import com.recipe.jamanchu.model.type.ResultCode;
+import com.recipe.jamanchu.model.type.ScrapedType;
 import com.recipe.jamanchu.model.type.TokenType;
 import com.recipe.jamanchu.model.type.UserRole;
+import com.recipe.jamanchu.repository.RecipeRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -61,6 +72,9 @@ class UserServiceImplTest {
   @Mock
   private CustomOauth2UserService customOauth2UserService;
 
+  @Mock
+  private RecipeRepository recipeRepository;
+
   @InjectMocks
   private UserServiceImpl userServiceimpl;
 
@@ -76,7 +90,10 @@ class UserServiceImplTest {
   private static final String REFRESH = "refresh-token";
   private static final String CODE = "kakaoCode";
   private static final String KAKAO_ACCESS_TOKEN = "kakaoAccessToken";
-  private final String REDIRECT_URI = "https://frontend-dun-eight-78.vercel.app/users/login/auth/kakao";
+  private static final String REDIRECT_URI = "https://frontend-dun-eight-78.vercel.app/users/login/auth/kakao";
+  private static final int MYRECIPEID = 1;
+  private static final int MYSCRAPEDRECIPEID = 1;
+
 
   private SignupDTO signup;
   private UserUpdateDTO userUpdateDTO;
@@ -86,12 +103,16 @@ class UserServiceImplTest {
   private UserInfoDTO userInfoDTO;
   private LoginDTO loginDTO;
   private KakaoUserDetails kakaoUserDetails;
+  private List<RecipeEntity> myRecipeList;
+  private List<RecipeEntity> myScrapRecipeList;
+  private List<MyRecipes> myRecipes;
+  private List<MyScrapedRecipes> myScrapedRecipes;
 
 
   @BeforeEach
   void setUp() {
     signup = new SignupDTO(EMAIL, PASSWORD, NICKNAME);
-    userUpdateDTO = new UserUpdateDTO(NEW_NICKNAME, BEFORE_PASSWORD, AFTER_PASSWORD);
+    userUpdateDTO = new UserUpdateDTO(NEW_NICKNAME, PASSWORD);
     deleteUserDTO = new DeleteUserDTO(PASSWORD);
     userInfoDTO = new UserInfoDTO(EMAIL, NICKNAME);
     loginDTO = new LoginDTO(EMAIL, PASSWORD);
@@ -128,30 +149,52 @@ class UserServiceImplTest {
     attributes.put("properties", properties);
 
     kakaoUserDetails = new KakaoUserDetails(attributes);
+
+    myRecipeList = List.of(
+        new RecipeEntity(
+            1L, user, "레시피 1", LevelType.LOW, CookingTimeType.TEN_MINUTES,
+            "thumbnail 1", RecipeProvider.USER, null, null, null, null, null, null),
+        new RecipeEntity(
+            2L, user, "레시피 2", LevelType.MEDIUM, CookingTimeType.FIFTEEN_MINUTES,
+            "thumbnail 2", RecipeProvider.USER, null, null, null, null, null, null)
+    );
+
+    myScrapRecipeList = List.of(
+        new RecipeEntity(
+            3L, kakaoUser, "레시피 3", LevelType.LOW, CookingTimeType.TEN_MINUTES,
+            "thumbnail 3", RecipeProvider.USER, null, null, null, null, null, null),
+        new RecipeEntity(
+            4L, kakaoUser, "레시피 4", LevelType.MEDIUM, CookingTimeType.FIFTEEN_MINUTES,
+            "thumbnail 4", RecipeProvider.USER, null, null, null, null, null, null)
+    );
+
+    myRecipes = myRecipeList.stream()
+        .limit(20)
+        .map(recipe -> new MyRecipes(
+            recipe.getId(),
+            recipe.getName(),
+            recipe.getThumbnail()
+        )).toList();
+
+    myScrapedRecipes = myScrapRecipeList.stream()
+        .limit(20)
+        .map(scraped -> new MyScrapedRecipes(
+            scraped.getId(),
+            scraped.getName(),
+            scraped.getUser().getNickname(),
+            scraped.getThumbnail()
+        )).toList();
   }
 
   @Test
   @DisplayName("회원가입 성공")
   void signup_Success() {
-    // given
-    doNothing().when(userAccessHandler).existsByNickname(signup.getNickname());
 
     // when
     ResultCode result = userServiceimpl.signup(signup);
 
     // then
     assertEquals(ResultCode.SUCCESS_SIGNUP, result);
-  }
-
-  @Test
-  @DisplayName("회원가입 실패 : 중복된 닉네임")
-  void signup_DuplicationNickname() {
-    // given
-    doThrow(new DuplicatedNicknameException()).when(userAccessHandler)
-        .existsByNickname(signup.getNickname());
-
-    // when then
-    assertThrows(DuplicatedNicknameException.class, () -> userServiceimpl.signup(signup));
   }
 
   @Test
@@ -247,28 +290,8 @@ class UserServiceImplTest {
     when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(USERID);
     when(userAccessHandler.findByUserId(USERID)).thenReturn(user);
 
-    doNothing().when(userAccessHandler).validatePassword(user.getPassword(), BEFORE_PASSWORD);
     doNothing().when(userAccessHandler).isSocialUser(user.getProvider());
-    doNothing().when(userAccessHandler).existsByNickname(userUpdateDTO.getNickname());
 
-    // when
-    ResultCode result = userServiceimpl.updateUserInfo(request, userUpdateDTO);
-
-    // then
-    assertEquals(ResultCode.SUCCESS_UPDATE_USER_INFO, result);
-  }
-
-  @Test
-  @DisplayName("회원정보 수정 성공 - 패스워드만 변경")
-  void updateUserInfo_SuccessForPassword() {
-    // given
-    UserUpdateDTO userUpdateDTO = new UserUpdateDTO("nickname", BEFORE_PASSWORD, AFTER_PASSWORD);
-
-    when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(USERID);
-    when(userAccessHandler.findByUserId(USERID)).thenReturn(user);
-
-    doNothing().when(userAccessHandler).validatePassword(user.getPassword(), BEFORE_PASSWORD);
-    doNothing().when(userAccessHandler).isSocialUser(user.getProvider());
     // when
     ResultCode result = userServiceimpl.updateUserInfo(request, userUpdateDTO);
 
@@ -289,51 +312,16 @@ class UserServiceImplTest {
   }
 
   @Test
-  @DisplayName("회원정보 수정 실패 : 비밀번호가 일치하지 않은 경우")
-  void updateUserInfo_PasswordMisMatch() {
-    // given
-    when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(USERID);
-    when(userAccessHandler.findByUserId(USERID)).thenReturn(user);
-
-    doThrow(new PasswordMismatchException()).when(userAccessHandler)
-        .validatePassword(user.getPassword(), BEFORE_PASSWORD);
-
-    // when then
-    assertThrows(PasswordMismatchException.class,
-        () -> userServiceimpl.updateUserInfo(request, userUpdateDTO));
-  }
-
-  @Test
   @DisplayName("회원정보 수정 실패 : 카카오로 로그인을 한 회원")
   void updateUserInfo_SocialAccountException() {
     // given
     when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(USERID);
     when(userAccessHandler.findByUserId(USERID)).thenReturn(kakaoUser);
 
-    doNothing().when(userAccessHandler).validatePassword(user.getPassword(), BEFORE_PASSWORD);
-
     doThrow(new SocialAccountException()).when(userAccessHandler).isSocialUser(kakaoUser.getProvider());
 
     // when then
     assertThrows(SocialAccountException.class,
-        () -> userServiceimpl.updateUserInfo(request, userUpdateDTO));
-  }
-
-  @Test
-  @DisplayName("회원정보 수정 실패 : 닉네임이 중복인 경우")
-  void updateUserInfo_DuplicationNickname() {
-    // given
-    when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(USERID);
-    when(userAccessHandler.findByUserId(USERID)).thenReturn(user);
-
-    doNothing().when(userAccessHandler).validatePassword(user.getPassword(), BEFORE_PASSWORD);
-    doNothing().when(userAccessHandler).isSocialUser(user.getProvider());
-
-    doThrow(new DuplicatedNicknameException()).when(userAccessHandler)
-        .existsByNickname(userUpdateDTO.getNickname());
-
-    // when then
-    assertThrows(DuplicatedNicknameException.class,
         () -> userServiceimpl.updateUserInfo(request, userUpdateDTO));
   }
 
@@ -425,4 +413,67 @@ class UserServiceImplTest {
         () -> userServiceimpl.getUserInfo(request));
   }
 
+  @Test
+  @DisplayName("마이페이지 레시피 정보 조회 성공")
+  void getUserRecipeInfo_Success() {
+    // given
+    when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(USERID);
+    when(userAccessHandler.findByUserId(USERID)).thenReturn(user);
+    when(recipeRepository.findAllByUser(user)).thenReturn(Optional.of(myRecipeList));
+    when(recipeRepository.findScrapRecipeByUser(user, ScrapedType.SCRAPED)).thenReturn(Optional.of(myScrapRecipeList));
+
+    PageResponse<MyRecipes> myRecipesPage = PageResponse.pagination(myRecipes, MYRECIPEID);
+    PageResponse<MyScrapedRecipes> myScrapedRecipesPage = PageResponse.pagination(myScrapedRecipes, MYSCRAPEDRECIPEID);
+
+    ResultResponse expectedResponse = new ResultResponse(ResultCode.SUCCESS_GET_USER_RECIPES_INFO,
+        new MyRecipeInfo(myRecipesPage, myScrapedRecipesPage)
+    );
+
+    // when
+    ResultResponse actualResponse = userServiceimpl.getUserRecipes(MYRECIPEID, MYSCRAPEDRECIPEID, request);
+
+    MyRecipeInfo expectedRecipeInfo = (MyRecipeInfo) expectedResponse.getData();
+    MyRecipeInfo actualRecipeInfo = (MyRecipeInfo) actualResponse.getData();
+
+    // then
+    assertEquals(expectedResponse.getCode(), actualResponse.getCode());
+
+    assertEquals(expectedRecipeInfo.getMyRecipes().getTotalPage(), actualRecipeInfo.getMyRecipes().getTotalPage());
+    assertEquals(expectedRecipeInfo.getMyScrapedRecipes().getTotalPage(), actualRecipeInfo.getMyScrapedRecipes().getTotalPage());
+
+    assertEquals(expectedRecipeInfo.getMyRecipes().getTotalData(), actualRecipeInfo.getMyRecipes().getTotalData());
+    assertEquals(expectedRecipeInfo.getMyScrapedRecipes().getTotalData(), actualRecipeInfo.getMyScrapedRecipes().getTotalData());
+
+    for (int i = 0; i < expectedRecipeInfo.getMyRecipes().getDataList().size(); i++) {
+      MyRecipes expectedMyRecipe = expectedRecipeInfo.getMyRecipes().getDataList().get(i);
+      MyRecipes actualMyRecipe = actualRecipeInfo.getMyRecipes().getDataList().get(i);
+      assertEquals(expectedMyRecipe.getMyRecipeId(), actualMyRecipe.getMyRecipeId());
+      assertEquals(expectedMyRecipe.getMyRecipeName(), actualMyRecipe.getMyRecipeName());
+      assertEquals(expectedMyRecipe.getMyRecipeThumbnail(), actualMyRecipe.getMyRecipeThumbnail());
+    }
+
+    for (int i = 0; i < expectedRecipeInfo.getMyScrapedRecipes().getDataList().size(); i++) {
+      MyScrapedRecipes expectedScrapedRecipe = expectedRecipeInfo.getMyScrapedRecipes().getDataList().get(i);
+      MyScrapedRecipes actualScrapedRecipe = actualRecipeInfo.getMyScrapedRecipes().getDataList().get(i);
+      assertEquals(expectedScrapedRecipe.getRecipeId(), actualScrapedRecipe.getRecipeId());
+      assertEquals(expectedScrapedRecipe.getRecipeName(), actualScrapedRecipe.getRecipeName());
+      assertEquals(expectedScrapedRecipe.getRecipeAuthor(), actualScrapedRecipe.getRecipeAuthor());
+      assertEquals(expectedScrapedRecipe.getRecipeThumbnail(), actualScrapedRecipe.getRecipeThumbnail());
+    }
+  }
+
+  @Test
+  @DisplayName("마이페이지 레시피 정보 조회 실패 : 사용자 없음")
+  void getUserRecipeInfo_UserNotFound() {
+    // given
+    when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(USERID);
+    when(userAccessHandler.findByUserId(USERID)).thenThrow(new UserNotFoundException());
+
+    // when then
+    assertThrows(UserNotFoundException.class,
+        () -> userServiceimpl.getUserRecipes(MYRECIPEID, MYSCRAPEDRECIPEID, request));
+  }
 }
+
+
+
