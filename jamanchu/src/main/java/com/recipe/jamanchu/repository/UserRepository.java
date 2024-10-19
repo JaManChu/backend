@@ -20,7 +20,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
   Optional<UserEntity> findByUserId(Long userId);
 
-  @Query("SELECT u FROM UserEntity u WHERE DATE(u.deletedAt) = CURRENT_DATE")
+  @Query("SELECT u FROM UserEntity u WHERE u.deletionScheduledAt = CURRENT_DATE")
   List<UserEntity> findAllDeletedToday();
 
   @Modifying

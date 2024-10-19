@@ -10,12 +10,12 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
+import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.SQLRestriction;
 
 @Getter
 @AllArgsConstructor
@@ -23,7 +23,7 @@ import org.hibernate.annotations.SQLRestriction;
 @Builder
 @Entity
 @SQLDelete(sql = "UPDATE user "
-    + "SET deleted_at = DATE_ADD(now(), INTERVAL 1 MONTH) "
+    + "SET deletion_scheduled_at = DATE_ADD(now(), INTERVAL 1 MONTH) "
     + "WHERE usr_id = ?")
 @Table(name = "user")
 public class UserEntity extends BaseTimeEntity {
@@ -54,5 +54,8 @@ public class UserEntity extends BaseTimeEntity {
   @NotNull
   @Enumerated(EnumType.STRING)
   private UserRole role;
+
+  @Column(name = "deletion_scheduled_at")
+  private LocalDate deletionScheduledAt;
 }
 
