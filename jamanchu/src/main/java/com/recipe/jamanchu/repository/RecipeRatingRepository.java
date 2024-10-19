@@ -1,6 +1,9 @@
 package com.recipe.jamanchu.repository;
 
+import com.recipe.jamanchu.entity.RecipeEntity;
 import com.recipe.jamanchu.entity.RecipeRatingEntity;
+import com.recipe.jamanchu.entity.UserEntity;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,4 +14,9 @@ public interface RecipeRatingRepository extends JpaRepository<RecipeRatingEntity
 
   @Query("SELECT AVG(r.rating) FROM RecipeRatingEntity r WHERE r.recipe.id = :recipeId")
   Double findAverageRatingByRecipeId(@Param("recipeId") Long recipeId);
+
+  boolean existsByUser(UserEntity user);
+
+  @Query("SELECT r.recipe FROM RecipeRatingEntity r GROUP BY r.recipe.id ORDER BY AVG(r.rating) DESC LIMIT 3")
+  List<RecipeEntity> findThreePopularRecipe();
 }
