@@ -48,7 +48,7 @@ public class UserServiceImpl implements UserService {
 
   // 회원가입
   @Override
-  public ResultCode signup(SignupDTO signupDTO) {
+  public ResultResponse signup(SignupDTO signupDTO) {
 
     // 회원 정보 저장
     userAccessHandler.saveUser(UserEntity.builder()
@@ -58,7 +58,7 @@ public class UserServiceImpl implements UserService {
         .role(UserRole.USER)
         .build());
 
-    return ResultCode.SUCCESS_SIGNUP;
+    return ResultResponse.of(ResultCode.SUCCESS_SIGNUP);
   }
 
   // 일반 로그인
@@ -105,7 +105,7 @@ public class UserServiceImpl implements UserService {
 
   // 회원 정보 수정
   @Override
-  public ResultCode updateUserInfo(HttpServletRequest request, UserUpdateDTO userUpdateDTO) {
+  public ResultResponse updateUserInfo(HttpServletRequest request, UserUpdateDTO userUpdateDTO) {
 
     UserEntity user = userAccessHandler
         .findByUserId(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue())));
@@ -122,17 +122,17 @@ public class UserServiceImpl implements UserService {
         .role(user.getRole())
         .build());
 
-    return ResultCode.SUCCESS_UPDATE_USER_INFO;
+    return ResultResponse.of(ResultCode.SUCCESS_UPDATE_USER_INFO);
   }
 
   // 회원 탈퇴
   @Override
-  public ResultCode deleteUser(HttpServletRequest request) {
+  public ResultResponse deleteUser(HttpServletRequest request) {
     UserEntity user = userAccessHandler
         .findByUserId(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue())));
 
     userAccessHandler.deleteUser(user);
-    return ResultCode.SUCCESS_DELETE_USER;
+    return ResultResponse.of(ResultCode.SUCCESS_DELETE_USER);
   }
 
   // 회원 정보 조회

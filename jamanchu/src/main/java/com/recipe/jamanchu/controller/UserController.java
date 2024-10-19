@@ -36,7 +36,7 @@ public class UserController {
   @PostMapping("/signup")
   public ResponseEntity<ResultResponse> signup(@Valid @RequestBody SignupDTO signupDTO) {
 
-    ResultResponse response = ResultResponse.of(userService.signup(signupDTO));
+    ResultResponse response = userService.signup(signupDTO);
     return ResponseEntity.status(response.getCode()).body(response);
   }
 
@@ -66,7 +66,7 @@ public class UserController {
       @Valid @RequestBody UserUpdateDTO userUpdateDTO) {
 
     return ResponseEntity.ok()
-        .body(ResultResponse.of(userService.updateUserInfo(request, userUpdateDTO)));
+        .body(userService.updateUserInfo(request, userUpdateDTO));
   }
 
   // 회원 탈퇴
@@ -74,7 +74,7 @@ public class UserController {
   public ResponseEntity<ResultResponse> deleteUser(HttpServletRequest request) {
 
     return ResponseEntity.ok()
-        .body(ResultResponse.of(userService.deleteUser(request)));
+        .body(userService.deleteUser(request));
   }
 
   // 회원 정보 조회

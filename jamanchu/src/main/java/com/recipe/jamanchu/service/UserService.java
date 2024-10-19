@@ -4,17 +4,16 @@ import com.recipe.jamanchu.model.dto.request.auth.LoginDTO;
 import com.recipe.jamanchu.model.dto.request.auth.SignupDTO;
 import com.recipe.jamanchu.model.dto.request.auth.UserUpdateDTO;
 import com.recipe.jamanchu.model.dto.response.ResultResponse;
-import com.recipe.jamanchu.model.type.ResultCode;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 public interface UserService {
 
-  ResultCode signup(SignupDTO signupDTO);
+  ResultResponse signup(SignupDTO signupDTO);
 
-  ResultCode updateUserInfo(HttpServletRequest request, UserUpdateDTO userUpdateDTO);
+  ResultResponse updateUserInfo(HttpServletRequest request, UserUpdateDTO userUpdateDTO);
 
-  ResultCode deleteUser(HttpServletRequest request);
+  ResultResponse deleteUser(HttpServletRequest request);
 
   ResultResponse getUserInfo(HttpServletRequest request);
 
