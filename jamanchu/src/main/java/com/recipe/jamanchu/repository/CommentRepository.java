@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface CommentRepository extends JpaRepository<CommentEntity, Long> {
-  List<CommentEntity> findAllByRecipe(RecipeEntity recipe);
+  List<CommentEntity> findAllByRecipeOrderByCreatedAtAsc(RecipeEntity recipe);
 }

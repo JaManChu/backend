@@ -134,7 +134,7 @@ public class CommentsServiceImpl implements CommentsService {
     RecipeEntity recipe = recipeRepository.findById(recipeId)
         .orElseThrow(RecipeNotFoundException::new);
 
-    List<CommentEntity> allByRecipe = commentRepository.findAllByRecipe(recipe);
+    List<CommentEntity> allByRecipe = commentRepository.findAllByRecipeOrderByCreatedAtAsc(recipe);
 
     Comments comments = Comments.of(
         allByRecipe.stream()
