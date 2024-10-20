@@ -25,7 +25,7 @@ public class RecipesUpdateDTO extends RecipesDTO{
       String recipeName,
       LevelType level,
       CookingTimeType cookingTime,
-      MultipartFile recipeThumbnail,
+      String recipeThumbnail,
       List<Ingredient> ingredients,
       List<RecipesManual> manuals,
       Long recipeId) {
