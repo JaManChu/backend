@@ -10,7 +10,6 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import lombok.Getter;
-import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 public class RecipesDTO {
@@ -28,7 +27,7 @@ public class RecipesDTO {
   private final CookingTimeType recipeCookingTime;
 
   @JsonProperty("recipeThumbnail")
-  private final MultipartFile recipeThumbnail;
+  private final String recipeThumbnail;
 
   @NotNull(message = "레시피 재료를 입력해주세요.")
   @JsonProperty("recipeIngredients")
@@ -39,7 +38,7 @@ public class RecipesDTO {
   private final List<RecipesManual> recipeOrderContents;
 
   @JsonCreator
-  public RecipesDTO(String recipeName, LevelType recipeLevel, CookingTimeType recipeCookingTime, MultipartFile recipeThumbnail, List<Ingredient> recipeIngredients, List<RecipesManual> recipeOrderContents) {
+  public RecipesDTO(String recipeName, LevelType recipeLevel, CookingTimeType recipeCookingTime, String recipeThumbnail, List<Ingredient> recipeIngredients, List<RecipesManual> recipeOrderContents) {
     this.recipeName = recipeName;
     this.recipeLevel = recipeLevel;
     this.recipeCookingTime = recipeCookingTime;

@@ -63,7 +63,7 @@ public class RecipeServiceImpl implements RecipeService {
 
   @Override
   @Transactional
-  public ResultResponse registerRecipe(HttpServletRequest request, RecipesDTO recipesDTO) {
+  public ResultResponse registerRecipe(HttpServletRequest request, RecipesDTO recipesDTO, String thumbnail, List<String> orderImages) {
     Long userId = jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()));
 
     UserEntity user = userAccessHandler.findByUserId(userId);
@@ -73,7 +73,7 @@ public class RecipeServiceImpl implements RecipeService {
         .name(recipesDTO.getRecipeName())
         .level(recipesDTO.getRecipeLevel())
         .time(recipesDTO.getRecipeCookingTime())
-        .thumbnail(String.valueOf(recipesDTO.getRecipeThumbnail()))
+        .thumbnail(thumbnail)
         .provider(USER)
         .build();
 
@@ -120,7 +120,7 @@ public class RecipeServiceImpl implements RecipeService {
       ManualEntity manual = ManualEntity.builder()
           .recipe(recipe)
           .manualContent(recipesDTO.getRecipeOrderContents().get(i).getRecipeOrderContent())
-          .manualPicture(recipesDTO.getRecipeOrderContents().get(i).getRecipeOrderImage())
+          .manualPicture(i < orderImages.size() ? orderImages.get(i) : null)
           .build();
 
       manuals.add(manual);
@@ -134,7 +134,7 @@ public class RecipeServiceImpl implements RecipeService {
   @Override
   @Transactional
   public ResultResponse updateRecipe(HttpServletRequest request,
-      RecipesUpdateDTO recipesUpdateDTO) {
+      RecipesUpdateDTO recipesUpdateDTO, String thumbnail, List<String> orderImages) {
     Long userId = jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()));
 
     UserEntity user = userAccessHandler.findByUserId(userId);
@@ -150,7 +150,7 @@ public class RecipeServiceImpl implements RecipeService {
 
     recipe.updateRecipe(recipesUpdateDTO.getRecipeName(),
         recipesUpdateDTO.getRecipeLevel(), recipesUpdateDTO.getRecipeCookingTime(),
-        String.valueOf(recipesUpdateDTO.getRecipeThumbnail()));
+      thumbnail);
 
     // 기존 recipeId로 저장된 재료 삭제
     recipeIngredientMappingRepository.deleteAllByRecipeId(recipeId);
@@ -199,7 +199,7 @@ public class RecipeServiceImpl implements RecipeService {
       ManualEntity manual = ManualEntity.builder()
           .recipe(recipe)
           .manualContent(recipesUpdateDTO.getRecipeOrderContents().get(i).getRecipeOrderContent())
-          .manualPicture(recipesUpdateDTO.getRecipeOrderContents().get(i).getRecipeOrderImage())
+          .manualPicture(i < orderImages.size() ? orderImages.get(i) : null)
           .build();
 
       manuals.add(manual);

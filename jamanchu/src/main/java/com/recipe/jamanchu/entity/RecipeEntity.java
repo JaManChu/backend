@@ -86,8 +86,4 @@ public class RecipeEntity extends BaseTimeEntity{
     this.time = time;
     this.thumbnail = thumbnail;
   }
-
-  public void updateThumbnail(String newThumbnail) {
-    this.thumbnail = newThumbnail;
-  }
 }

@@ -42,7 +42,7 @@ public class RecipeController {
   @GetMapping("/search")
   public ResponseEntity<ResultResponse> searchRecipes(
       HttpServletRequest request,
-      @RequestParam(value = "ingredientName",required = false) List<String> ingredients,
+      @RequestParam(value = "ingredientName", required = false) List<String> ingredients,
       @RequestParam(value = "recipeLevel", required = false) LevelType recipeLevel,
       @RequestParam(value = "recipeCookingTime", required = false) CookingTimeType recipeCookingTime,
       @RequestParam(value = "page", defaultValue = "0") int page,
@@ -71,8 +71,12 @@ public class RecipeController {
   @PostMapping
   public ResponseEntity<ResultResponse> registerRecipe(
       HttpServletRequest request,
-      @Valid @RequestBody RecipesDTO recipesDTO) {
-    return ResponseEntity.ok(recipeService.registerRecipe(request, recipesDTO));
+      @Valid @RequestBody RecipesDTO recipesDTO,
+      @RequestParam("thumbnailUrl") String thumbnailUrl,
+      @RequestParam(value = "recipeOrderImagesUrl", required = false) List<String> recipeOrderImagesUrl) {
+
+    // 레시피 등록 서비스 호출
+    return ResponseEntity.ok(recipeService.registerRecipe(request, recipesDTO, thumbnailUrl, recipeOrderImagesUrl));
   }
 
   @PostMapping("/{recipeId}/scrap")
@@ -85,8 +89,10 @@ public class RecipeController {
   @PutMapping
   public ResponseEntity<ResultResponse> updateRecipe(
       HttpServletRequest request,
-      @Valid @RequestBody RecipesUpdateDTO recipesUpdateDTO) {
-    return ResponseEntity.ok(recipeService.updateRecipe(request, recipesUpdateDTO));
+      @Valid @RequestBody RecipesUpdateDTO recipesUpdateDTO,
+      @RequestParam("thumbnailUrl") String thumbnailUrl,
+      @RequestParam("recipeOrderImagesUrl") List<String> recipeOrderImagesUrl) {
+    return ResponseEntity.ok(recipeService.updateRecipe(request, recipesUpdateDTO, thumbnailUrl, recipeOrderImagesUrl));
   }
 
   @DeleteMapping
