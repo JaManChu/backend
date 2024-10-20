@@ -99,6 +99,7 @@ public class UserServiceImpl implements UserService {
     return UriComponentsBuilder.fromUriString(REDIRECT_URI)
         .queryParam(TokenType.ACCESS.getValue(), access)
         .queryParam("nickname", user.getNickname())
+        .queryParam("provider", user.getProvider())
         .build()
         .toUriString();
   }
