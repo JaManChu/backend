@@ -2,7 +2,6 @@ package com.recipe.jamanchu.service.impl;
 
 import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.times;
@@ -13,6 +12,7 @@ import com.recipe.jamanchu.component.UserAccessHandler;
 import com.recipe.jamanchu.entity.IngredientEntity;
 import com.recipe.jamanchu.entity.ManualEntity;
 import com.recipe.jamanchu.entity.RecipeEntity;
+import com.recipe.jamanchu.entity.RecipeIngredientEntity;
 import com.recipe.jamanchu.entity.RecipeRatingEntity;
 import com.recipe.jamanchu.entity.TenThousandRecipeEntity;
 import com.recipe.jamanchu.entity.UserEntity;
@@ -24,6 +24,7 @@ import com.recipe.jamanchu.model.type.UserRole;
 import com.recipe.jamanchu.repository.IngredientRepository;
 import com.recipe.jamanchu.repository.ManualRepository;
 import com.recipe.jamanchu.repository.RecipeIngredientMappingRepository;
+import com.recipe.jamanchu.repository.RecipeIngredientRepository;
 import com.recipe.jamanchu.repository.RecipeRatingRepository;
 import com.recipe.jamanchu.repository.RecipeRepository;
 import com.recipe.jamanchu.repository.TenThousandRecipeRepository;
@@ -31,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -54,10 +56,13 @@ class RecipeDivideServiceImplTest {
   private RecipeRatingRepository recipeRatingRepository;
 
   @Mock
+  private IngredientRepository ingredientRepository;
+
+  @Mock
   private ManualRepository manualRepository;
 
   @Mock
-  private IngredientRepository ingredientRepository;
+  private RecipeIngredientRepository recipeIngredientRepository;
 
   @Mock
   private TenThousandRecipeRepository tenThousandRecipeRepository;
@@ -124,7 +129,7 @@ class RecipeDivideServiceImplTest {
     verify(recipeRepository, times(1)).save(any(RecipeEntity.class));
     verify(recipeRatingRepository, times(1)).save(any(RecipeRatingEntity.class));
     verify(manualRepository, times(1)).saveAll(anyList()); // 2개의 매뉴얼 단계가 있음
-    verify(ingredientRepository, times(1)).saveAll(anyList());
+    verify(recipeIngredientRepository, times(1)).saveAll(anyList());
     verify(recipeIngredientMappingRepository, times(1)).saveAll(anyList());
   }
 
@@ -403,6 +408,14 @@ class RecipeDivideServiceImplTest {
   void testSaveIngredientDetails() {
     // given
     RecipeEntity recipe = RecipeEntity.builder().build();
+    IngredientEntity existingIngredient = IngredientEntity.builder()
+        .ingredientId(1L)
+        .ingredientName("ingredient1")
+        .build();
+    when(ingredientRepository.findByIngredientName("ingredient1")).thenReturn(Optional.of(existingIngredient));
+
+    // 새로운 재료가 추가될 경우
+    when(ingredientRepository.findByIngredientName("ingredient2")).thenReturn(Optional.empty());
 
     // when
     recipeDivideService.saveIngredientDetails(recipe, scrapRecipe);
@@ -411,8 +424,12 @@ class RecipeDivideServiceImplTest {
     assertEquals("ingredient1 100g,ingredient2 200ml", scrapRecipe.getIngredients());
 
     // verify
-    verify(ingredientRepository, times(1)).saveAll(anyList());
-    verify(recipeIngredientMappingRepository, times(1)).saveAll(anyList());  }
+    verify(recipeIngredientRepository, times(1)).saveAll(anyList());
+    verify(recipeIngredientMappingRepository, times(1)).saveAll(anyList());
+    verify(ingredientRepository, times(1)).findByIngredientName("ingredient1"); // 기존 재료 조회 확인
+    verify(ingredientRepository, times(1)).findByIngredientName("ingredient2"); // 새로운 재료 조회 확인
+    verify(ingredientRepository, times(1)).saveAll(anyList()); // 새로운 재료 저장 확인
+  }
 
   @Test
   @DisplayName("비어있는 재료 항목은 무시하고 다른 재료는 저장")
@@ -432,10 +449,10 @@ class RecipeDivideServiceImplTest {
     recipeDivideService.saveIngredientDetails(recipe, scrapedRecipe);
 
     // then
-    ArgumentCaptor<List<IngredientEntity>> ingredientCaptor = ArgumentCaptor.forClass((Class) List.class);
-    verify(ingredientRepository, times(1)).saveAll(ingredientCaptor.capture());
+    ArgumentCaptor<List<RecipeIngredientEntity>> ingredientCaptor = ArgumentCaptor.forClass((Class) List.class);
+    verify(recipeIngredientRepository, times(1)).saveAll(ingredientCaptor.capture());
 
-    List<IngredientEntity> savedIngredients = ingredientCaptor.getValue();
+    List<RecipeIngredientEntity> savedIngredients = ingredientCaptor.getValue();
 
     // Tomato와 Onion이 올바르게 저장되었는지 확인
     assertEquals(2, savedIngredients.size());
@@ -463,10 +480,10 @@ class RecipeDivideServiceImplTest {
     recipeDivideService.saveIngredientDetails(recipe, scrapedRecipe);
 
     // then
-    ArgumentCaptor<List<IngredientEntity>> ingredientCaptor = ArgumentCaptor.forClass((Class) List.class);
-    verify(ingredientRepository, times(1)).saveAll(ingredientCaptor.capture());
+    ArgumentCaptor<List<RecipeIngredientEntity>> ingredientCaptor = ArgumentCaptor.forClass((Class) List.class);
+    verify(recipeIngredientRepository, times(1)).saveAll(ingredientCaptor.capture());
 
-    List<IngredientEntity> savedIngredients = ingredientCaptor.getValue();
+    List<RecipeIngredientEntity> savedIngredients = ingredientCaptor.getValue();
 
     assertEquals(3, savedIngredients.size());
     assertEquals("Tomato", savedIngredients.get(0).getName());

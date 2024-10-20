@@ -3,6 +3,7 @@ package com.recipe.jamanchu.repository;
 import com.recipe.jamanchu.entity.RecipeEntity;
 import com.recipe.jamanchu.entity.RecipeRatingEntity;
 import com.recipe.jamanchu.entity.UserEntity;
+
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -21,4 +22,6 @@ public interface RecipeRatingRepository extends JpaRepository<RecipeRatingEntity
   List<RecipeEntity> findThreePopularRecipe();
 
   List<RecipeRatingEntity> findByUser(UserEntity user);
+
+  void deleteAllByUser(UserEntity user);
 }
