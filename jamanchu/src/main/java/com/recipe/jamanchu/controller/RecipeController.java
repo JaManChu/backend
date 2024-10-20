@@ -10,11 +10,8 @@ import com.recipe.jamanchu.model.type.LevelType;
 import com.recipe.jamanchu.service.RecipeService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import com.recipe.jamanchu.service.PictureService;
-import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,9 +21,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -47,7 +42,7 @@ public class RecipeController {
   @GetMapping("/search")
   public ResponseEntity<ResultResponse> searchRecipes(
       HttpServletRequest request,
-      @RequestParam(value = "ingredientName",required = false) List<String> ingredients,
+      @RequestParam(value = "ingredientName", required = false) List<String> ingredients,
       @RequestParam(value = "recipeLevel", required = false) LevelType recipeLevel,
       @RequestParam(value = "recipeCookingTime", required = false) CookingTimeType recipeCookingTime,
       @RequestParam(value = "page", defaultValue = "0") int page,
