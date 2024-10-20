@@ -7,7 +7,6 @@ import com.recipe.jamanchu.auth.oauth2.CustomOauth2UserService;
 import com.recipe.jamanchu.auth.oauth2.KakaoUserDetails;
 import com.recipe.jamanchu.component.UserAccessHandler;
 import com.recipe.jamanchu.entity.UserEntity;
-import com.recipe.jamanchu.model.dto.request.auth.DeleteUserDTO;
 import com.recipe.jamanchu.model.dto.request.auth.LoginDTO;
 import com.recipe.jamanchu.model.dto.request.auth.SignupDTO;
 import com.recipe.jamanchu.model.dto.request.auth.UserUpdateDTO;
@@ -49,7 +48,7 @@ public class UserServiceImpl implements UserService {
 
   // 회원가입
   @Override
-  public ResultCode signup(SignupDTO signupDTO) {
+  public ResultResponse signup(SignupDTO signupDTO) {
 
     // 회원 정보 저장
     userAccessHandler.saveUser(UserEntity.builder()
@@ -59,7 +58,7 @@ public class UserServiceImpl implements UserService {
         .role(UserRole.USER)
         .build());
 
-    return ResultCode.SUCCESS_SIGNUP;
+    return ResultResponse.of(ResultCode.SUCCESS_SIGNUP);
   }
 
   // 일반 로그인
@@ -106,7 +105,7 @@ public class UserServiceImpl implements UserService {
 
   // 회원 정보 수정
   @Override
-  public ResultCode updateUserInfo(HttpServletRequest request, UserUpdateDTO userUpdateDTO) {
+  public ResultResponse updateUserInfo(HttpServletRequest request, UserUpdateDTO userUpdateDTO) {
 
     UserEntity user = userAccessHandler
         .findByUserId(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue())));
@@ -123,22 +122,17 @@ public class UserServiceImpl implements UserService {
         .role(user.getRole())
         .build());
 
-    return ResultCode.SUCCESS_UPDATE_USER_INFO;
+    return ResultResponse.of(ResultCode.SUCCESS_UPDATE_USER_INFO);
   }
 
   // 회원 탈퇴
   @Override
-  public ResultCode deleteUser(HttpServletRequest request, DeleteUserDTO deleteUserDTO) {
-
+  public ResultResponse deleteUser(HttpServletRequest request) {
     UserEntity user = userAccessHandler
         .findByUserId(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue())));
 
-    if (user.getProvider() == null) {
-      userAccessHandler.validatePassword(user.getPassword(), deleteUserDTO.getPassword());
-    }
-
     userAccessHandler.deleteUser(user);
-    return ResultCode.SUCCESS_DELETE_USER;
+    return ResultResponse.of(ResultCode.SUCCESS_DELETE_USER);
   }
 
   // 회원 정보 조회
