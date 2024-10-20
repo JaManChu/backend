@@ -10,8 +10,11 @@ import com.recipe.jamanchu.model.type.LevelType;
 import com.recipe.jamanchu.service.RecipeService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import com.recipe.jamanchu.service.PictureService;
+import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,7 +24,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -29,6 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class RecipeController {
 
   private final RecipeService recipeService;
+  private final PictureService pictureService;
 
   @GetMapping
   public ResponseEntity<ResultResponse> getRecipes(
@@ -68,11 +74,33 @@ public class RecipeController {
     return ResponseEntity.ok(recipeService.getRecipesByRating(request, page, size));
   }
 
+  @PostMapping(path = "/upload-thumbnail", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ResponseEntity<String> uploadThumbnail(
+      HttpServletRequest request,
+      @RequestPart(value = "recipeThumbnail") MultipartFile recipeThumbnail,
+      @RequestParam(value = "recipeName") String recipeName
+  ) throws IOException {
+    return ResponseEntity.ok(pictureService.uploadThumbnail(request, recipeName, recipeThumbnail));
+  }
+
+  @PostMapping(path = "/upload-orderImages", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ResponseEntity<List<String>> uploadOrderImages(
+      HttpServletRequest request,
+      @RequestPart(value = "recipeOrderImages")List<MultipartFile> recipeOrderImages,
+      @RequestParam(value = "recipeName") String recipeName
+  ) throws IOException {
+    return ResponseEntity.ok(pictureService.uploadOrderImages(request, recipeName, recipeOrderImages));
+  }
+
   @PostMapping
   public ResponseEntity<ResultResponse> registerRecipe(
       HttpServletRequest request,
-      @Valid @RequestBody RecipesDTO recipesDTO) {
-    return ResponseEntity.ok(recipeService.registerRecipe(request, recipesDTO));
+      @Valid @RequestBody RecipesDTO recipesDTO,
+      @RequestParam("thumbnailUrl") String thumbnailUrl,
+      @RequestParam("recipeOrderImagesUrl") List<String> recipeOrderImagesUrl) {
+
+    // 레시피 등록 서비스 호출
+    return ResponseEntity.ok(recipeService.registerRecipe(request, recipesDTO, thumbnailUrl, recipeOrderImagesUrl));
   }
 
   @PostMapping("/{recipeId}/scrap")
@@ -85,8 +113,10 @@ public class RecipeController {
   @PutMapping
   public ResponseEntity<ResultResponse> updateRecipe(
       HttpServletRequest request,
-      @Valid @RequestBody RecipesUpdateDTO recipesUpdateDTO) {
-    return ResponseEntity.ok(recipeService.updateRecipe(request, recipesUpdateDTO));
+      @Valid @RequestBody RecipesUpdateDTO recipesUpdateDTO,
+      @RequestParam("thumbnailUrl") String thumbnailUrl,
+      @RequestParam("recipeOrderImagesUrl") List<String> recipeOrderImagesUrl) {
+    return ResponseEntity.ok(recipeService.updateRecipe(request, recipesUpdateDTO, thumbnailUrl, recipeOrderImagesUrl));
   }
 
   @DeleteMapping
