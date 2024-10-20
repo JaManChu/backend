@@ -120,7 +120,7 @@ public class RecipeServiceImpl implements RecipeService {
       ManualEntity manual = ManualEntity.builder()
           .recipe(recipe)
           .manualContent(recipesDTO.getRecipeOrderContents().get(i).getRecipeOrderContent())
-          .manualPicture(orderImages.get(i))
+          .manualPicture(i < orderImages.size() ? orderImages.get(i) : null)
           .build();
 
       manuals.add(manual);
@@ -199,7 +199,7 @@ public class RecipeServiceImpl implements RecipeService {
       ManualEntity manual = ManualEntity.builder()
           .recipe(recipe)
           .manualContent(recipesUpdateDTO.getRecipeOrderContents().get(i).getRecipeOrderContent())
-          .manualPicture(orderImages.get(i))
+          .manualPicture(i < orderImages.size() ? orderImages.get(i) : null)
           .build();
 
       manuals.add(manual);

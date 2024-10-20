@@ -73,7 +73,7 @@ public class RecipeController {
       HttpServletRequest request,
       @Valid @RequestBody RecipesDTO recipesDTO,
       @RequestParam("thumbnailUrl") String thumbnailUrl,
-      @RequestParam("recipeOrderImagesUrl") List<String> recipeOrderImagesUrl) {
+      @RequestParam(value = "recipeOrderImagesUrl", required = false) List<String> recipeOrderImagesUrl) {
 
     // 레시피 등록 서비스 호출
     return ResponseEntity.ok(recipeService.registerRecipe(request, recipesDTO, thumbnailUrl, recipeOrderImagesUrl));
