@@ -5,9 +5,12 @@ import com.recipe.jamanchu.model.dto.request.recipe.RecipesDeleteDTO;
 import com.recipe.jamanchu.model.dto.request.recipe.RecipesSearchDTO;
 import com.recipe.jamanchu.model.dto.request.recipe.RecipesUpdateDTO;
 import com.recipe.jamanchu.model.dto.response.ResultResponse;
+import com.recipe.jamanchu.model.type.CookingTimeType;
+import com.recipe.jamanchu.model.type.LevelType;
 import com.recipe.jamanchu.service.RecipeService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -39,10 +42,13 @@ public class RecipeController {
   @GetMapping("/search")
   public ResponseEntity<ResultResponse> searchRecipes(
       HttpServletRequest request,
-      @Valid @RequestBody RecipesSearchDTO recipesSearchDTO,
+      @RequestParam(value = "ingredientName",required = false) List<String> ingredients,
+      @RequestParam(value = "recipeLevel", required = false) LevelType recipeLevel,
+      @RequestParam(value = "recipeCookingTime", required = false) CookingTimeType recipeCookingTime,
       @RequestParam(value = "page", defaultValue = "0") int page,
       @RequestParam(value = "size", defaultValue = "15") int size
   ) {
+    RecipesSearchDTO recipesSearchDTO = new RecipesSearchDTO(ingredients, recipeLevel, recipeCookingTime);
     return ResponseEntity.ok(recipeService.searchRecipes(request, recipesSearchDTO, page, size));
   }
 
