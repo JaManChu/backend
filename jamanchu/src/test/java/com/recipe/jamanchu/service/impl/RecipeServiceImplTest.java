@@ -101,6 +101,8 @@ class RecipeServiceImplTest {
   private RecipeEntity recipe;
   private RecipesDTO recipesDTO;
   private RecipesUpdateDTO recipesUpdateDTO;
+  private String thumbnailURL;
+  private List<String> orderImagesURL;
 
   @BeforeEach
   void setUp() {
@@ -176,6 +178,16 @@ class RecipeServiceImplTest {
         .ingredients(recipeIngredientEntities)
         .manuals(manualEntities)
         .build();
+
+    thumbnailURL = "thumbnail.jpg";
+
+    String orderImages1 = "orderImages1.jpg";
+    String orderImages2 = "orderImages2.jpg";
+    String orderImages3 = "orderImages3.jpg";
+    orderImagesURL = new ArrayList<>();
+    orderImagesURL.add(orderImages1);
+    orderImagesURL.add(orderImages2);
+    orderImagesURL.add(orderImages3);
   }
 
   @Test
@@ -195,7 +207,7 @@ class RecipeServiceImplTest {
         .thenReturn(Optional.of(existingIngredient));
 
     // when
-    ResultResponse result = recipeService.registerRecipe(request, recipesDTO);
+    ResultResponse result = recipeService.registerRecipe(request, recipesDTO, thumbnailURL, orderImagesURL);
 
     // then
     assertEquals("레시피 등록 성공!", result.getMessage());
@@ -227,7 +239,7 @@ class RecipeServiceImplTest {
             .build()));
 
     // when
-    ResultResponse result = recipeService.registerRecipe(request, recipesDTO);
+    ResultResponse result = recipeService.registerRecipe(request, recipesDTO, thumbnailURL, orderImagesURL);
 
     // then
     assertEquals("레시피 등록 성공!", result.getMessage());
@@ -281,7 +293,7 @@ class RecipeServiceImplTest {
         .thenReturn(List.of(newIngredient));
 
     // When
-    ResultResponse result = recipeService.updateRecipe(request, recipesUpdateDTO);
+    ResultResponse result = recipeService.updateRecipe(request, recipesUpdateDTO, thumbnailURL, orderImagesURL);
 
     // Then
     assertEquals("레시피 수정 성공!", result.getMessage());
@@ -313,7 +325,7 @@ class RecipeServiceImplTest {
 
     // when & then
     assertThrows(UnmatchedUserException.class,
-        () -> recipeService.updateRecipe(request, recipesUpdateDTO));
+        () -> recipeService.updateRecipe(request, recipesUpdateDTO, thumbnailURL, orderImagesURL));
 
     // verify
     verify(recipeRepository, times(1)).findById(1L);
