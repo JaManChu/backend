@@ -49,9 +49,10 @@ public class UserAccessHandler {
 
   // email 값과 일치하는 회원 정보 반환
   public UserEntity findByEmail(String email) {
-
     log.info("findByEmail -> email : {}", email);
+
     return userRepository.findByEmail(email)
+        .filter(user -> user.getDeletionScheduledAt() == null)
         .orElseThrow(UserNotFoundException::new);
   }
 
