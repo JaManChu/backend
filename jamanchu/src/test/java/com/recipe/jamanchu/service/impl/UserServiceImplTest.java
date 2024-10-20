@@ -188,10 +188,10 @@ class UserServiceImplTest {
   void signup_Success() {
 
     // when
-    ResultCode result = userServiceimpl.signup(signup);
+    ResultResponse result = userServiceimpl.signup(signup);
 
     // then
-    assertEquals(ResultCode.SUCCESS_SIGNUP, result);
+    assertEquals(ResultCode.SUCCESS_SIGNUP.getStatusCode(), result.getCode());
   }
 
   @Test
@@ -290,10 +290,10 @@ class UserServiceImplTest {
     doNothing().when(userAccessHandler).isSocialUser(user.getProvider());
 
     // when
-    ResultCode result = userServiceimpl.updateUserInfo(request, userUpdateDTO);
+    ResultResponse result = userServiceimpl.updateUserInfo(request, userUpdateDTO);
 
     // then
-    assertEquals(ResultCode.SUCCESS_UPDATE_USER_INFO, result);
+    assertEquals(ResultCode.SUCCESS_UPDATE_USER_INFO.getStatusCode(), result.getCode());
   }
 
   @Test
@@ -331,10 +331,10 @@ class UserServiceImplTest {
     when(userAccessHandler.findByUserId(USERID)).thenReturn(user);
 
     // when
-    ResultCode result = userServiceimpl.deleteUser(request);
+    ResultResponse result = userServiceimpl.deleteUser(request);
 
     // then
-    assertEquals(ResultCode.SUCCESS_DELETE_USER, result);
+    assertEquals(ResultCode.SUCCESS_DELETE_USER.getStatusCode(), result.getCode());
   }
 
   @Test
@@ -346,10 +346,10 @@ class UserServiceImplTest {
     when(userAccessHandler.findByUserId(USERID)).thenReturn(kakaoUser);
 
     // when
-    ResultCode result = userServiceimpl.deleteUser(request);
+    ResultResponse result = userServiceimpl.deleteUser(request);
 
     // then
-    assertEquals(ResultCode.SUCCESS_DELETE_USER, result);
+    assertEquals(ResultCode.SUCCESS_DELETE_USER.getStatusCode(), result.getCode());
   }
 
   @Test
