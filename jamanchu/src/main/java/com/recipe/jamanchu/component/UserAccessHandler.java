@@ -9,6 +9,7 @@ import com.recipe.jamanchu.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.model.type.ResultCode;
 import com.recipe.jamanchu.model.type.UserRole;
 import com.recipe.jamanchu.repository.UserRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -23,6 +24,11 @@ public class UserAccessHandler {
   private final UserRepository userRepository;
   private final BCryptPasswordEncoder passwordEncoder;
 
+
+  // 모든 유저 객체 반환
+  public List<UserEntity> findAllUsers(){
+    return userRepository.findAll();
+  }
 
   // userId 값과 일치하는 회원 정보 반환
   public UserEntity findByUserId(Long userId) {
