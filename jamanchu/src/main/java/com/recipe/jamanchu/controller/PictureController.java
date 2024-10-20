@@ -33,7 +33,7 @@ public class PictureController {
   @PostMapping(path = "/orderImages", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<List<String>> uploadOrderImages(
       HttpServletRequest request,
-      @RequestPart(value = "recipeOrderImages")List<MultipartFile> recipeOrderImages,
+      @RequestPart(value = "recipeOrderImages", required = false) List<MultipartFile> recipeOrderImages,
       @RequestParam(value = "recipeName") String recipeName
   ) throws IOException {
     return ResponseEntity.ok(pictureService.uploadOrderImages(request, recipeName, recipeOrderImages));
