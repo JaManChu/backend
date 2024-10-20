@@ -89,4 +89,11 @@ public class RecipeController {
       @Valid @RequestBody RecipesDeleteDTO recipesDeleteDTO) {
     return ResponseEntity.ok(recipeService.deleteRecipe(request, recipesDeleteDTO));
   }
+
+  @GetMapping("/recommended")
+  public ResponseEntity<ResultResponse> getRecommendRecipes(
+      HttpServletRequest request
+  ) {
+    return ResponseEntity.ok(recipeService.getRecommendRecipes(request));
+  }
 }
