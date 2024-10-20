@@ -253,6 +253,7 @@ class UserServiceImplTest {
     String response = UriComponentsBuilder.fromUriString(REDIRECT_URI)
         .queryParam(TokenType.ACCESS.getValue(), ACCESS)
         .queryParam("nickname", user.getNickname())
+        .queryParam("provider", user.getProvider())
         .build()
         .toUriString();
 
