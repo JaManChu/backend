@@ -39,9 +39,8 @@ public class PictureServiceImpl implements PictureService {
         String uploadedUrl = pictureManager.upload(userId, recipeName, file, PictureType.RECIPE_ORDER_IMAGE);
         recipeOrderImageUrls.add(uploadedUrl);
       }
-    } else {
-      recipeOrderImageUrls.add(null);
     }
+
     return recipeOrderImageUrls;
   }
 }
