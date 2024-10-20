@@ -17,6 +17,8 @@ public interface RecipeRatingRepository extends JpaRepository<RecipeRatingEntity
 
   boolean existsByUser(UserEntity user);
 
-  @Query("SELECT r.recipe FROM RecipeRatingEntity r GROUP BY r.recipe.id ORDER BY AVG(r.rating) DESC LIMIT 3")
+  @Query("SELECT rr.recipe FROM RecipeRatingEntity rr GROUP BY rr.recipe.id ORDER BY AVG(rr.rating) DESC LIMIT 3")
   List<RecipeEntity> findThreePopularRecipe();
+
+  List<RecipeRatingEntity> findByUser(UserEntity user);
 }
