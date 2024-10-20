@@ -25,9 +25,7 @@ public class PictureServiceImpl implements PictureService {
       throws IOException {
     Long userId = jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()));
 
-    PictureType pictureType = PictureType.THUMBNAIL;
-
-    return pictureManager.upload(userId, recipeName, recipeThumbnail, pictureType);
+    return pictureManager.upload(userId, recipeName, recipeThumbnail, PictureType.THUMBNAIL);
   }
 
   @Override
@@ -37,9 +35,8 @@ public class PictureServiceImpl implements PictureService {
 
     List<String> recipeOrderImageUrls = new ArrayList<>();
     if (recipeOrderImages != null) {
-      PictureType pictureType = PictureType.RECIPE_ORDER_IMAGE;
       for (MultipartFile file : recipeOrderImages) {
-        String uploadedUrl = pictureManager.upload(userId, recipeName, file, pictureType);
+        String uploadedUrl = pictureManager.upload(userId, recipeName, file, PictureType.RECIPE_ORDER_IMAGE);
         recipeOrderImageUrls.add(uploadedUrl);
       }
     } else {
