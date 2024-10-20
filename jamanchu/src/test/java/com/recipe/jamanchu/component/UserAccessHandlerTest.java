@@ -15,6 +15,7 @@ import com.recipe.jamanchu.entity.UserEntity;
 import com.recipe.jamanchu.exceptions.exception.PasswordMismatchException;
 import com.recipe.jamanchu.exceptions.exception.SocialAccountException;
 import com.recipe.jamanchu.exceptions.exception.UserNotFoundException;
+import com.recipe.jamanchu.exceptions.exception.WithdrewUserException;
 import com.recipe.jamanchu.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.model.type.ResultCode;
 import com.recipe.jamanchu.repository.CommentRepository;
@@ -23,6 +24,7 @@ import com.recipe.jamanchu.repository.RecipeRatingRepository;
 import com.recipe.jamanchu.repository.RecipeRepository;
 import com.recipe.jamanchu.repository.ScrapedRecipeRepository;
 import com.recipe.jamanchu.repository.UserRepository;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +36,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
@@ -207,7 +210,11 @@ class UserAccessHandlerTest {
   void existsByEmail_Duplicated() {
     // given
     String email = "test@example.com";
+
+    UserEntity user = Mockito.mock(UserEntity.class);
     when(userRepository.existsByEmail(email)).thenReturn(true);
+    when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+    when(user.getDeletionScheduledAt()).thenReturn(null);
 
     // when
     ResultResponse resultResponse = userAccessHandler.existsByEmail(email);
@@ -228,6 +235,21 @@ class UserAccessHandlerTest {
 
     // then
     assertEquals(ResultCode.EMAIL_AVAILABLE.getStatusCode(), resultResponse.getCode());
+  }
+
+  @Test
+  @DisplayName("existsByEmail : 탈퇴한 회원의 이메일")
+  void existsByEmail_WithdrewUser() {
+    // given
+    String email = "test@example.com";
+
+    UserEntity user = Mockito.mock(UserEntity.class);
+    when(userRepository.existsByEmail(email)).thenReturn(true);
+    when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+    when(user.getDeletionScheduledAt()).thenReturn(LocalDate.now());
+
+    // when & then
+    assertThrows(WithdrewUserException.class, () -> userAccessHandler.existsByEmail(email));
   }
 
   @Test
@@ -351,8 +373,8 @@ class UserAccessHandlerTest {
   @DisplayName("testDeleteAllUserData : 탈퇴한 사용자의 모든 데이터 삭제")
   public void testDeleteAllUserData() {
     // 가짜 데이터 설정
-    UserEntity user1 = new UserEntity(1L, "user1@example.com", "password", "user1", null, null, null);
-    UserEntity user2 = new UserEntity(2L, "user2@example.com", "password", "user2", null, null, null);
+    UserEntity user1 = new UserEntity(1L, "user1@example.com", "password", "user1", null, null, null, null);
+    UserEntity user2 = new UserEntity(2L, "user2@example.com", "password", "user2", null, null, null, null);
 
     List<UserEntity> users = Arrays.asList(user1, user2);
 
