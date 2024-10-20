@@ -26,4 +26,9 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
   @Modifying
   @Query(value = "DELETE FROM user WHERE usr_id = :userId", nativeQuery = true)
   void deleteUserByUserId(@Param("userId") Long userId);
+
+  @Query("SELECT u FROM UserEntity u "
+      + "WHERE u.email = :email "
+      + "AND u.provider IS NOT NULL ")
+  Optional<UserEntity> findKakaoUser(@Param("email") String email);
 }
