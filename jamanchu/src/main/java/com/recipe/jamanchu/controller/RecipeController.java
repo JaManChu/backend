@@ -34,7 +34,6 @@ import org.springframework.web.multipart.MultipartFile;
 public class RecipeController {
 
   private final RecipeService recipeService;
-  private final PictureService pictureService;
 
   @GetMapping
   public ResponseEntity<ResultResponse> getRecipes(
@@ -72,24 +71,6 @@ public class RecipeController {
       @RequestParam(value = "size", defaultValue = "15") int size
   ) {
     return ResponseEntity.ok(recipeService.getRecipesByRating(request, page, size));
-  }
-
-  @PostMapping(path = "/upload-thumbnail", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public ResponseEntity<String> uploadThumbnail(
-      HttpServletRequest request,
-      @RequestPart(value = "recipeThumbnail") MultipartFile recipeThumbnail,
-      @RequestParam(value = "recipeName") String recipeName
-  ) throws IOException {
-    return ResponseEntity.ok(pictureService.uploadThumbnail(request, recipeName, recipeThumbnail));
-  }
-
-  @PostMapping(path = "/upload-orderImages", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public ResponseEntity<List<String>> uploadOrderImages(
-      HttpServletRequest request,
-      @RequestPart(value = "recipeOrderImages")List<MultipartFile> recipeOrderImages,
-      @RequestParam(value = "recipeName") String recipeName
-  ) throws IOException {
-    return ResponseEntity.ok(pictureService.uploadOrderImages(request, recipeName, recipeOrderImages));
   }
 
   @PostMapping
