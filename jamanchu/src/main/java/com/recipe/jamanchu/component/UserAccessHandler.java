@@ -49,9 +49,10 @@ public class UserAccessHandler {
 
   // email 값과 일치하는 회원 정보 반환
   public UserEntity findByEmail(String email) {
-
     log.info("findByEmail -> email : {}", email);
+
     return userRepository.findByEmail(email)
+        .filter(user -> user.getDeletionScheduledAt() == null)
         .orElseThrow(UserNotFoundException::new);
   }
 
@@ -59,7 +60,7 @@ public class UserAccessHandler {
   // 없을 경우 전달 받은 email, nickname, providerId으로 회원 정보 저장 후 반환
   public UserEntity findOrCreateUser(KakaoUserDetails kakaoUserDetails) {
     log.info("findOrCreateUser -> email : {}", kakaoUserDetails.getEmail());
-    return userRepository.findByEmail(kakaoUserDetails.getEmail())
+    return userRepository.findKakaoUser(kakaoUserDetails.getEmail())
         .orElseGet(() -> userRepository.save(UserEntity.builder()
             .email(kakaoUserDetails.getEmail())
             .password(passwordEncoder.encode(String.valueOf(Math.random() * 8)))

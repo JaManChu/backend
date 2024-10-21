@@ -124,19 +124,19 @@ class UserAccessHandlerTest {
   }
 
   @Test
-  @DisplayName("findByEmail - 성공: 사용자 존재")
+  @DisplayName("findByEmail - 성공: 사용자 존재, 삭제 예정 없음")
   void findByEmail_Success() {
     // given
     String email = "test@example.com";
+    UserEntity user = Mockito.mock(UserEntity.class);
     when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+    when(user.getDeletionScheduledAt()).thenReturn(null);
 
     // when
     UserEntity result = userAccessHandler.findByEmail(email);
 
     // then
-    assertNotNull(result);
-    assertEquals(email, result.getEmail());
-    verify(userRepository, times(1)).findByEmail(email);
+    assertEquals(user, result);
   }
 
   @Test
@@ -148,14 +148,26 @@ class UserAccessHandlerTest {
 
     // when & then
     assertThrows(UserNotFoundException.class, () -> userAccessHandler.findByEmail(email));
-    verify(userRepository, times(1)).findByEmail(email);
+  }
+
+  @Test
+  @DisplayName("findByEmail - 실패: 사용자 삭제 예정")
+  void findByEmail_UserScheduledForDeletion() {
+    // given
+    String email = "deletion@example.com";
+    UserEntity user = Mockito.mock(UserEntity.class);
+    when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+    when(user.getDeletionScheduledAt()).thenReturn(Mockito.mock(LocalDate.class));
+
+    // when & then
+    assertThrows(UserNotFoundException.class, () -> userAccessHandler.findByEmail(email));
   }
 
   @Test
   @DisplayName("findOrCreateUser - 성공: 사용자 존재")
   void findOrCreateUser_UserExists() {
     // given
-    when(userRepository.findByEmail(kakaoUserDetails.getEmail())).thenReturn(Optional.of(user));
+    when(userRepository.findKakaoUser(kakaoUserDetails.getEmail())).thenReturn(Optional.of(user));
 
     // when
     UserEntity result = userAccessHandler.findOrCreateUser(kakaoUserDetails);
@@ -163,7 +175,7 @@ class UserAccessHandlerTest {
     // then
     assertNotNull(result);
     assertEquals(user.getEmail(), result.getEmail());
-    verify(userRepository, times(1)).findByEmail(kakaoUserDetails.getEmail());
+    verify(userRepository, times(1)).findKakaoUser(kakaoUserDetails.getEmail());
     verify(userRepository, times(0)).save(any(UserEntity.class));
   }
 
@@ -171,7 +183,7 @@ class UserAccessHandlerTest {
   @DisplayName("findOrCreateUser - 성공: 사용자 없음, 생성")
   void findOrCreateUser_UserDoesNotExist() {
     // given
-    when(userRepository.findByEmail(kakaoUserDetails.getEmail())).thenReturn(Optional.empty());
+    when(userRepository.findKakaoUser(kakaoUserDetails.getEmail())).thenReturn(Optional.empty());
     when(passwordEncoder.encode(anyString())).thenReturn("encodedRandomPassword");
     when(userRepository.save(any(UserEntity.class))).thenReturn(user);
 
