@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -15,7 +16,7 @@ import com.recipe.jamanchu.component.UserAccessHandler;
 import com.recipe.jamanchu.entity.IngredientEntity;
 import com.recipe.jamanchu.entity.ManualEntity;
 import com.recipe.jamanchu.entity.RecipeEntity;
-import com.recipe.jamanchu.entity.RecipeIngredientMappingEntity;
+import com.recipe.jamanchu.entity.RecipeIngredientEntity;
 import com.recipe.jamanchu.entity.RecipeRatingEntity;
 import com.recipe.jamanchu.entity.ScrapedRecipeEntity;
 import com.recipe.jamanchu.entity.UserEntity;
@@ -38,6 +39,7 @@ import com.recipe.jamanchu.model.type.UserRole;
 import com.recipe.jamanchu.repository.IngredientRepository;
 import com.recipe.jamanchu.repository.ManualRepository;
 import com.recipe.jamanchu.repository.RecipeIngredientMappingRepository;
+import com.recipe.jamanchu.repository.RecipeIngredientRepository;
 import com.recipe.jamanchu.repository.RecipeRatingRepository;
 import com.recipe.jamanchu.repository.RecipeRepository;
 import com.recipe.jamanchu.repository.ScrapedRecipeRepository;
@@ -62,6 +64,9 @@ class RecipeServiceImplTest {
 
   @Mock
   private RecipeRepository recipeRepository;
+
+  @Mock
+  private RecipeIngredientRepository recipeIngredientRepository;
 
   @Mock
   private IngredientRepository ingredientRepository;
@@ -91,7 +96,7 @@ class RecipeServiceImplTest {
   private RecipeServiceImpl recipeService;
 
   private UserEntity user;
-  private List<IngredientEntity> ingredientEntities;
+  private List<RecipeIngredientEntity> recipeIngredientEntities;
   private List<ManualEntity> manualEntities;
   private RecipeEntity recipe;
   private RecipesDTO recipesDTO;
@@ -139,15 +144,15 @@ class RecipeServiceImplTest {
         1L
     );
 
-    ingredientEntities = new ArrayList<>();
+    recipeIngredientEntities = new ArrayList<>();
     for (int i = 0; i < recipesDTO.getRecipeIngredients().size(); i++) {
-      IngredientEntity ingredient = IngredientEntity.builder()
+      RecipeIngredientEntity ingredient = RecipeIngredientEntity.builder()
           .recipe(recipe)
           .name(recipesDTO.getRecipeIngredients().get(i).getIngredientName())
           .quantity(recipesDTO.getRecipeIngredients().get(i).getIngredientQuantity())
           .build();
 
-      ingredientEntities.add(ingredient);
+      recipeIngredientEntities.add(ingredient);
     }
 
     manualEntities = new ArrayList<>();
@@ -168,19 +173,26 @@ class RecipeServiceImplTest {
         .level(recipesDTO.getRecipeLevel())
         .time(recipesDTO.getRecipeCookingTime())
         .thumbnail(String.valueOf(recipesDTO.getRecipeThumbnail()))
-        .ingredients(ingredientEntities)
+        .ingredients(recipeIngredientEntities)
         .manuals(manualEntities)
         .build();
   }
 
   @Test
-  @DisplayName("레시피 등록 성공")
-  void registerRecipe_Success() {
+  @DisplayName("재료가 이미 존재할 경우 재료를 새로 추가하지 않고 매핑만 추가")
+  void registerRecipe_ExistingIngredient() {
     // given
+    IngredientEntity existingIngredient = IngredientEntity.builder()
+        .ingredientId(1L)
+        .ingredientName("설탕")
+        .build();
+
     when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(user.getUserId());
     when(userAccessHandler.findByUserId(user.getUserId())).thenReturn(user);
-    when(ingredientRepository.saveAll(anyList())).thenReturn(new ArrayList<>());
+    when(recipeIngredientRepository.saveAll(anyList())).thenReturn(new ArrayList<>());
     when(recipeIngredientMappingRepository.saveAll(anyList())).thenReturn(new ArrayList<>());
+    when(ingredientRepository.findByIngredientName(anyString()))
+        .thenReturn(Optional.of(existingIngredient));
 
     // when
     ResultResponse result = recipeService.registerRecipe(request, recipesDTO);
@@ -190,13 +202,47 @@ class RecipeServiceImplTest {
 
     // verify
     verify(recipeRepository, times(1)).save(any(RecipeEntity.class));
-    verify(ingredientRepository, times(1)).saveAll(anyList());
+    verify(recipeIngredientRepository, times(1)).saveAll(anyList());
     verify(recipeIngredientMappingRepository, times(1)).saveAll(anyList());
     verify(manualRepository, times(1)).saveAll(anyList());
+    verify(ingredientRepository, times(2)).findByIngredientName(anyString());
   }
 
   @Test
-  @DisplayName("레시피 수정 성공")
+  @DisplayName("재료가 존재하지 않을 경우 새로 추가하고 매핑 추가")
+  void registerRecipe_NewIngredient() {
+    // given
+    when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(
+        user.getUserId());
+    when(userAccessHandler.findByUserId(user.getUserId())).thenReturn(user);
+    when(recipeIngredientRepository.saveAll(anyList())).thenReturn(new ArrayList<>());
+    when(recipeIngredientMappingRepository.saveAll(anyList())).thenReturn(new ArrayList<>());
+    when(ingredientRepository.findByIngredientName(anyString()))
+        .thenReturn(Optional.empty());
+
+    when(ingredientRepository.saveAll(anyList()))
+        .thenReturn(List.of(IngredientEntity.builder()
+            .ingredientId(2L)
+            .ingredientName("새로운 재료")
+            .build()));
+
+    // when
+    ResultResponse result = recipeService.registerRecipe(request, recipesDTO);
+
+    // then
+    assertEquals("레시피 등록 성공!", result.getMessage());
+
+    // verify
+    verify(recipeRepository, times(1)).save(any(RecipeEntity.class));
+    verify(recipeIngredientRepository, times(1)).saveAll(anyList());
+    verify(recipeIngredientMappingRepository, times(1)).saveAll(anyList());
+    verify(manualRepository, times(1)).saveAll(anyList());
+    verify(ingredientRepository, times(2)).findByIngredientName(anyString());
+    verify(ingredientRepository, times(1)).saveAll(anyList());
+  }
+
+  @Test
+  @DisplayName("레시피 수정 성공 - 기존 재료가 있는 경우 패스하고 새로운 재료만 추가되는 경우")
   void updateRecipe_Success() {
     // Given
     recipe = RecipeEntity.builder()
@@ -206,23 +252,33 @@ class RecipeServiceImplTest {
         .level(recipesDTO.getRecipeLevel())
         .time(recipesDTO.getRecipeCookingTime())
         .thumbnail(String.valueOf(recipesDTO.getRecipeThumbnail()))
-        .ingredients(ingredientEntities)
+        .ingredients(recipeIngredientEntities)
         .manuals(manualEntities)
         .build();
 
-    List<RecipeIngredientMappingEntity> recipeIngredientMappings = new ArrayList<>();
-    for (IngredientEntity ingredient : ingredientEntities) {
-      RecipeIngredientMappingEntity mapping = RecipeIngredientMappingEntity.builder()
-          .recipe(recipe)
-          .ingredient(ingredient)
-          .build();
+    IngredientEntity existingIngredientEntity = IngredientEntity.builder()
+        .ingredientId(1L)
+        .ingredientName("재료")
+        .build();
+    IngredientEntity newIngredient = IngredientEntity.builder()
+        .ingredientId(1L)
+        .ingredientName("재료1")
+        .build();
 
-      recipeIngredientMappings.add(mapping);
-    }
-
+    // 모킹된 재료 데이터
     when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(user.getUserId());
     when(userAccessHandler.findByUserId(1L)).thenReturn(user);
     when(recipeRepository.findById(1L)).thenReturn(Optional.of(recipe));
+
+
+    when(ingredientRepository.findByIngredientName("재료"))
+        .thenReturn(Optional.of(existingIngredientEntity));
+    when(ingredientRepository.findByIngredientName("재료1"))
+        .thenReturn(Optional.empty());
+
+    // 새로운 재료가 저장될 때 모킹
+    when(ingredientRepository.saveAll(anyList()))
+        .thenReturn(List.of(newIngredient));
 
     // When
     ResultResponse result = recipeService.updateRecipe(request, recipesUpdateDTO);
@@ -232,12 +288,15 @@ class RecipeServiceImplTest {
 
     // verify
     verify(recipeRepository, times(1)).findById(1L);
-    verify(ingredientRepository, times(1)).deleteAllByRecipeId(1L);
-    verify(ingredientRepository, times(1)).saveAll(anyList());
+    verify(recipeIngredientRepository, times(1)).deleteAllByRecipeId(1L);
+    verify(recipeIngredientRepository, times(1)).saveAll(anyList());
     verify(recipeIngredientMappingRepository, times(1)).deleteAllByRecipeId(1L);
     verify(recipeIngredientMappingRepository, times(1)).saveAll(anyList());
     verify(manualRepository, times(1)).deleteAllByRecipeId(1L);
     verify(manualRepository, times(1)).saveAll(anyList());
+    verify(ingredientRepository, times(1)).findByIngredientName("재료");
+    verify(ingredientRepository, times(1)).findByIngredientName("재료1");
+    verify(ingredientRepository, times(1)).saveAll(anyList());
   }
 
   @Test
@@ -258,8 +317,8 @@ class RecipeServiceImplTest {
 
     // verify
     verify(recipeRepository, times(1)).findById(1L);
-    verify(ingredientRepository, times(0)).deleteAllByRecipeId(1L);
-    verify(ingredientRepository, times(0)).saveAll(anyList());
+    verify(recipeIngredientRepository, times(0)).deleteAllByRecipeId(1L);
+    verify(recipeIngredientRepository, times(0)).saveAll(anyList());
     verify(manualRepository, times(0)).deleteAllByRecipeId(1L);
     verify(manualRepository, times(0)).saveAll(anyList());
   }
@@ -548,7 +607,7 @@ class RecipeServiceImplTest {
         .level(LevelType.LOW)
         .time(CookingTimeType.FIFTEEN_MINUTES)
         .thumbnail("thumbnail")
-        .ingredients(ingredientEntities)
+        .ingredients(recipeIngredientEntities)
         .manuals(manualEntities)
         .rating(ratingEntities)
         .build();

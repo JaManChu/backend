@@ -17,8 +17,15 @@ import com.recipe.jamanchu.exceptions.exception.SocialAccountException;
 import com.recipe.jamanchu.exceptions.exception.UserNotFoundException;
 import com.recipe.jamanchu.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.model.type.ResultCode;
+import com.recipe.jamanchu.repository.CommentRepository;
+import com.recipe.jamanchu.repository.IngredientRatingRepository;
+import com.recipe.jamanchu.repository.RecipeRatingRepository;
+import com.recipe.jamanchu.repository.RecipeRepository;
+import com.recipe.jamanchu.repository.ScrapedRecipeRepository;
 import com.recipe.jamanchu.repository.UserRepository;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,6 +45,21 @@ class UserAccessHandlerTest {
 
   @Mock
   private BCryptPasswordEncoder passwordEncoder;
+
+  @Mock
+  private ScrapedRecipeRepository scrapedRecipeRepository;
+
+  @Mock
+  private RecipeRepository recipeRepository;
+
+  @Mock
+  private CommentRepository commentRepository;
+
+  @Mock
+  private RecipeRatingRepository recipeRatingRepository;
+
+  @Mock
+  private IngredientRatingRepository ingredientRatingRepository;
 
   @InjectMocks
   private UserAccessHandler userAccessHandler;
@@ -323,6 +345,42 @@ class UserAccessHandlerTest {
 
     // then
     assertEquals(ResultCode.PASSWORD_MATCH.getStatusCode(), resultResponse.getCode());
+  }
+
+  @Test
+  @DisplayName("testDeleteAllUserData : 탈퇴한 사용자의 모든 데이터 삭제")
+  public void testDeleteAllUserData() {
+    // 가짜 데이터 설정
+    UserEntity user1 = new UserEntity(1L, "user1@example.com", "password", "user1", null, null, null);
+    UserEntity user2 = new UserEntity(2L, "user2@example.com", "password", "user2", null, null, null);
+
+    List<UserEntity> users = Arrays.asList(user1, user2);
+
+    // findAllDeletedToday() 메서드가 users 리스트를 반환하도록 설정
+    when(userRepository.findAllDeletedToday()).thenReturn(users);
+
+    // deleteAllUserData() 실행
+    userAccessHandler.deleteAllUserData();
+
+    // 삭제된 데이터를 검증
+    verify(scrapedRecipeRepository, times(1)).deleteAllByUser(user1);
+    verify(scrapedRecipeRepository, times(1)).deleteAllByUser(user2);
+
+    verify(commentRepository, times(1)).deleteAllByUser(user1);
+    verify(commentRepository, times(1)).deleteAllByUser(user2);
+
+    verify(recipeRatingRepository, times(1)).deleteAllByUser(user1);
+    verify(recipeRatingRepository, times(1)).deleteAllByUser(user2);
+
+    verify(ingredientRatingRepository, times(1)).deleteAllByUser(user1);
+    verify(ingredientRatingRepository, times(1)).deleteAllByUser(user2);
+
+    verify(recipeRepository, times(1)).deleteAllByUser(user1);
+    verify(recipeRepository, times(1)).deleteAllByUser(user2);
+
+    // user 삭제 검증
+    verify(userRepository, times(1)).deleteUserByUserId(user1.getUserId());
+    verify(userRepository, times(1)).deleteUserByUserId(user2.getUserId());
   }
 
 }

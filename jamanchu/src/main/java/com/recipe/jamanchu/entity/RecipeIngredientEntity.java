@@ -19,13 +19,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "manuals")
-public class ManualEntity {
+@Table(name = "rcp_ing")
+public class RecipeIngredientEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "mn_id")
-  private Long manualId;
+  @Column(name = "ri_id")
+  private Long ingredientId;
 
   @NotNull
   @ManyToOne
@@ -33,13 +33,9 @@ public class ManualEntity {
   private RecipeEntity recipe;
 
   @NotNull
-  @Column(name = "mn_content", columnDefinition = "TEXT")
-  private String manualContent;
+  @Column(name = "ing_name", length = 30)
+  private String name;
 
-  @Column(name = "mn_picture")
-  private String manualPicture;
-
-  public void updateManualPicture(String newManualPicture) {
-    this.manualPicture = newManualPicture;
-  }
+  @Column(name = "quantity")
+  private String quantity;
 }
