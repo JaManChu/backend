@@ -33,4 +33,10 @@ public interface RecipeService {
 
   // 레시피 삭제 API
   ResultResponse deleteRecipe(HttpServletRequest request, RecipesDeleteDTO recipesDeleteDTO);
+
+  // 추천 레시피 조회 API
+  ResultResponse getRecommendRecipes(HttpServletRequest request);
+
+  // 추천 레시피 계산
+  void calculateAllRecommendations();
 }

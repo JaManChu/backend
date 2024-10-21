@@ -343,7 +343,7 @@ class CommentsServiceImplTest {
 
     // when
     when(recipeRepository.findById(recipeId)).thenReturn(Optional.of(recipe));
-    when(commentRepository.findAllByRecipe(recipe)).thenReturn(allByRecipe);
+    when(commentRepository.findAllByRecipeOrderByCreatedAtAsc(recipe)).thenReturn(allByRecipe);
 
     // then
     Comments data = (Comments) commentService.getCommentsList(recipeId).getData();

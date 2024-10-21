@@ -39,6 +39,11 @@ public class UserAccessHandler {
   private final IngredientRatingRepository ingredientRatingRepository;
 
 
+  // 모든 유저 객체 반환
+  public List<UserEntity> findAllUsers(){
+    return userRepository.findAll();
+  }
+
   // userId 값과 일치하는 회원 정보 반환
   public UserEntity findByUserId(Long userId) {
 
