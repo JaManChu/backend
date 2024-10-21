@@ -1,6 +1,7 @@
 package com.recipe.jamanchu.api.component;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -78,7 +79,7 @@ class UserAccessHandlerTest {
         .password("encodedPassword")
         .provider("kakao")
         .providerId("providerId")
-        .role(com.recipe.jamanchu.model.type.UserRole.USER)
+        .role(com.recipe.jamanchu.domain.model.type.UserRole.USER)
         .build();
 
     Map<String, Object> kakaoAccount = new HashMap<>();

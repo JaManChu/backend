@@ -1,5 +1,6 @@
 package com.recipe.jamanchu.api.auth.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 import com.recipe.jamanchu.api.component.UserAccessHandler;
