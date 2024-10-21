@@ -1,6 +1,7 @@
 package com.recipe.jamanchu.service.impl;
 
-import static com.recipe.jamanchu.model.type.RecipeProvider.*;
+import static com.recipe.jamanchu.model.type.RecipeProvider.USER;
+import static com.recipe.jamanchu.model.type.TokenType.ACCESS;
 
 import com.recipe.jamanchu.auth.jwt.JwtUtil;
 import com.recipe.jamanchu.component.UserAccessHandler;
@@ -9,6 +10,7 @@ import com.recipe.jamanchu.entity.RecipeIngredientEntity;
 import com.recipe.jamanchu.entity.ManualEntity;
 import com.recipe.jamanchu.entity.RecipeEntity;
 import com.recipe.jamanchu.entity.RecipeIngredientMappingEntity;
+import com.recipe.jamanchu.entity.RecipeRatingEntity;
 import com.recipe.jamanchu.entity.ScrapedRecipeEntity;
 import com.recipe.jamanchu.entity.UserEntity;
 import com.recipe.jamanchu.exceptions.exception.RecipeNotFoundException;
@@ -22,6 +24,8 @@ import com.recipe.jamanchu.model.dto.response.ingredients.Ingredient;
 import com.recipe.jamanchu.model.dto.response.recipes.RecipesInfo;
 import com.recipe.jamanchu.model.dto.response.recipes.RecipesManual;
 import com.recipe.jamanchu.model.dto.response.recipes.RecipesSummary;
+import com.recipe.jamanchu.model.dto.response.recipes.RecommendRecipe;
+import com.recipe.jamanchu.model.dto.response.recipes.RecommendRecipes;
 import com.recipe.jamanchu.model.type.ResultCode;
 import com.recipe.jamanchu.model.type.ScrapedType;
 import com.recipe.jamanchu.model.type.TokenType;
@@ -36,9 +40,13 @@ import com.recipe.jamanchu.service.RecipeService;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -60,6 +68,11 @@ public class RecipeServiceImpl implements RecipeService {
   private final IngredientRepository ingredientRepository;
   private final UserAccessHandler userAccessHandler;
   private final JwtUtil jwtUtil;
+
+  private final Map<Long, RecommendRecipes> recommendationCache = new ConcurrentHashMap<>();
+
+  private final Map<Long, Map<Long, Double>> recipeDifferences = new ConcurrentHashMap<>();
+  private final Map<Long, Map<Long, Integer>> recipeCounts = new ConcurrentHashMap<>();
 
   @Override
   @Transactional
@@ -258,7 +271,8 @@ public class RecipeServiceImpl implements RecipeService {
   }
 
   @Override
-  public ResultResponse searchRecipes(HttpServletRequest request, RecipesSearchDTO recipesSearchDTO, int page, int size) {
+  public ResultResponse searchRecipes(HttpServletRequest request, RecipesSearchDTO recipesSearchDTO,
+      int page, int size) {
     Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
     List<Long> scrapedRecipeIds = getScrapedRecipeIds(request);
 
@@ -277,7 +291,8 @@ public class RecipeServiceImpl implements RecipeService {
     return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_RECIPES, recipesSummaries);
   }
 
-  private Page<RecipeEntity> searchAndRecipes(RecipesSearchDTO recipesSearchDTO, List<Long> scrapedRecipeIds, Pageable pageable) {
+  private Page<RecipeEntity> searchAndRecipes(RecipesSearchDTO recipesSearchDTO,
+      List<Long> scrapedRecipeIds, Pageable pageable) {
     if (!scrapedRecipeIds.isEmpty()) {
       return recipeRepository.searchAndRecipesIdNotIn(
           recipesSearchDTO.getRecipeLevel(),
@@ -407,6 +422,158 @@ public class RecipeServiceImpl implements RecipeService {
         scrapedRecipe.getScrapedType() == ScrapedType.SCRAPED
             ? ResultCode.SUCCESS_SCRAPED_RECIPE
             : ResultCode.SUCCESS_CANCELED_SCRAP_RECIPE, scrapedRecipe.getScrapedType());
+  }
+
+
+  @Override
+  public ResultResponse getRecommendRecipes(HttpServletRequest request) {
+
+    // 유저 아이디 가져오기
+    Long userId = jwtUtil.getUserId(request.getHeader(ACCESS.getValue()));
+
+    // 유저 확인
+    UserEntity user = userAccessHandler.findByUserId(userId);
+
+    // 레시피 평가 항목이 있는지 조회
+    if (!recipeRatingRepository.existsByUser(user)) {
+      // 분기) 레시피 평가 항목이 없을 경우 -> 기존 레시피에서 평균 평점이 제일 높은 레시피 추천
+      return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_RECOMMEND_RECIPES,
+          getRecommendRecipesWhenNoRating());
+    } else {
+      // 분기) 레시피 평가 항목이 있는 경우 -> 유저의 평가 항목을 기반으로 레시피 추천
+      return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_RECOMMEND_RECIPES,
+          getRecommendRecipesWhenRating(user.getUserId()));
+    }
+  }
+
+  /*
+   * 레시피 평가 항목이 없을 경우 -> 기존 레시피에서 평균 평점이 제일 높은 레시피 추천
+   */
+  private RecommendRecipes getRecommendRecipesWhenNoRating() {
+    return RecommendRecipes.of(
+        recipeRatingRepository.findThreePopularRecipe()
+            .stream()
+            .map(recipe -> {
+              UserEntity user = recipe.getUser();
+              return RecommendRecipe.of(recipe, user);
+            })
+            .collect(Collectors.toList())
+    );
+  }
+
+  /*
+   * 레시피 평가 항목이 있는 경우 -> 유저의 평가 항목을 기반으로 레시피 추천
+   */
+  private RecommendRecipes getRecommendRecipesWhenRating(Long userId) {
+
+    if (recommendationCache.get(userId).getRecipes().isEmpty()
+        || recipeRatingRepository.findAll().size() < 30) {
+      return getRecommendRecipesWhenNoRating();
+    }
+    return recommendationCache.getOrDefault(userId, RecommendRecipes.empty());
+  }
+
+  /*
+   * 모든 유저에 대해서 추천 레시피 계산
+   */
+  @Override
+  public void calculateAllRecommendations() {
+
+    computeDifferences();
+
+    List<UserEntity> users = userAccessHandler.findAllUsers();
+
+    for (UserEntity user : users) {
+      RecommendRecipes recommendations = this.recommend(user);
+      recommendationCache.put(user.getUserId(), recommendations);
+    }
+  }
+
+  /*
+   * 레시피 간의 차이 계산
+   */
+  private void computeDifferences() {
+
+    // 모든 레시피 평가 데이터 조회
+    List<RecipeRatingEntity> ratings = recipeRatingRepository.findAll();
+
+    // (User, Recipe) 데이터를 User 단위로 그룹화
+    Map<UserEntity, List<RecipeRatingEntity>> userRatings = ratings.stream()
+        .collect(Collectors.groupingBy(RecipeRatingEntity::getUser));
+
+    // 모든 유저의 평가 데이터에 대해 반복
+    for (List<RecipeRatingEntity> userRating : userRatings.values()) {
+      for (int i = 0; i < userRating.size(); i++) {
+        for (int j = i + 1; j < userRating.size(); j++) {
+          RecipeRatingEntity r1 = userRating.get(i);
+          RecipeRatingEntity r2 = userRating.get(j);
+
+          // RecipeA, RecipeB 쌍
+          long recipeA = r1.getRecipe().getId();
+          long recipeB = r2.getRecipe().getId();
+
+          double diff = r1.getRating() - r2.getRating();
+
+          // RecipeA와 RecipeB 간의 차이 저장
+          recipeDifferences.putIfAbsent(recipeA, new ConcurrentHashMap<>());
+          recipeDifferences.get(recipeA).put(recipeB,
+              recipeDifferences.get(recipeA).getOrDefault(recipeB, 0.0) + diff);
+
+          recipeCounts.putIfAbsent(recipeA, new ConcurrentHashMap<>());
+          recipeCounts.get(recipeA).put(recipeB,
+              recipeCounts.get(recipeA).getOrDefault(recipeB, 0) + 1);
+        }
+      }
+    }
+
+    // 평균 차이 계산
+    for (long recipeA : recipeDifferences.keySet()) {
+      for (long recipeB : recipeDifferences.get(recipeA).keySet()) {
+        double oldValue = recipeDifferences.get(recipeA).get(recipeB);
+        int count = recipeCounts.get(recipeA).get(recipeB);
+        recipeDifferences.get(recipeA).put(recipeB, oldValue / count);
+      }
+    }
+  }
+
+  private RecommendRecipes recommend(UserEntity user) {
+    Map<Long, Double> recommendations = new HashMap<>();
+    Map<Long, Integer> frequencies = new HashMap<>();
+
+    List<RecipeRatingEntity> userRatings = recipeRatingRepository.findByUser(user);
+
+    for (RecipeRatingEntity rating : userRatings) {
+      long recipeId = rating.getRecipe().getId();
+
+      // 사용자가 평가한 레시피와 차이를 계산하여 추천 점수 갱신
+      for (Map.Entry<Long, Double> entry : recipeDifferences.getOrDefault(recipeId,
+          Collections.emptyMap()).entrySet()) {
+        long otherRecipeId = entry.getKey();
+        double diff = entry.getValue();
+
+        recommendations.put(otherRecipeId,
+            recommendations.getOrDefault(otherRecipeId, 0.0) + (diff + rating.getRating()));
+        frequencies.put(otherRecipeId,
+            frequencies.getOrDefault(otherRecipeId, 0) + 1);
+      }
+    }
+
+    // 평균 계산
+    recommendations.replaceAll((i, v) -> recommendations.get(i) / frequencies.get(i));
+
+    // 추천 점수가 4.0 이상인 레시피를 평점순으로 정렬하고, 가장 높은 3개만 추천
+    int topN = 3;
+    return RecommendRecipes.of(
+        recommendations.entrySet()
+            .stream()
+            .filter(e -> e.getValue() >= 4.0)
+            .sorted((e1, e2) -> Double.compare(e2.getValue(), e1.getValue()))
+            .limit(topN)
+            .map(e -> RecommendRecipe.of(
+                recipeRepository.findById(e.getKey()).orElseThrow(RecipeNotFoundException::new),
+                user))
+            .toList()
+    );
   }
 
   // 유저의 scrapedRecipeIds를 가져오는 메서드

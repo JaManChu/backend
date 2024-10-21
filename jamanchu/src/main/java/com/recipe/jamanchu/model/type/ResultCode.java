@@ -36,6 +36,7 @@ public enum ResultCode {
   SUCCESS_REISSUE_REFRESH_TOKEN(HttpStatus.OK, "access-token 재발급 성공"),
   PASSWORD_MATCH(HttpStatus.OK, "비밀번호가 일치 합니다."),
   PASSWORD_MISMATCH(HttpStatus.OK, "비밀번호가 일치하지 않습니다."),
+  SUCCESS_RETRIEVE_RECOMMEND_RECIPES(HttpStatus.OK, "추천 레시피 조회 성공"),
   ;
 
   private final HttpStatus statusCode;
