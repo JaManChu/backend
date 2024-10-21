@@ -3,6 +3,7 @@ package com.recipe.jamanchu.domain.request.recipe;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
+import com.recipe.jamanchu.domain.model.dto.request.recipe.RecipesDeleteDTO;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;

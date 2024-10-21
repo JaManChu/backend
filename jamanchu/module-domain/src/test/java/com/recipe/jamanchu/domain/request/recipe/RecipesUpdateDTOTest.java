@@ -3,6 +3,7 @@ package com.recipe.jamanchu.domain.request.recipe;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
+import com.recipe.jamanchu.domain.model.dto.request.recipe.RecipesUpdateDTO;
 import com.recipe.jamanchu.domain.model.dto.response.ingredients.Ingredient;
 import com.recipe.jamanchu.domain.model.dto.response.recipes.RecipesManual;
 import com.recipe.jamanchu.domain.model.type.CookingTimeType;
