@@ -35,4 +35,5 @@ out/
 
 ### VS Code ###
 .vscode/
-secret.yml
+module-api/src/main/resources/secret.yml
+module-batch/src/main/resources/secret.yml
