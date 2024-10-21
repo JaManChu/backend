@@ -439,7 +439,7 @@ public class RecipeServiceImpl implements RecipeService {
   /*
    * 레시피 평가 항목이 있는 경우 -> 유저의 평가 항목을 기반으로 레시피 추천
    */
-  public RecommendRecipes getRecommendRecipesWhenRating(Long userId) {
+  private RecommendRecipes getRecommendRecipesWhenRating(Long userId) {
 
     if (recommendationCache.get(userId).getRecipes().isEmpty()
         || recipeRatingRepository.findAll().size() < 30) {
@@ -511,7 +511,7 @@ public class RecipeServiceImpl implements RecipeService {
     }
   }
 
-  public RecommendRecipes recommend(UserEntity user) {
+  private RecommendRecipes recommend(UserEntity user) {
     Map<Long, Double> recommendations = new HashMap<>();
     Map<Long, Integer> frequencies = new HashMap<>();
 
