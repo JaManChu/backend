@@ -1,6 +1,6 @@
-package com.recipe.jamanchu.exceptions.exception;
+package com.recipe.jamanchu.core.exceptions.exception;
 
-import com.recipe.jamanchu.exceptions.ExceptionStatus;
+import com.recipe.jamanchu.core.exceptions.ExceptionStatus;
 
 public class MissingNicknameException extends GlobalException{
 

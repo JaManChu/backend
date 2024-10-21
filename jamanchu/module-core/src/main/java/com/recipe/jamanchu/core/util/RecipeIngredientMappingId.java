@@ -1,4 +1,4 @@
-package com.recipe.jamanchu.util;
+package com.recipe.jamanchu.core.util;
 
 import java.io.Serializable;
 import java.util.Objects;

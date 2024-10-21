@@ -1,4 +1,4 @@
-package com.recipe.jamanchu.exceptions;
+package com.recipe.jamanchu.core.exceptions;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,7 +19,7 @@ public enum ExceptionStatus {
   USER_INFO_RETRIEVAL(HttpStatus.UNAUTHORIZED, "사용자 정보를 가져오는 데 실패했습니다."),
   MISSING_NICKNAME(HttpStatus.BAD_REQUEST, "닉네임을 입력해주세요!"),
   REFRESH_TOKEN_EXPIRED(HttpStatus.GONE, "다시 로그인을 해주세요!"),
-  COOKIE_NOT_FOUND(HttpStatus.NOT_FOUND, "다시 로그인을 해주세요!"),
+  COOKIE_NOT_FOUND(HttpStatus.PRECONDITION_FAILED, "다시 로그인을 해주세요!"),
   WITHDREW_USER(HttpStatus.BAD_REQUEST, "이미 탈퇴한 회원입니다. 계정 복구를 희망하시면 "
       + "'user@example.com'으로 문의를 해주세요"),
   ;

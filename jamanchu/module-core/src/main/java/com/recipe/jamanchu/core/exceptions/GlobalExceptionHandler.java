@@ -1,6 +1,6 @@
-package com.recipe.jamanchu.exceptions;
+package com.recipe.jamanchu.core.exceptions;
 
-import com.recipe.jamanchu.exceptions.exception.GlobalException;
+import com.recipe.jamanchu.core.exceptions.exception.GlobalException;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.http.ResponseEntity;
