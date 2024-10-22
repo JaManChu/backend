@@ -276,7 +276,13 @@ public class RecipeServiceImpl implements RecipeService {
     Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
     List<Long> scrapedRecipeIds = getScrapedRecipeIds(request);
 
-    Page<RecipeEntity> recipes = searchAndRecipes(recipesSearchDTO, scrapedRecipeIds, pageable);
+    // Page<RecipeEntity> recipes = searchAndRecipes(recipesSearchDTO, scrapedRecipeIds, pageable);
+    Page<RecipeEntity> recipes = recipeRepository.searchAndRecipesQueryDSL(
+        recipesSearchDTO.getRecipeLevel(),
+        recipesSearchDTO.getRecipeCookingTime(),
+        recipesSearchDTO.getIngredients(),
+        scrapedRecipeIds,
+        pageable);
 
     if (recipes.isEmpty()) {
       recipes = searchOrRecipes(recipesSearchDTO, scrapedRecipeIds, pageable);
@@ -290,30 +296,7 @@ public class RecipeServiceImpl implements RecipeService {
 
     return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_RECIPES, recipesSummaries);
   }
-
-  private Page<RecipeEntity> searchAndRecipes(RecipesSearchDTO recipesSearchDTO,
-      List<Long> scrapedRecipeIds, Pageable pageable) {
-    if (!scrapedRecipeIds.isEmpty()) {
-      return recipeRepository.searchAndRecipesIdNotIn(
-          recipesSearchDTO.getRecipeLevel(),
-          recipesSearchDTO.getRecipeCookingTime(),
-          recipesSearchDTO.getIngredients(),
-          (long) recipesSearchDTO.getIngredients().size(),
-          scrapedRecipeIds,
-          pageable
-      );
-    } else {
-      // SCRAPED한 레시피가 없거나 Token이 없으면 And 조건으로 레시피를 조회
-      return recipeRepository.searchAndRecipes(
-          recipesSearchDTO.getRecipeLevel(),
-          recipesSearchDTO.getRecipeCookingTime(),
-          recipesSearchDTO.getIngredients(),
-          (long) recipesSearchDTO.getIngredients().size(),
-          pageable
-      );
-    }
-  }
-
+  
   private Page<RecipeEntity> searchOrRecipes(RecipesSearchDTO recipesSearchDTO,
       List<Long> scrapedRecipeIds, Pageable pageable) {
     if (!scrapedRecipeIds.isEmpty()) {
