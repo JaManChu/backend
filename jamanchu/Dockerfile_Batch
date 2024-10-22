@@ -9,7 +9,7 @@ COPY gradle gradle
 COPY build.gradle .
 COPY settings.gradle .
 
-COPY module-api module-batch
+COPY module-batch module-batch
 COPY module-domain module-domain
 COPY module-core module-core
 
