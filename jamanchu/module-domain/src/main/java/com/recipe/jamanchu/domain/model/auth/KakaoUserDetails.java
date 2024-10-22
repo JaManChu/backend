@@ -1,4 +1,4 @@
-package com.recipe.jamanchu.api.auth.oauth2;
+package com.recipe.jamanchu.domain.model.auth;
 
 import java.util.Map;
 import lombok.AllArgsConstructor;

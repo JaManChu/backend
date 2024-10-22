@@ -8,8 +8,9 @@ import static org.mockito.Mockito.when;
 
 import com.recipe.jamanchu.api.auth.jwt.JwtUtil;
 import com.recipe.jamanchu.api.auth.oauth2.CustomOauth2UserService;
-import com.recipe.jamanchu.api.auth.oauth2.KakaoUserDetails;
-import com.recipe.jamanchu.api.component.UserAccessHandler;
+import com.recipe.jamanchu.domain.component.UserAccessHandler;
+import com.recipe.jamanchu.domain.model.auth.KakaoUserDetails;
+
 import com.recipe.jamanchu.domain.entity.RecipeEntity;
 import com.recipe.jamanchu.domain.entity.UserEntity;
 import com.recipe.jamanchu.core.exceptions.exception.AccessTokenRetrievalException;

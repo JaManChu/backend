@@ -2,6 +2,7 @@ package com.recipe.jamanchu.api.auth.oauth2;
 
 import com.recipe.jamanchu.core.exceptions.exception.AccessTokenRetrievalException;
 import com.recipe.jamanchu.core.exceptions.exception.UserInfoRetrievalException;
+import com.recipe.jamanchu.domain.model.auth.KakaoUserDetails;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

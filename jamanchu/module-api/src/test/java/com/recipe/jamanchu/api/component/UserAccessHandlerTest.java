@@ -10,7 +10,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.recipe.jamanchu.api.auth.oauth2.KakaoUserDetails;
+import com.recipe.jamanchu.domain.component.UserAccessHandler;
+import com.recipe.jamanchu.domain.model.auth.KakaoUserDetails;
 import com.recipe.jamanchu.domain.entity.UserEntity;
 import com.recipe.jamanchu.core.exceptions.exception.PasswordMismatchException;
 import com.recipe.jamanchu.core.exceptions.exception.SocialAccountException;
