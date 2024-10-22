@@ -27,7 +27,7 @@ public class RecipeRepositoryCustomImpl implements RecipeRepositoryCustom {
   private final JPAQueryFactory queryFactory;
   @Override
   public Page<RecipeEntity> searchAndRecipesQueryDSL(LevelType level, CookingTimeType cookingTime,
-      List<String> ingredients, Long ingredientCount, Pageable pageable, List<Long> scrapedRecipeIds) {
+      List<String> ingredients, List<Long> scrapedRecipeIds, Pageable pageable) {
     QRecipeEntity recipe = QRecipeEntity.recipeEntity;
     QRecipeIngredientEntity recipeIngredient = QRecipeIngredientEntity.recipeIngredientEntity;
 
@@ -67,7 +67,7 @@ public class RecipeRepositoryCustomImpl implements RecipeRepositoryCustom {
       combinedCondition = combinedCondition.and(recipe.time.eq(cookingTime));
     }
 
-    // 스크랩된 레시피 제외 조건 추가  --> 테스트 필요
+    // 스크랩된 레시피 제외 조건 추가
     if (!scrapedRecipeIds.isEmpty()) {
       combinedCondition = combinedCondition.and(recipe.id.notIn(scrapedRecipeIds));
     }

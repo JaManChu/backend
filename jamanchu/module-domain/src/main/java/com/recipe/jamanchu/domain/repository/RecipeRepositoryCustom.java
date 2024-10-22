@@ -9,6 +9,6 @@ import org.springframework.data.domain.Pageable;
 
 public interface RecipeRepositoryCustom {
   Page<RecipeEntity> searchAndRecipesQueryDSL(LevelType level, CookingTimeType cookingTime,
-      List<String> ingredients, Long ingredientCount,
-      Pageable pageable, List<Long> scrapedRecipeIds);
+      List<String> ingredients, List<Long> scrapedRecipeIds,
+      Pageable pageable);
 }
