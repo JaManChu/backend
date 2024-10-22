@@ -29,6 +29,7 @@ public class RecipeRepositoryCustomImpl implements RecipeRepositoryCustom {
 
     // 기본 쿼리
     JPQLQuery<RecipeEntity> query = queryFactory.selectFrom(recipe)
+        .distinct()
         .join(recipe.ingredients, recipeIngredient);
 
     // 조건 중 하나라도 있어야 하므로, 기본 조건을 생성합니다.
@@ -88,6 +89,7 @@ public class RecipeRepositoryCustomImpl implements RecipeRepositoryCustom {
 
     // 기본 쿼리
     JPQLQuery<RecipeEntity> query = queryFactory.selectFrom(recipe)
+        .distinct()
         .join(recipe.ingredients, recipeIngredient);
 
     // 조건 중 하나라도 있어야 하므로, 기본 조건을 생성합니다.
