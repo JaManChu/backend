@@ -1,0 +1,58 @@
+spring:
+  config:
+    import: classpath:secret.yml
+  jpa:
+    hibernate:
+      # 필요에 따라서 수정 필요
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        check_nullability: true
+        format-sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+        default_batch_fetch_size: 1000
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${DEV.DATABASE.URL}
+    username: ${DEV.DATABASE.USERNAME}
+    password: ${DEV.DATABASE.PASSWORD}
+  jwt:
+    secret:
+      key: ${DEV.AUTH.JWT.SECRET.KEY}
+  security:
+    oauth2:
+      client:
+        provider:
+          kakao:
+            authorization-uri: ${DEV.AUTH.OAUTH.PROVIDER.KAKAO.authorization-uri}
+            token-uri: ${DEV.AUTH.OAUTH.PROVIDER.KAKAO.token-uri}
+            user-info-uri: ${DEV.AUTH.OAUTH.PROVIDER.KAKAO.user-info-uri}
+            user-name-attribute: ${DEV.AUTH.OAUTH.PROVIDER.KAKAO.user-name-attribute}
+        registration:
+          kakao:
+            client-id: ${DEV.AUTH.OAUTH.REGISTRATION.KAKAO.client-id}
+            client-secret: ${DEV.AUTH.OAUTH.REGISTRATION.KAKAO.client-secret}
+            client-authentication-method: ${DEV.AUTH.OAUTH.REGISTRATION.KAKAO.client-authentication-method}
+            redirect-uri: ${DEV.AUTH.OAUTH.REGISTRATION.KAKAO.redirect-uri}
+            authorization-grant-type: ${DEV.AUTH.OAUTH.REGISTRATION.KAKAO.authorization-grant-type}
+            client-name: ${DEV.AUTH.OAUTH.REGISTRATION.KAKAO.client-name}
+            scope:
+              - ${DEV.AUTH.OAUTH.REGISTRATION.KAKAO.scope[0]}
+              - ${DEV.AUTH.OAUTH.REGISTRATION.KAKAO.scope[1]}
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+cloud:
+  aws:
+    s3:
+      bucket: jamanchu
+    region:
+      static: ap-northeast-2
+      auto: false
+    stack:
+      auto: false
+    credentials:
+      access-key: ${DEV.AUTH.S3.access-key}
+      secret-key: ${DEV.AUTH.S3.secret-key}

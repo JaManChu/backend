@@ -1,1 +1,6 @@
 rootProject.name = 'jamanchu'
+include 'module-api'
+include 'module-domain'
+include 'module-core'
+include 'module-batch'
+
