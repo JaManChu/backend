@@ -276,16 +276,12 @@ public class RecipeServiceImpl implements RecipeService {
     Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
     List<Long> scrapedRecipeIds = getScrapedRecipeIds(request);
 
-    // Page<RecipeEntity> recipes = searchAndRecipes(recipesSearchDTO, scrapedRecipeIds, pageable);
     Page<RecipeEntity> recipes = recipeRepository.searchAndRecipesQueryDSL(
-        recipesSearchDTO.getRecipeLevel(),
-        recipesSearchDTO.getRecipeCookingTime(),
-        recipesSearchDTO.getIngredients(),
-        scrapedRecipeIds,
-        pageable);
+        recipesSearchDTO, scrapedRecipeIds, pageable);
 
     if (recipes.isEmpty()) {
-      recipes = searchOrRecipes(recipesSearchDTO, scrapedRecipeIds, pageable);
+      recipes = recipeRepository.searchOrRecipesQueryDSL(
+          recipesSearchDTO, scrapedRecipeIds, pageable);
     }
 
     if (recipes.isEmpty()) {
