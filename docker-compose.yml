@@ -2,7 +2,7 @@ services:
   api:
     build:
       context: jamanchu
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile_API
     container_name: api
     ports:
       - "8080:8080"
@@ -11,6 +11,20 @@ services:
     restart: always
     networks:
       - jamanchu_network
+
+  batch:
+    build:
+      context: jamanchu
+      dockerfile: Dockerfile_Batch
+    container_name: batch
+    ports:
+      - "8081:8081"
+    environment:
+      ACTIVE_PROFILE: prod
+    restart: always
+    networks:
+      - jamanchu_network
+
   mysql:
     image: mysql:latest
     container_name: mysql
