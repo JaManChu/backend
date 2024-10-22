@@ -36,7 +36,4 @@ public interface RecipeService {
 
   // 추천 레시피 조회 API
   ResultResponse getRecommendRecipes(HttpServletRequest request);
-
-  // 추천 레시피 계산
-  void calculateAllRecommendations();
 }
