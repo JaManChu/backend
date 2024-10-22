@@ -15,7 +15,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.recipe.jamanchu.api.auth.jwt.JwtUtil;
-import com.recipe.jamanchu.api.component.UserAccessHandler;
+import com.recipe.jamanchu.domain.component.UserAccessHandler;
 import com.recipe.jamanchu.domain.entity.IngredientEntity;
 import com.recipe.jamanchu.domain.entity.ManualEntity;
 import com.recipe.jamanchu.domain.entity.RecipeEntity;

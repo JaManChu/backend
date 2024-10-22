@@ -3,7 +3,7 @@ package com.recipe.jamanchu.api.auth.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
-import com.recipe.jamanchu.api.component.UserAccessHandler;
+import com.recipe.jamanchu.domain.component.UserAccessHandler;
 import com.recipe.jamanchu.domain.entity.UserEntity;
 import com.recipe.jamanchu.domain.model.type.UserRole;
 import org.junit.jupiter.api.DisplayName;

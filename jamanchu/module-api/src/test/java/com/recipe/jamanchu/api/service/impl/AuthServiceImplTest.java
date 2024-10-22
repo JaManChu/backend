@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import com.recipe.jamanchu.api.auth.jwt.JwtUtil;
-import com.recipe.jamanchu.api.component.UserAccessHandler;
+import com.recipe.jamanchu.domain.component.UserAccessHandler;
 import com.recipe.jamanchu.domain.entity.UserEntity;
 import com.recipe.jamanchu.core.exceptions.exception.CookieNotFoundException;
 import com.recipe.jamanchu.core.exceptions.exception.RefreshTokenExpiredException;

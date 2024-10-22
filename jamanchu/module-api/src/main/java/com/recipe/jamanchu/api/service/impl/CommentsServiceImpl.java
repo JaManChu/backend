@@ -3,7 +3,7 @@ package com.recipe.jamanchu.api.service.impl;
 import static com.recipe.jamanchu.domain.model.type.RecipeProvider.SCRAP;
 
 import com.recipe.jamanchu.api.auth.jwt.JwtUtil;
-import com.recipe.jamanchu.api.component.UserAccessHandler;
+import com.recipe.jamanchu.domain.component.UserAccessHandler;
 import com.recipe.jamanchu.domain.entity.CommentEntity;
 import com.recipe.jamanchu.domain.entity.RecipeEntity;
 import com.recipe.jamanchu.domain.entity.UserEntity;
