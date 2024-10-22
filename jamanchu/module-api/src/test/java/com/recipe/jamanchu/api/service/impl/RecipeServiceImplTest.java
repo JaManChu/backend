@@ -480,7 +480,7 @@ class RecipeServiceImplTest {
   }
 
   @Test
-  @DisplayName("레시피 조건 검색 성공 - 스크랩한 레시피가 없는 경우")
+  @DisplayName("레시피 And 조건 검색 성공 - 스크랩한 레시피가 없는 경우")
   void searchRecipes_Success_NoScrapedRecipes() {
     // given
     RecipesSearchDTO searchDTO = new RecipesSearchDTO(
@@ -501,11 +501,10 @@ class RecipeServiceImplTest {
     );
 
     Page<RecipeEntity> recipePage = new PageImpl<>(recipeEntities);
+    List<Long> scrapedRecipeIds = new ArrayList<>();
 
-    when(recipeRepository.searchAndRecipes(eq(searchDTO.getRecipeLevel()),
-        eq(searchDTO.getRecipeCookingTime()),
-        anyList(),
-        eq((long) searchDTO.getIngredients().size()),
+    when(recipeRepository.searchAndRecipesQueryDSL(eq(searchDTO),
+        eq(scrapedRecipeIds),
         any(Pageable.class)))
         .thenReturn(recipePage);
 
@@ -519,12 +518,12 @@ class RecipeServiceImplTest {
     assertEquals("Recipe1", summaries.get(0).getRecipeName());
 
     // verify
-    verify(recipeRepository, times(1)).searchAndRecipes(any(), any(), any(), any(), any(Pageable.class));
-    verify(recipeRepository, never()).searchOrRecipes(any(), any(), any(), any(Pageable.class));
+    verify(recipeRepository, times(1)).searchAndRecipesQueryDSL(eq(searchDTO), anyList(), any(Pageable.class));
+    verify(recipeRepository, never()).searchOrRecipesQueryDSL(eq(searchDTO), anyList(), any(Pageable.class));
   }
 
   @Test
-  @DisplayName("레시피 조건 검색 성공 - 스크랩한 레시피가 있는 경우")
+  @DisplayName("레시피 And 조건 실패 -> Or 조건 검색 성공 - 스크랩한 레시피가 있는 경우")
   void searchRecipes_Success_WithScrapedRecipes() {
     // given
     RecipesSearchDTO searchDTO = new RecipesSearchDTO(
@@ -553,17 +552,12 @@ class RecipeServiceImplTest {
     when(request.getHeader(TokenType.ACCESS.getValue())).thenReturn(token);
     when(jwtUtil.getUserId(token)).thenReturn(userId);
     when(scrapedRecipeRepository.findRecipeIdsByUserIdAndScrapedType(userId, ScrapedType.SCRAPED)).thenReturn(scrapedRecipeIds);
-    when(recipeRepository.searchAndRecipesIdNotIn(eq(searchDTO.getRecipeLevel()),
-        eq(searchDTO.getRecipeCookingTime()),
-        anyList(),
-        eq((long) searchDTO.getIngredients().size()),
+    when(recipeRepository.searchAndRecipesQueryDSL(eq(searchDTO),
         eq(scrapedRecipeIds),
         any(Pageable.class)))
         .thenReturn(new PageImpl<>(List.of())); // 먼저 AND 쿼리가 비어있도록 설정
 
-    when(recipeRepository.searchOrRecipesIdNotIn(eq(searchDTO.getRecipeLevel()),
-        eq(searchDTO.getRecipeCookingTime()),
-        anyList(),
+    when(recipeRepository.searchOrRecipesQueryDSL(eq(searchDTO),
         eq(scrapedRecipeIds),
         any(Pageable.class)))
         .thenReturn(recipePage); // OR 쿼리에서 결과를 반환하도록 설정
@@ -578,8 +572,8 @@ class RecipeServiceImplTest {
     assertEquals("Recipe2", summaries.get(0).getRecipeName());
 
     // verify
-    verify(recipeRepository, times(1)).searchAndRecipesIdNotIn(any(), any(), any(), any(), any(), any(Pageable.class));
-    verify(recipeRepository, times(1)).searchOrRecipesIdNotIn(any(), any(), any(), any(), any(Pageable.class));
+    verify(recipeRepository, times(1)).searchAndRecipesQueryDSL(eq(searchDTO), anyList(), any(Pageable.class));
+    verify(recipeRepository, times(1)).searchOrRecipesQueryDSL(eq(searchDTO), anyList(), any(Pageable.class));
   }
 
   @Test
@@ -593,10 +587,12 @@ class RecipeServiceImplTest {
     );
     Page<RecipeEntity> emptyPage = Page.empty();
 
-    when(recipeRepository.searchAndRecipes(any(), any(), any(), anyLong(),
+    when(recipeRepository.searchAndRecipesQueryDSL(eq(searchDTO),
+        any(),
         any(Pageable.class))).thenReturn(emptyPage);
-    when(recipeRepository.searchOrRecipes(any(), any(), any(), any(Pageable.class))).thenReturn(
-        emptyPage);
+    when(recipeRepository.searchOrRecipesQueryDSL(eq(searchDTO),
+        any(),
+        any(Pageable.class))).thenReturn(emptyPage);
 
     // when & then
     assertThrows(RecipeNotFoundException.class,
