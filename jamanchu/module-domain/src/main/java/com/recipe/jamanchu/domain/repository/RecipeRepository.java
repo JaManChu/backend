@@ -2,8 +2,6 @@ package com.recipe.jamanchu.domain.repository;
 
 import com.recipe.jamanchu.domain.entity.RecipeEntity;
 import com.recipe.jamanchu.domain.entity.UserEntity;
-import com.recipe.jamanchu.domain.model.type.CookingTimeType;
-import com.recipe.jamanchu.domain.model.type.LevelType;
 import com.recipe.jamanchu.domain.model.type.ScrapedType;
 
 import java.util.List;

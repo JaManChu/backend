@@ -1,7 +1,7 @@
-package com.recipe.jamanchu.repository;
+package com.recipe.jamanchu.domain.repository;
 
-import com.recipe.jamanchu.entity.RecipeEntity;
-import com.recipe.jamanchu.model.dto.request.recipe.RecipesSearchDTO;
+import com.recipe.jamanchu.domain.entity.RecipeEntity;
+import com.recipe.jamanchu.domain.model.dto.request.recipe.RecipesSearchDTO;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

@@ -1,14 +1,14 @@
-package com.recipe.jamanchu.repository.impl;
+package com.recipe.jamanchu.domain.repository.impl;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.recipe.jamanchu.entity.QRecipeEntity;
-import com.recipe.jamanchu.entity.QRecipeIngredientEntity;
-import com.recipe.jamanchu.entity.RecipeEntity;
-import com.recipe.jamanchu.model.dto.request.recipe.RecipesSearchDTO;
-import com.recipe.jamanchu.repository.RecipeRepositoryCustom;
+import com.recipe.jamanchu.domain.entity.RecipeEntity;
+import com.recipe.jamanchu.domain.model.dto.request.recipe.RecipesSearchDTO;
+import com.recipe.jamanchu.domain.repository.RecipeRepositoryCustom;
+import com.recipe.jamanchu.domain.entity.QRecipeEntity;
+import com.recipe.jamanchu.domain.entity.QRecipeIngredientEntity;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
