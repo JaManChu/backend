@@ -1,6 +1,6 @@
 package com.recipe.jamanchu.api.component;
 
-import com.recipe.jamanchu.api.auth.oauth2.KakaoUserDetails;
+import com.recipe.jamanchu.domain.model.auth.KakaoUserDetails;
 import com.recipe.jamanchu.domain.entity.UserEntity;
 import com.recipe.jamanchu.core.exceptions.exception.PasswordMismatchException;
 import com.recipe.jamanchu.core.exceptions.exception.SocialAccountException;
