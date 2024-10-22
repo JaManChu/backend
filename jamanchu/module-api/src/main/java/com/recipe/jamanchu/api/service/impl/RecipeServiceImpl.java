@@ -292,27 +292,6 @@ public class RecipeServiceImpl implements RecipeService {
 
     return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_RECIPES, recipesSummaries);
   }
-  
-  private Page<RecipeEntity> searchOrRecipes(RecipesSearchDTO recipesSearchDTO,
-      List<Long> scrapedRecipeIds, Pageable pageable) {
-    if (!scrapedRecipeIds.isEmpty()) {
-      return recipeRepository.searchOrRecipesIdNotIn(
-          recipesSearchDTO.getRecipeLevel(),
-          recipesSearchDTO.getRecipeCookingTime(),
-          recipesSearchDTO.getIngredients(),
-          scrapedRecipeIds,
-          pageable
-      );
-    } else {
-      // SCRAPED한 레시피가 없거나 Token이 없으면 Or 조건으로 레시피를 조회
-      return recipeRepository.searchOrRecipes(
-          recipesSearchDTO.getRecipeLevel(),
-          recipesSearchDTO.getRecipeCookingTime(),
-          recipesSearchDTO.getIngredients(),
-          pageable
-      );
-    }
-  }
 
   @Override
   public ResultResponse getRecipeDetail(Long recipeId) {
