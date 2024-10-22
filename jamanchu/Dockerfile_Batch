@@ -8,16 +8,20 @@ COPY gradlew .
 COPY gradle gradle
 COPY build.gradle .
 COPY settings.gradle .
-COPY src src
+
+COPY module-batch module-batch
+COPY module-domain module-domain
+COPY module-core module-core
 
 # ./gradlew 파일 권한 변경
 RUN chmod +x ./gradlew
 
 # gradle 빌드
-RUN ./gradlew bootJar
+RUN ./gradlew :module-batch:bootJar
 FROM amazoncorretto:17
 
-COPY --from=builder build/libs/*.jar app.jar
+COPY --from=builder module-batch/build/libs/*.jar app.jar
+
 
 ENTRYPOINT [ "java","-jar","/app.jar" ]
 VOLUME /tmp

@@ -4,8 +4,8 @@ import static com.recipe.jamanchu.domain.model.type.ResultCode.SUCCESS_GET_USER_
 
 import com.recipe.jamanchu.api.auth.jwt.JwtUtil;
 import com.recipe.jamanchu.api.auth.oauth2.CustomOauth2UserService;
-import com.recipe.jamanchu.api.auth.oauth2.KakaoUserDetails;
-import com.recipe.jamanchu.api.component.UserAccessHandler;
+import com.recipe.jamanchu.domain.component.UserAccessHandler;
+import com.recipe.jamanchu.domain.model.auth.KakaoUserDetails;
 import com.recipe.jamanchu.domain.entity.UserEntity;
 import com.recipe.jamanchu.domain.model.dto.request.auth.LoginDTO;
 import com.recipe.jamanchu.domain.model.dto.request.auth.SignupDTO;

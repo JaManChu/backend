@@ -1,11 +1,12 @@
-package com.recipe.jamanchu.api.component;
+package com.recipe.jamanchu.domain.component;
 
-import com.recipe.jamanchu.api.auth.oauth2.KakaoUserDetails;
-import com.recipe.jamanchu.domain.entity.UserEntity;
+
 import com.recipe.jamanchu.core.exceptions.exception.PasswordMismatchException;
 import com.recipe.jamanchu.core.exceptions.exception.SocialAccountException;
 import com.recipe.jamanchu.core.exceptions.exception.UserNotFoundException;
 import com.recipe.jamanchu.core.exceptions.exception.WithdrewUserException;
+import com.recipe.jamanchu.domain.entity.UserEntity;
+import com.recipe.jamanchu.domain.model.auth.KakaoUserDetails;
 import com.recipe.jamanchu.domain.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.domain.model.type.ResultCode;
 import com.recipe.jamanchu.domain.model.type.UserRole;
@@ -40,7 +41,7 @@ public class UserAccessHandler {
 
 
   // 모든 유저 객체 반환
-  public List<UserEntity> findAllUsers(){
+  public List<UserEntity> findAllUsers() {
     return userRepository.findAll();
   }
 
@@ -85,7 +86,7 @@ public class UserAccessHandler {
   }
 
   // 이메일 중복 체크
-  public ResultResponse existsByEmail(String email){
+  public ResultResponse existsByEmail(String email) {
     if (userRepository.existsByEmail(email)) {
       Optional<UserEntity> userOpt = userRepository.findByEmail(email);
 
@@ -105,7 +106,7 @@ public class UserAccessHandler {
 
 
   // 닉네임 중복 체크
-  public ResultResponse existsByNickname(String nickname){
+  public ResultResponse existsByNickname(String nickname) {
 
     if (userRepository.existsByNickname(nickname)) {
       return ResultResponse.of(ResultCode.NICKNAME_ALREADY_IN_USE, false);

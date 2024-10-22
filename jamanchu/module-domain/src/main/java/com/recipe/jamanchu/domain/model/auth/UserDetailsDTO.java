@@ -1,4 +1,4 @@
-package com.recipe.jamanchu.api.auth.dto;
+package com.recipe.jamanchu.domain.model.auth;
 
 import com.recipe.jamanchu.domain.entity.UserEntity;
 import java.util.ArrayList;
