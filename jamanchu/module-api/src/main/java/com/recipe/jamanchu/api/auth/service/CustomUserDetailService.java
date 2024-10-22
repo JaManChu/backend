@@ -1,7 +1,8 @@
 package com.recipe.jamanchu.api.auth.service;
 
-import com.recipe.jamanchu.api.auth.dto.UserDetailsDTO;
-import com.recipe.jamanchu.api.component.UserAccessHandler;
+import com.recipe.jamanchu.domain.component.UserAccessHandler;
+import com.recipe.jamanchu.domain.model.auth.UserDetailsDTO;
+
 import com.recipe.jamanchu.domain.entity.UserEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
