@@ -15,7 +15,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface RecipeRepository extends JpaRepository<RecipeEntity, Long> {
+public interface RecipeRepository extends JpaRepository<RecipeEntity, Long>, RecipeRepositoryCustom {
 
   // AND 조건으로 검색하는 쿼리
   @Query(value = "SELECT r FROM RecipeEntity r JOIN r.ingredients ri " +
