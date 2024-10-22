@@ -4,17 +4,17 @@ import static com.recipe.jamanchu.domain.model.type.RecipeProvider.USER;
 import static com.recipe.jamanchu.domain.model.type.TokenType.ACCESS;
 
 import com.recipe.jamanchu.api.auth.jwt.JwtUtil;
-import com.recipe.jamanchu.api.component.UserAccessHandler;
-import com.recipe.jamanchu.domain.entity.IngredientEntity;
-import com.recipe.jamanchu.domain.entity.RecipeIngredientEntity;
-import com.recipe.jamanchu.domain.entity.ManualEntity;
-import com.recipe.jamanchu.domain.entity.RecipeEntity;
-import com.recipe.jamanchu.domain.entity.RecipeIngredientMappingEntity;
-import com.recipe.jamanchu.domain.entity.RecipeRatingEntity;
-import com.recipe.jamanchu.domain.entity.ScrapedRecipeEntity;
-import com.recipe.jamanchu.domain.entity.UserEntity;
+import com.recipe.jamanchu.api.service.RecipeService;
 import com.recipe.jamanchu.core.exceptions.exception.RecipeNotFoundException;
 import com.recipe.jamanchu.core.exceptions.exception.UnmatchedUserException;
+import com.recipe.jamanchu.domain.component.UserAccessHandler;
+import com.recipe.jamanchu.domain.entity.IngredientEntity;
+import com.recipe.jamanchu.domain.entity.ManualEntity;
+import com.recipe.jamanchu.domain.entity.RecipeEntity;
+import com.recipe.jamanchu.domain.entity.RecipeIngredientEntity;
+import com.recipe.jamanchu.domain.entity.RecipeIngredientMappingEntity;
+import com.recipe.jamanchu.domain.entity.ScrapedRecipeEntity;
+import com.recipe.jamanchu.domain.entity.UserEntity;
 import com.recipe.jamanchu.domain.model.dto.request.recipe.RecipesDTO;
 import com.recipe.jamanchu.domain.model.dto.request.recipe.RecipesDeleteDTO;
 import com.recipe.jamanchu.domain.model.dto.request.recipe.RecipesSearchDTO;
@@ -36,11 +36,9 @@ import com.recipe.jamanchu.domain.repository.RecipeIngredientRepository;
 import com.recipe.jamanchu.domain.repository.RecipeRatingRepository;
 import com.recipe.jamanchu.domain.repository.RecipeRepository;
 import com.recipe.jamanchu.domain.repository.ScrapedRecipeRepository;
-import com.recipe.jamanchu.api.service.RecipeService;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -431,108 +429,7 @@ public class RecipeServiceImpl implements RecipeService {
     return recommendationCache.getOrDefault(userId, RecommendRecipes.empty());
   }
 
-  /*
-   * 모든 유저에 대해서 추천 레시피 계산
-   */
-  @Override
-  public void calculateAllRecommendations() {
 
-    computeDifferences();
-
-    List<UserEntity> users = userAccessHandler.findAllUsers();
-
-    for (UserEntity user : users) {
-      RecommendRecipes recommendations = this.recommend(user);
-      recommendationCache.put(user.getUserId(), recommendations);
-    }
-  }
-
-  /*
-   * 레시피 간의 차이 계산
-   */
-  private void computeDifferences() {
-
-    // 모든 레시피 평가 데이터 조회
-    List<RecipeRatingEntity> ratings = recipeRatingRepository.findAll();
-
-    // (User, Recipe) 데이터를 User 단위로 그룹화
-    Map<UserEntity, List<RecipeRatingEntity>> userRatings = ratings.stream()
-        .collect(Collectors.groupingBy(RecipeRatingEntity::getUser));
-
-    // 모든 유저의 평가 데이터에 대해 반복
-    for (List<RecipeRatingEntity> userRating : userRatings.values()) {
-      for (int i = 0; i < userRating.size(); i++) {
-        for (int j = i + 1; j < userRating.size(); j++) {
-          RecipeRatingEntity r1 = userRating.get(i);
-          RecipeRatingEntity r2 = userRating.get(j);
-
-          // RecipeA, RecipeB 쌍
-          long recipeA = r1.getRecipe().getId();
-          long recipeB = r2.getRecipe().getId();
-
-          double diff = r1.getRating() - r2.getRating();
-
-          // RecipeA와 RecipeB 간의 차이 저장
-          recipeDifferences.putIfAbsent(recipeA, new ConcurrentHashMap<>());
-          recipeDifferences.get(recipeA).put(recipeB,
-              recipeDifferences.get(recipeA).getOrDefault(recipeB, 0.0) + diff);
-
-          recipeCounts.putIfAbsent(recipeA, new ConcurrentHashMap<>());
-          recipeCounts.get(recipeA).put(recipeB,
-              recipeCounts.get(recipeA).getOrDefault(recipeB, 0) + 1);
-        }
-      }
-    }
-
-    // 평균 차이 계산
-    for (long recipeA : recipeDifferences.keySet()) {
-      for (long recipeB : recipeDifferences.get(recipeA).keySet()) {
-        double oldValue = recipeDifferences.get(recipeA).get(recipeB);
-        int count = recipeCounts.get(recipeA).get(recipeB);
-        recipeDifferences.get(recipeA).put(recipeB, oldValue / count);
-      }
-    }
-  }
-
-  private RecommendRecipes recommend(UserEntity user) {
-    Map<Long, Double> recommendations = new HashMap<>();
-    Map<Long, Integer> frequencies = new HashMap<>();
-
-    List<RecipeRatingEntity> userRatings = recipeRatingRepository.findByUser(user);
-
-    for (RecipeRatingEntity rating : userRatings) {
-      long recipeId = rating.getRecipe().getId();
-
-      // 사용자가 평가한 레시피와 차이를 계산하여 추천 점수 갱신
-      for (Map.Entry<Long, Double> entry : recipeDifferences.getOrDefault(recipeId,
-          Collections.emptyMap()).entrySet()) {
-        long otherRecipeId = entry.getKey();
-        double diff = entry.getValue();
-
-        recommendations.put(otherRecipeId,
-            recommendations.getOrDefault(otherRecipeId, 0.0) + (diff + rating.getRating()));
-        frequencies.put(otherRecipeId,
-            frequencies.getOrDefault(otherRecipeId, 0) + 1);
-      }
-    }
-
-    // 평균 계산
-    recommendations.replaceAll((i, v) -> recommendations.get(i) / frequencies.get(i));
-
-    // 추천 점수가 4.0 이상인 레시피를 평점순으로 정렬하고, 가장 높은 3개만 추천
-    int topN = 3;
-    return RecommendRecipes.of(
-        recommendations.entrySet()
-            .stream()
-            .filter(e -> e.getValue() >= 4.0)
-            .sorted((e1, e2) -> Double.compare(e2.getValue(), e1.getValue()))
-            .limit(topN)
-            .map(e -> RecommendRecipe.of(
-                recipeRepository.findById(e.getKey()).orElseThrow(RecipeNotFoundException::new),
-                user))
-            .toList()
-    );
-  }
 
   // 유저의 scrapedRecipeIds를 가져오는 메서드
   private List<Long> getScrapedRecipeIds(HttpServletRequest request) {
