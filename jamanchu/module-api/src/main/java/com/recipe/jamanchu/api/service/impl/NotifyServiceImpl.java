@@ -131,7 +131,7 @@ public class NotifyServiceImpl implements NotifyService {
 
     Optional<List<RecipeEntity>> allByUser = recipeRepository.findAllByUser(user);
 
-    List<Long> list = List.of();
+    List<Long> list = new ArrayList<>();
     if (allByUser.isPresent()) {
       list = new ArrayList<>(allByUser.get().stream()
           .map(RecipeEntity::getId)
