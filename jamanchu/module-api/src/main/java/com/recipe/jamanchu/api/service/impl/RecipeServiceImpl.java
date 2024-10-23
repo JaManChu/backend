@@ -37,6 +37,7 @@ import com.recipe.jamanchu.domain.repository.RecipeRatingRepository;
 import com.recipe.jamanchu.domain.repository.RecipeRepository;
 import com.recipe.jamanchu.domain.repository.RecommendRecipeRepository;
 import com.recipe.jamanchu.domain.repository.ScrapedRecipeRepository;
+import com.recipe.jamanchu.domain.repository.SeasoningRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -64,6 +65,7 @@ public class RecipeServiceImpl implements RecipeService {
   private final RecipeIngredientMappingRepository recipeIngredientMappingRepository;
   private final IngredientRepository ingredientRepository;
   private final RecommendRecipeRepository recommendRecipeRepository;
+  private final SeasoningRepository seasoningRepository;
   private final UserAccessHandler userAccessHandler;
   private final JwtUtil jwtUtil;
 
@@ -98,9 +100,16 @@ public class RecipeServiceImpl implements RecipeService {
 
     recipeIngredientRepository.saveAll(recipeIngredientEntities);
 
+    List<String> seasoningNames = seasoningRepository.findAllName();
+
+    List<RecipeIngredientEntity> filteredIngredients = recipeIngredientEntities.stream()
+        .filter(ingredient -> seasoningNames.stream()
+            .noneMatch(spice -> ingredient.getName().toLowerCase().contains(spice.toLowerCase()))) // 양념류 이름이 포함된 재료 제외
+        .toList();
+
     List<IngredientEntity> ingredientEntities = new ArrayList<>();
     List<RecipeIngredientMappingEntity> recipeIngredientMappings = new ArrayList<>();
-    for (RecipeIngredientEntity recipeIngredient : recipeIngredientEntities) {
+    for (RecipeIngredientEntity recipeIngredient : filteredIngredients) {
       IngredientEntity ingredient = ingredientRepository.findByIngredientName(recipeIngredient.getName())
           .orElseGet(() -> {
             IngredientEntity newIngredient = IngredientEntity.builder()
@@ -175,9 +184,16 @@ public class RecipeServiceImpl implements RecipeService {
 
     recipeIngredientRepository.saveAll(recipeIngredientEntities);
 
+    List<String> seasoningNames = seasoningRepository.findAllName();
+
+    List<RecipeIngredientEntity> filteredIngredients = recipeIngredientEntities.stream()
+        .filter(ingredient -> seasoningNames.stream()
+            .noneMatch(spice -> ingredient.getName().toLowerCase().contains(spice.toLowerCase()))) // 양념류 이름이 포함된 재료 제외
+        .toList();
+
     List<IngredientEntity> ingredientEntities = new ArrayList<>();
     List<RecipeIngredientMappingEntity> recipeIngredientMappings = new ArrayList<>();
-    for (RecipeIngredientEntity recipeIngredient : recipeIngredientEntities) {
+    for (RecipeIngredientEntity recipeIngredient : filteredIngredients) {
       IngredientEntity ingredient = ingredientRepository.findByIngredientName(recipeIngredient.getName())
           .orElseGet(() -> {
             IngredientEntity newIngredient = IngredientEntity.builder()
