@@ -46,6 +46,7 @@ import com.recipe.jamanchu.domain.repository.RecipeIngredientRepository;
 import com.recipe.jamanchu.domain.repository.RecipeRatingRepository;
 import com.recipe.jamanchu.domain.repository.RecipeRepository;
 import com.recipe.jamanchu.domain.repository.ScrapedRecipeRepository;
+import com.recipe.jamanchu.domain.repository.SeasoningRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
@@ -85,6 +86,9 @@ class RecipeServiceImplTest {
 
   @Mock
   private RecipeRatingRepository ratingRepository;
+
+  @Mock
+  private SeasoningRepository seasoningRepository;
 
   @Mock
   private UserAccessHandler userAccessHandler;
@@ -208,6 +212,7 @@ class RecipeServiceImplTest {
     when(recipeIngredientMappingRepository.saveAll(anyList())).thenReturn(new ArrayList<>());
     when(ingredientRepository.findByIngredientName(anyString()))
         .thenReturn(Optional.of(existingIngredient));
+    when(seasoningRepository.findAllName()).thenReturn(anyList());
 
     // when
     ResultResponse result = recipeService.registerRecipe(request, recipesDTO, thumbnailURL, orderImagesURL);
@@ -221,6 +226,7 @@ class RecipeServiceImplTest {
     verify(recipeIngredientMappingRepository, times(1)).saveAll(anyList());
     verify(manualRepository, times(1)).saveAll(anyList());
     verify(ingredientRepository, times(2)).findByIngredientName(anyString());
+    verify(seasoningRepository, times(1)).findAllName();
   }
 
   @Test
@@ -254,6 +260,7 @@ class RecipeServiceImplTest {
     verify(manualRepository, times(1)).saveAll(anyList());
     verify(ingredientRepository, times(2)).findByIngredientName(anyString());
     verify(ingredientRepository, times(1)).saveAll(anyList());
+    verify(seasoningRepository, times(1)).findAllName();
   }
 
   @Test
@@ -285,7 +292,6 @@ class RecipeServiceImplTest {
     when(userAccessHandler.findByUserId(1L)).thenReturn(user);
     when(recipeRepository.findById(1L)).thenReturn(Optional.of(recipe));
 
-
     when(ingredientRepository.findByIngredientName("재료"))
         .thenReturn(Optional.of(existingIngredientEntity));
     when(ingredientRepository.findByIngredientName("재료1"))
@@ -312,6 +318,7 @@ class RecipeServiceImplTest {
     verify(ingredientRepository, times(1)).findByIngredientName("재료");
     verify(ingredientRepository, times(1)).findByIngredientName("재료1");
     verify(ingredientRepository, times(1)).saveAll(anyList());
+    verify(seasoningRepository, times(1)).findAllName();
   }
 
   @Test
