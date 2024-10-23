@@ -43,7 +43,7 @@ public class NotifyServiceImpl implements NotifyService {
 
     userAccessHandler.existsById(userId);
 
-    SseEmitter sseEmitter = new SseEmitter();
+    SseEmitter sseEmitter = new SseEmitter(600_000_000L); //  1000분간 알림 설정 (임시)
     subscribers.put(userId, sseEmitter);
 
     // SSE 연결 해제 시
