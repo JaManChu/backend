@@ -419,7 +419,7 @@ public class RecipeServiceImpl implements RecipeService {
    */
   private RecommendRecipes getRecommendRecipesWhenRating(UserEntity user) {
 
-    if (recipeRatingRepository.findAll().size() < 30) {
+    if (recipeRatingRepository.findAllWhereRatingIsGreaterThanEqual(1.0).size() < 30) {
       return getRecommendRecipesWhenNoRating();
     }
     return RecommendRecipes.of(
