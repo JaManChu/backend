@@ -37,7 +37,7 @@ public enum ResultCode {
   PASSWORD_MATCH(HttpStatus.OK, "비밀번호가 일치 합니다."),
   PASSWORD_MISMATCH(HttpStatus.OK, "비밀번호가 일치하지 않습니다."),
   SUCCESS_RETRIEVE_RECOMMEND_RECIPES(HttpStatus.OK, "추천 레시피 조회 성공"),
-  ;
+  SUCCESS_GET_ALARM_LIST(HttpStatus.OK, "알림 리스트 조회 성공" );
 
   private final HttpStatus statusCode;
   private final String message;
