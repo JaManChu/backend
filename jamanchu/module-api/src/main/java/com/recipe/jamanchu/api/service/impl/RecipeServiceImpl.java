@@ -35,6 +35,7 @@ import com.recipe.jamanchu.domain.repository.RecipeIngredientMappingRepository;
 import com.recipe.jamanchu.domain.repository.RecipeIngredientRepository;
 import com.recipe.jamanchu.domain.repository.RecipeRatingRepository;
 import com.recipe.jamanchu.domain.repository.RecipeRepository;
+import com.recipe.jamanchu.domain.repository.RecommendRecipeRepository;
 import com.recipe.jamanchu.domain.repository.ScrapedRecipeRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
@@ -64,13 +65,9 @@ public class RecipeServiceImpl implements RecipeService {
   private final RecipeRatingRepository recipeRatingRepository;
   private final RecipeIngredientMappingRepository recipeIngredientMappingRepository;
   private final IngredientRepository ingredientRepository;
+  private final RecommendRecipeRepository recommendRecipeRepository;
   private final UserAccessHandler userAccessHandler;
   private final JwtUtil jwtUtil;
-
-  private final Map<Long, RecommendRecipes> recommendationCache = new ConcurrentHashMap<>();
-
-  private final Map<Long, Map<Long, Double>> recipeDifferences = new ConcurrentHashMap<>();
-  private final Map<Long, Map<Long, Integer>> recipeCounts = new ConcurrentHashMap<>();
 
   @Override
   @Transactional
@@ -398,7 +395,7 @@ public class RecipeServiceImpl implements RecipeService {
     } else {
       // 분기) 레시피 평가 항목이 있는 경우 -> 유저의 평가 항목을 기반으로 레시피 추천
       return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_RECOMMEND_RECIPES,
-          getRecommendRecipesWhenRating(user.getUserId()));
+          getRecommendRecipesWhenRating(user));
     }
   }
 
@@ -420,13 +417,21 @@ public class RecipeServiceImpl implements RecipeService {
   /*
    * 레시피 평가 항목이 있는 경우 -> 유저의 평가 항목을 기반으로 레시피 추천
    */
-  private RecommendRecipes getRecommendRecipesWhenRating(Long userId) {
+  private RecommendRecipes getRecommendRecipesWhenRating(UserEntity user) {
 
-    if (recommendationCache.get(userId).getRecipes().isEmpty()
-        || recipeRatingRepository.findAll().size() < 30) {
+    if (recipeRatingRepository.findAll().size() < 30) {
       return getRecommendRecipesWhenNoRating();
     }
-    return recommendationCache.getOrDefault(userId, RecommendRecipes.empty());
+    return RecommendRecipes.of(
+        recommendRecipeRepository.findAllByUser(user).stream()
+          .map(recommendRecipeEntity ->
+            RecommendRecipe.of(
+              recommendRecipeEntity.getRecipe(),
+              recommendRecipeEntity.getUser()
+            )
+          )
+          .toList()
+        );
   }
 
 
