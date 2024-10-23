@@ -60,7 +60,8 @@ public class SecurityConfig {
                 "/api/v1/auth/token/refresh").permitAll()
             .requestMatchers(HttpMethod.GET,
                 "/api/v1/recipes",
-                "/api/v1/recipes/**").permitAll()
+                "/api/v1/recipes/**",
+                "/api/v1/comments/**").permitAll()
             .anyRequest().authenticated());
     http
         .addFilterBefore(new JwtFilter(jwtUtil),
