@@ -16,6 +16,7 @@ import com.recipe.jamanchu.domain.repository.RecipeRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -104,18 +105,15 @@ public class NotifyServiceImpl implements NotifyService {
       Long recipeId) {
 
     Long userId = jwtUtil.getUserId(request.getHeader(ACCESS.getValue()));
-
     userAccessHandler.existsById(userId);
-
     if (ignoreAlarmRecipeIds.containsKey(userId)) {
-      Set<Long> ignoreRecipeIds = ignoreAlarmRecipeIds.get(userId);
-      if (ignoreRecipeIds.contains(recipeId)) {
-        ignoreRecipeIds.remove(recipeId);
+      if (ignoreAlarmRecipeIds.containsIgnore(userId,recipeId)) {
+        ignoreAlarmRecipeIds.removeIgnore(userId,recipeId);
       } else {
-        ignoreRecipeIds.add(recipeId);
+        ignoreAlarmRecipeIds.addIgnore(userId,recipeId);
       }
     } else {
-      ignoreAlarmRecipeIds.put(userId, Set.of(recipeId));
+      ignoreAlarmRecipeIds.put(userId, new HashSet<>(Set.of(recipeId)));
     }
 
     return getNotifyList(request);
