@@ -41,7 +41,9 @@ import com.recipe.jamanchu.domain.repository.SeasoningRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -273,10 +275,11 @@ public class RecipeServiceImpl implements RecipeService {
       throw new RecipeNotFoundException();
     }
 
-    List<RecipesSummary> recipesSummaries = convertToRecipesSummary(recipes);
+    // 결과 응답에 레시피 리스트와 총 레시피 개수 포함
+    Map<String, Object> responseData = convertToRecipesSummary(recipes);
 
     // 결과 반환
-    return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_ALL_RECIPES, recipesSummaries);
+    return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_ALL_RECIPES, responseData);
   }
 
   @Override
@@ -297,9 +300,10 @@ public class RecipeServiceImpl implements RecipeService {
       throw new RecipeNotFoundException();
     }
 
-    List<RecipesSummary> recipesSummaries = convertToRecipesSummary(recipes);
+    // 결과 응답에 레시피 리스트와 총 레시피 개수 포함
+    Map<String, Object> responseData = convertToRecipesSummary(recipes);
 
-    return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_RECIPES, recipesSummaries);
+    return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_RECIPES, responseData);
   }
 
   @Override
@@ -355,9 +359,10 @@ public class RecipeServiceImpl implements RecipeService {
       throw new RecipeNotFoundException();
     }
 
-    List<RecipesSummary> recipesSummaries = convertToRecipesSummary(recipes);
+    // 결과 응답에 레시피 리스트와 총 레시피 개수 포함
+    Map<String, Object> responseData = convertToRecipesSummary(recipes);
 
-    return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_ALL_RECIPES_BY_RATING, recipesSummaries);
+    return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_ALL_RECIPES_BY_RATING, responseData);
   }
 
   @Override
@@ -469,9 +474,9 @@ public class RecipeServiceImpl implements RecipeService {
     return scrapedRecipeIds;
   }
 
-  // RecipeEntity 리스트를 RecipesSummary로 변환하는 메서드
-  private List<RecipesSummary> convertToRecipesSummary(Page<RecipeEntity> recipes) {
-    return recipes.stream().map(
+  // RecipeEntity 리스트를 RecipesSummary와 총 레시피 갯수로 변환하는 메서드
+  private Map<String, Object> convertToRecipesSummary(Page<RecipeEntity> recipes) {
+    List<RecipesSummary> recipesSummaries = recipes.stream().map(
         recipeEntity -> new RecipesSummary(
             recipeEntity.getId(),
             recipeEntity.getName(),
@@ -484,5 +489,15 @@ public class RecipeServiceImpl implements RecipeService {
                 .orElse(0.0)
         )
     ).toList();
+
+    // 총 레시피 개수를 가져옴
+    long totalRecipes = recipes.getTotalElements();
+
+    // 결과 응답에 레시피 리스트와 총 레시피 개수 포함
+    Map<String, Object> responseData = new HashMap<>();
+    responseData.put("recipes", recipesSummaries);
+    responseData.put("totalRecipes", totalRecipes);
+
+    return responseData;
   }
 }
