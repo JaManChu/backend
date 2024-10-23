@@ -7,6 +7,7 @@ import com.recipe.jamanchu.domain.entity.RecipeEntity;
 import com.recipe.jamanchu.domain.entity.RecipeIngredientEntity;
 import com.recipe.jamanchu.domain.entity.RecipeIngredientMappingEntity;
 import com.recipe.jamanchu.domain.entity.RecipeRatingEntity;
+import com.recipe.jamanchu.domain.entity.SeasoningEntity;
 import com.recipe.jamanchu.domain.entity.TenThousandRecipeEntity;
 import com.recipe.jamanchu.domain.entity.UserEntity;
 import com.recipe.jamanchu.domain.model.dto.response.ResultResponse;
@@ -18,11 +19,13 @@ import com.recipe.jamanchu.domain.repository.RecipeIngredientMappingRepository;
 import com.recipe.jamanchu.domain.repository.RecipeIngredientRepository;
 import com.recipe.jamanchu.domain.repository.RecipeRatingRepository;
 import com.recipe.jamanchu.domain.repository.RecipeRepository;
+import com.recipe.jamanchu.domain.repository.SeasoningRepository;
 import com.recipe.jamanchu.domain.repository.TenThousandRecipeRepository;
 import com.recipe.jamanchu.api.service.RecipeDivideService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -39,6 +42,7 @@ public class RecipeDivideServiceImpl implements RecipeDivideService {
   private final RecipeIngredientRepository recipeIngredientRepository;
   private final RecipeIngredientMappingRepository recipeIngredientMappingRepository;
   private final TenThousandRecipeRepository tenThousandRecipeRepository;
+  private final SeasoningRepository seasoningRepository;
 
   @Override
   public ResultResponse processAndSaveAllData(Long startId, Long endId) {
@@ -130,6 +134,11 @@ public class RecipeDivideServiceImpl implements RecipeDivideService {
     List<RecipeIngredientEntity> recipeIngredientEntities = new ArrayList<>();
     List<IngredientEntity> ingredientEntities = new ArrayList<>();
     List<RecipeIngredientMappingEntity> recipeIngredientMappingEntities = new ArrayList<>();
+
+    List<String> seasoningNames = seasoningRepository.findAll().stream()
+        .map(SeasoningEntity::getName)
+        .toList();
+
     for (String recipeIngredient : scrapIngredients) {
       recipeIngredient = recipeIngredient.trim();
       if (recipeIngredient.isEmpty()) {
@@ -156,6 +165,13 @@ public class RecipeDivideServiceImpl implements RecipeDivideService {
           .quantity(quantity)
           .build();
 
+      recipeIngredientEntities.add(recipeIngredientEntity);
+
+      boolean isSeasoning = seasoningNames.stream().anyMatch(recipeIngredient::contains);
+      if (isSeasoning) {
+        continue;  // 재료명이 양념류를 포함하면 Ingredient entity 에는 저장하지 않고 건너뜀
+      }
+
       Optional<IngredientEntity> ingredientEntity = ingredientRepository.findByIngredientName(name);
       IngredientEntity ingredient;
       if (ingredientEntity.isPresent()) {
@@ -166,8 +182,6 @@ public class RecipeDivideServiceImpl implements RecipeDivideService {
             .build();
         ingredientEntities.add(ingredient);
       }
-
-      recipeIngredientEntities.add(recipeIngredientEntity);
 
       RecipeIngredientMappingEntity recipeIngredientMappingEntity = RecipeIngredientMappingEntity.builder()
           .recipe(recipe)
