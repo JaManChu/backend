@@ -1,10 +1,11 @@
-package com.recipe.jamanchu.core.util;
+package com.recipe.jamanchu.api.util;
 
 import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.recipe.jamanchu.domain.model.type.PictureType;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
