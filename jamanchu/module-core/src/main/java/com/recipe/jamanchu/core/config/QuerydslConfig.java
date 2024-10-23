@@ -1,4 +1,4 @@
-package com.recipe.jamanchu.config;
+package com.recipe.jamanchu.core.config;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
