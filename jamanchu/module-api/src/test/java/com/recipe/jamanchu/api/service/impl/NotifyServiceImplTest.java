@@ -21,8 +21,6 @@ import com.recipe.jamanchu.domain.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.domain.model.dto.response.notify.Notify;
 import com.recipe.jamanchu.domain.repository.RecipeRepository;
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
