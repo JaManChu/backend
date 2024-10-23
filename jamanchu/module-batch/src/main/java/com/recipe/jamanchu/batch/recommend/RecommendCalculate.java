@@ -9,16 +9,13 @@ import com.recipe.jamanchu.domain.repository.RecipeRatingRepository;
 import com.recipe.jamanchu.domain.repository.RecipeRepository;
 import com.recipe.jamanchu.domain.repository.RecommendRecipeRepository;
 import jakarta.annotation.PostConstruct;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,21 +56,23 @@ public class RecommendCalculate {
     Map<UserEntity, List<RecipeRatingEntity>> userRatings = ratings.stream()
         .collect(Collectors.groupingBy(RecipeRatingEntity::getUser));
 
-//    userRatings.forEach((user, ratings2) -> {
-//      StringBuilder ratingLog = new StringBuilder();
-//      ratingLog.append("User: ").append(user.getUserId()).append(", Ratings: ");
-//
-//      ratings2.forEach(rating -> {
-//        ratingLog.append("[Recipe: ")
-//            .append(rating.getRecipe().getId())
-//            .append(", Rating: ")
-//            .append(rating.getRating())
-//            .append("], ");
-//      });
-//
-//      // 최종 로그 출력
-//      log.info(ratingLog.toString());
-//    });
+    /* 추후 삭제 예정 */
+    /* 유저가 어떻게 평가했는지에 대한 로그 출력 */
+    userRatings.forEach((user, ratings2) -> {
+      StringBuilder ratingLog = new StringBuilder();
+      ratingLog.append("User: ").append(user.getUserId()).append(", Ratings: ");
+
+      ratings2.forEach(rating -> {
+        ratingLog.append("[Recipe: ")
+            .append(rating.getRecipe().getId())
+            .append(", Rating: ")
+            .append(rating.getRating())
+            .append("], ");
+      });
+
+      // 최종 로그 출력
+      log.info(ratingLog.toString());
+    });
 
     // 모든 유저의 평가 데이터에 대해 반복
     for (List<RecipeRatingEntity> userRating : userRatings.values()) {
@@ -92,8 +91,6 @@ public class RecommendCalculate {
 
           double diff = r1.getRating() - r2.getRating();
 
-          log.info("RecipeA: {}, RecipeB: {}, Difference: {}", recipeA, recipeB, diff);
-
           // RecipeA와 RecipeB 간의 차이 저장
           recipeDifferences.putIfAbsent(recipeA, new ConcurrentHashMap<>());
           Map<Long, Double> recipeADiffs = recipeDifferences.get(recipeA);
@@ -110,17 +107,17 @@ public class RecommendCalculate {
       }
     }
 
+    /* 추후 삭제예정 */
+    /* 각 레시피별 편차 계산 로그 출력 */
     recipeDifferences.forEach((recipeA, differences) -> {
       StringBuilder diffLog = new StringBuilder();
       diffLog.append("RecipeA: ").append(recipeA).append(", Differences: ");
 
-      differences.forEach((recipeB, diff) -> {
-        diffLog.append("[RecipeB: ")
-            .append(recipeB)
-            .append(", Difference: ")
-            .append(diff)
-            .append("], ");
-      });
+      differences.forEach((recipeB, diff) -> diffLog.append("[RecipeB: ")
+          .append(recipeB)
+          .append(", Difference: ")
+          .append(diff)
+          .append("], "));
 
       // 최종 로그 출력
       log.info(diffLog.toString());
@@ -163,6 +160,7 @@ public class RecommendCalculate {
       recommendations.replaceAll((i, v) -> recommendations.get(i) / frequencies.get(i));
 
       // 추천 점수가 4.0 이상인 레시피를 평점순으로 정렬하고, 가장 높은 3개만 추천
+      // 3개는 변경될 수 있음.
       int topN = 3;
       recommendations.entrySet()
           .stream()
