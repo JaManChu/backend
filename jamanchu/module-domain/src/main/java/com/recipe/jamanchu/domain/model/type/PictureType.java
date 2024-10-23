@@ -1,4 +1,4 @@
-package com.recipe.jamanchu.core.util;
+package com.recipe.jamanchu.domain.model.type;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
