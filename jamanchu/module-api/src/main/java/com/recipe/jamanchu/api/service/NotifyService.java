@@ -1,5 +1,6 @@
 package com.recipe.jamanchu.api.service;
 
+import com.recipe.jamanchu.domain.entity.RecipeEntity;
 import com.recipe.jamanchu.domain.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.domain.model.dto.response.notify.Notify;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,11 +12,11 @@ public interface NotifyService {
   SseEmitter subscribe(HttpServletRequest request);
 
   // 사용자에게 알림을 전달.
-  void notifyUser(Long userId, Notify notify);
+  void notifyUser(RecipeEntity recipe, Long userId, Notify notify);
 
   // 특정 레시피에 대한 알림 설정 Toggle
-  ResultResponse toggleSpecificRecipeCommentAlarm(HttpServletRequest request, Long recipeId);
+  ResultResponse ignoreRecipeComment(HttpServletRequest request, Long recipeId);
 
-  // 전체 레시피 알림 무시
-  ResultResponse ignoreAllRecipeCommentAlarm(HttpServletRequest request);
+  // 해당 유저의 알림 리스트 반환
+  ResultResponse getNotifyList(HttpServletRequest request);
 }

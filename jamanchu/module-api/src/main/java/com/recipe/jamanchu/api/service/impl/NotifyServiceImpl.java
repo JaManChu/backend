@@ -1,30 +1,45 @@
 package com.recipe.jamanchu.api.service.impl;
 
+import static com.recipe.jamanchu.domain.model.type.TokenType.ACCESS;
+
 import com.recipe.jamanchu.api.auth.jwt.JwtUtil;
+import com.recipe.jamanchu.api.notify.IgnoreRecipeCommentAlarmMap;
+import com.recipe.jamanchu.api.notify.SseEmitterMap;
+import com.recipe.jamanchu.api.service.NotifyService;
 import com.recipe.jamanchu.domain.component.UserAccessHandler;
+import com.recipe.jamanchu.domain.entity.RecipeEntity;
+import com.recipe.jamanchu.domain.entity.UserEntity;
 import com.recipe.jamanchu.domain.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.domain.model.dto.response.notify.Notify;
-import com.recipe.jamanchu.api.service.NotifyService;
+import com.recipe.jamanchu.domain.model.type.ResultCode;
+import com.recipe.jamanchu.domain.repository.RecipeRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class NotifyServiceImpl implements NotifyService {
 
   private final JwtUtil jwtUtil;
   private final UserAccessHandler userAccessHandler;
-  private final Map<Long, SseEmitter> subscribers;
+  private final SseEmitterMap subscribers;
+  private final IgnoreRecipeCommentAlarmMap ignoreAlarmRecipeIds;
+  private final RecipeRepository recipeRepository;
 
   // 레시피 아이디 구독
   @Override
   public SseEmitter subscribe(HttpServletRequest request) {
 
-    Long userId = jwtUtil.getUserId(request.getHeader("Access-Token"));
+    Long userId = jwtUtil.getUserId(request.getHeader(ACCESS.getValue()));
 
     userAccessHandler.existsById(userId);
 
@@ -46,29 +61,33 @@ public class NotifyServiceImpl implements NotifyService {
       subscribers.remove(userId, sseEmitter);
     });
 
-    try{
+    try {
       sseEmitter.send("Alarm Init Message");
-    }catch (IOException e){
+    } catch (IOException e) {
       sseEmitter.complete();
       subscribers.remove(userId, sseEmitter);
     }
-
 
     return sseEmitter;
   }
 
   // 알림 전송
   @Override
-  public void notifyUser(Long userId, Notify notify) {
+  public void notifyUser(RecipeEntity recipe, Long userId, Notify notify) {
     userAccessHandler.existsById(userId);
+
+    // 알림 무시한 레시피인 경우 알림 전송 X
+    if (isIgnoreAlarm(userId, recipe.getId())) {
+      return;
+    }
 
     SseEmitter userSseEmitter = subscribers.get(userId);
     if (userSseEmitter != null) {
       try {
         userSseEmitter.send(
             SseEmitter.event()
-              .name("댓글 알림!")
-              .data(notify)
+                .name("댓글 알림!")
+                .data(notify)
         );
       } catch (Exception e) {
         userSseEmitter.completeWithError(e);
@@ -78,19 +97,61 @@ public class NotifyServiceImpl implements NotifyService {
   }
 
   /*
-   * 특정 레시피 알림 Toggle
-   */
+   * 사용자가 알림을 무시하는 레시피
+   * */
   @Override
-  public ResultResponse toggleSpecificRecipeCommentAlarm(HttpServletRequest request,
+  public ResultResponse ignoreRecipeComment(HttpServletRequest request,
       Long recipeId) {
-    return null;
+
+    Long userId = jwtUtil.getUserId(request.getHeader(ACCESS.getValue()));
+
+    userAccessHandler.existsById(userId);
+
+    if (ignoreAlarmRecipeIds.containsKey(userId)) {
+      Set<Long> ignoreRecipeIds = ignoreAlarmRecipeIds.get(userId);
+      if (ignoreRecipeIds.contains(recipeId)) {
+        ignoreRecipeIds.remove(recipeId);
+      } else {
+        ignoreRecipeIds.add(recipeId);
+      }
+    } else {
+      ignoreAlarmRecipeIds.put(userId, Set.of(recipeId));
+    }
+
+    return getNotifyList(request);
   }
 
   /*
-   * 전체 레시피 알림 무시
-   */
+   * 사용자가 알림을 허용한 리스트 전체 조회
+   * */
   @Override
-  public ResultResponse ignoreAllRecipeCommentAlarm(HttpServletRequest request) {
-    return null;
+  public ResultResponse getNotifyList(HttpServletRequest request) {
+
+    Long userId = jwtUtil.getUserId(request.getHeader(ACCESS.getValue()));
+
+    UserEntity user = userAccessHandler.findByUserId(userId);
+
+    Optional<List<RecipeEntity>> allByUser = recipeRepository.findAllByUser(user);
+
+    List<Long> list = List.of();
+    if (allByUser.isPresent()) {
+      list = new ArrayList<>(allByUser.get().stream()
+          .map(RecipeEntity::getId)
+          .toList());
+
+      if (ignoreAlarmRecipeIds.containsKey(userId)) {
+        Set<Long> ignoreRecipeIds = ignoreAlarmRecipeIds.get(userId);
+        list.removeAll(ignoreRecipeIds);
+      }
+    }
+    return ResultResponse.of(ResultCode.SUCCESS_GET_ALARM_LIST, list);
+  }
+
+  /*
+   * 알림 무시 여부 확인
+   * */
+  private boolean isIgnoreAlarm(Long userId, Long recipeId) {
+    return ignoreAlarmRecipeIds.containsKey(userId) && ignoreAlarmRecipeIds.get(userId)
+        .contains(recipeId);
   }
 }
