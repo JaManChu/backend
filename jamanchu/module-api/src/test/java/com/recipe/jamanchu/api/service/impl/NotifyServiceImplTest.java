@@ -1,8 +1,12 @@
 package com.recipe.jamanchu.api.service.impl;
 
+import static com.recipe.jamanchu.domain.model.type.TokenType.ACCESS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -17,7 +21,10 @@ import com.recipe.jamanchu.domain.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.domain.model.dto.response.notify.Notify;
 import com.recipe.jamanchu.domain.repository.RecipeRepository;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -144,10 +151,17 @@ class NotifyServiceImplTest {
     Long ignoreUserId = 1L;
     Long ignoreRecipeId = 1L;
 
+    UserEntity ignoreUser = UserEntity.builder()
+        .userId(ignoreUserId)
+        .nickname("user")
+        .build();
+
+
     Long userId = 2L;
 
     UserEntity user = UserEntity.builder()
         .userId(userId)
+        .nickname("user")
         .build();
 
     RecipeEntity recipe = RecipeEntity.builder()
@@ -157,28 +171,34 @@ class NotifyServiceImplTest {
                 RecipeRatingEntity.builder().rating(5.0).build()
             )
         )
-        .user(user)
+        .user(ignoreUser)
         .build();
 
-    Notify notify = Notify.of("recipe", "message", 5.0, "commentUser");
+    Notify notify = Notify.of("recipe", "message", 5.0, "user");
 
     // when
-    when(jwtUtil.getUserId(request.getHeader("Access-Token"))).thenReturn(ignoreUserId);
+    when(jwtUtil.getUserId(request.getHeader(ACCESS.getValue()))).thenReturn(ignoreUserId);
     doNothing().when(userAccessHandler).existsById(1L);
+    when(jwtUtil.getUserId(request.getHeader(ACCESS.getValue()))).thenReturn(ignoreUserId);
+    when(userAccessHandler.findByUserId(ignoreUserId)).thenReturn(user);
+    when(recipeRepository.findAllByUser(user)).thenReturn(Optional.of(List.of(recipe)));
+
+    ResultResponse resultResponse1 = notifyService.toggleRecipeComment(request, ignoreRecipeId);
+    Object data1 = resultResponse1.getData();
+    assertEquals(1, ((List) data1).size());
+    assertEquals(1L, ((List) data1).get(0));
+//
     doNothing().when(userAccessHandler).existsById(2L);
 
-    // action
-    ResultResponse resultResponse = notifyService.toggleRecipeComment(request, ignoreRecipeId);
-    Object data = resultResponse.getData();
-    Notify data1 = (Notify) data;
     notifyService.notifyUser(recipe, userId, notify);
-    // then
-    assertEquals("recipe", data1.getRecipeName());
 
+    //then
+    verify(userAccessHandler, times(2)).existsById(any());
+    verify(jwtUtil, times(2)).getUserId(request.getHeader(ACCESS.getValue()));
+    verify(ignoreAlarmRecipeIds, times(2)).containsKey(ignoreUserId);
     verify(ignoreAlarmRecipeIds, atLeastOnce()).put(ignoreUserId, Set.of(ignoreRecipeId));
-    verify(userAccessHandler, atLeastOnce()).existsById(userId);
-    verify(ignoreAlarmRecipeIds, atLeastOnce()).containsKey(userId);
-
+    verify(userAccessHandler, atLeastOnce()).findByUserId(anyLong());
+    verify(recipeRepository, atLeastOnce()).findAllByUser(any());
   }
 
 }
