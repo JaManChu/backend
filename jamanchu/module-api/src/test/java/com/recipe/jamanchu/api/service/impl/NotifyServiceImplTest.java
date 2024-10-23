@@ -121,7 +121,7 @@ class NotifyServiceImplTest {
 
   @DisplayName("알림 무시 성공")
   @Test
-  void successIgnoreRecipeComment() {
+  void successToggleRecipeComment() {
     // given
     Long userId = 1L;
     Long recipeId = 1L;
@@ -131,7 +131,7 @@ class NotifyServiceImplTest {
     doNothing().when(userAccessHandler).existsById(1L);
 
     // action
-    notifyService.ignoreRecipeComment(request, recipeId);
+    notifyService.toggleRecipeComment(request, recipeId);
 
     // then
     verify(ignoreAlarmRecipeIds, atLeastOnce()).put(userId, Set.of(recipeId));
@@ -168,7 +168,7 @@ class NotifyServiceImplTest {
     doNothing().when(userAccessHandler).existsById(2L);
 
     // action
-    ResultResponse resultResponse = notifyService.ignoreRecipeComment(request, ignoreRecipeId);
+    ResultResponse resultResponse = notifyService.toggleRecipeComment(request, ignoreRecipeId);
     Object data = resultResponse.getData();
     Notify data1 = (Notify) data;
     notifyService.notifyUser(recipe, userId, notify);

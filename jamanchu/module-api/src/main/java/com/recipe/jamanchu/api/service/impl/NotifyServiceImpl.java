@@ -97,10 +97,10 @@ public class NotifyServiceImpl implements NotifyService {
   }
 
   /*
-   * 사용자가 알림을 무시하는 레시피
+   * 사용자의 알림 허용 여부 toggle
    * */
   @Override
-  public ResultResponse ignoreRecipeComment(HttpServletRequest request,
+  public ResultResponse toggleRecipeComment(HttpServletRequest request,
       Long recipeId) {
 
     Long userId = jwtUtil.getUserId(request.getHeader(ACCESS.getValue()));
