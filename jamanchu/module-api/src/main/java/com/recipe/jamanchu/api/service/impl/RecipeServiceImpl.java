@@ -275,11 +275,7 @@ public class RecipeServiceImpl implements RecipeService {
       throw new RecipeNotFoundException();
     }
 
-    // 결과 응답에 레시피 리스트와 총 레시피 개수 포함
-    Map<String, Object> responseData = convertToRecipesSummary(recipes);
-
-    // 결과 반환
-    return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_ALL_RECIPES, responseData);
+    return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_ALL_RECIPES, convertToRecipesSummary(recipes));
   }
 
   @Override
@@ -300,10 +296,7 @@ public class RecipeServiceImpl implements RecipeService {
       throw new RecipeNotFoundException();
     }
 
-    // 결과 응답에 레시피 리스트와 총 레시피 개수 포함
-    Map<String, Object> responseData = convertToRecipesSummary(recipes);
-
-    return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_RECIPES, responseData);
+    return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_RECIPES, convertToRecipesSummary(recipes));
   }
 
   @Override
@@ -359,10 +352,7 @@ public class RecipeServiceImpl implements RecipeService {
       throw new RecipeNotFoundException();
     }
 
-    // 결과 응답에 레시피 리스트와 총 레시피 개수 포함
-    Map<String, Object> responseData = convertToRecipesSummary(recipes);
-
-    return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_ALL_RECIPES_BY_RATING, responseData);
+    return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_ALL_RECIPES_BY_RATING, convertToRecipesSummary(recipes));
   }
 
   @Override
