@@ -41,10 +41,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -231,7 +229,7 @@ public class RecipeServiceImpl implements RecipeService {
     RecipeEntity recipe = recipeRepository.findById(recipeId)
         .orElseThrow(RecipeNotFoundException::new);
 
-    if (!Objects.equals(user.getUserId(), recipe.getUser().getUserId())) {
+      if (!Objects.equals(user.getUserId(), recipe.getUser().getUserId())) {
       throw new UnmatchedUserException();
     }
 
@@ -419,7 +417,7 @@ public class RecipeServiceImpl implements RecipeService {
    */
   private RecommendRecipes getRecommendRecipesWhenRating(UserEntity user) {
 
-    if (recipeRatingRepository.findAllWhereRatingIsGreaterThanEqual(1.0).size() < 30) {
+    if (recipeRatingRepository.findAllWhereRatingOverOne().size() < 30) {
       return getRecommendRecipesWhenNoRating();
     }
     return RecommendRecipes.of(
