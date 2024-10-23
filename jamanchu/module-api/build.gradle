@@ -14,9 +14,6 @@ dependencies {
     implementation project(':module-domain')
     implementation project(':module-core')
 
-    // Spring Security
-    implementation 'org.springframework.boot:spring-boot-starter-security'
-
     // Jwt
     implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
     implementation 'io.jsonwebtoken:jjwt-impl:0.12.5'

@@ -1,10 +1,10 @@
 package com.recipe.jamanchu.api.service.impl;
 
 import com.recipe.jamanchu.api.auth.jwt.JwtUtil;
-import com.recipe.jamanchu.core.util.PictureType;
+import com.recipe.jamanchu.domain.model.type.PictureType;
 import com.recipe.jamanchu.domain.model.type.TokenType;
 import com.recipe.jamanchu.api.service.PictureService;
-import com.recipe.jamanchu.core.util.PictureManager;
+import com.recipe.jamanchu.api.util.PictureManager;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.ArrayList;

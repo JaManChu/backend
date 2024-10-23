@@ -1,4 +1,4 @@
-package com.recipe.jamanchu.api.config;
+package com.recipe.jamanchu.core.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
