@@ -15,7 +15,7 @@ public interface NotifyService {
   void notifyUser(RecipeEntity recipe, Long userId, Notify notify);
 
   // 특정 레시피에 대한 알림 설정 Toggle
-  ResultResponse ignoreRecipeComment(HttpServletRequest request, Long recipeId);
+  ResultResponse toggleRecipeComment(HttpServletRequest request, Long recipeId);
 
   // 해당 유저의 알림 리스트 반환
   ResultResponse getNotifyList(HttpServletRequest request);
