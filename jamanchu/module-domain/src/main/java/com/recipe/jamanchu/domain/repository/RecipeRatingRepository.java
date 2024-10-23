@@ -24,5 +24,6 @@ public interface RecipeRatingRepository extends JpaRepository<RecipeRatingEntity
 
   void deleteAllByUser(UserEntity user);
 
-  List<RecipeRatingEntity> findAllWhereRatingIsGreaterThanEqual(Double rating);
+  @Query("SELECT rr FROM RecipeRatingEntity rr WHERE rr.rating >= 1.0")
+  List<RecipeRatingEntity> findAllWhereRatingOverOne();
 }
