@@ -160,7 +160,6 @@ public class UserAccessHandler {
   }
 
   @Transactional
-  @Scheduled(cron = "0 0 0 * * *")
   public void deleteAllUserData() {
     List<UserEntity> users = userRepository.findAllDeletedToday();
     log.info("today : {}", LocalDate.now());
