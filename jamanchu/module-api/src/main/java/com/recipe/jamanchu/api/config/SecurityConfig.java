@@ -55,6 +55,8 @@ public class SecurityConfig {
                 "/api/v1/users/login",
                 "/api/v1/auth/email-check",
                 "/api/v1/auth/nickname-check",
+                "/api/v1/auth/find-password",
+                "/api/v1/auth/update-password",
                 "/favicon.ico",
                 "/api/v1/users/login/auth/kakao",
                 "/api/v1/auth/token/refresh").permitAll()

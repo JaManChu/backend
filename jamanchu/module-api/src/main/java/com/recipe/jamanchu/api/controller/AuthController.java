@@ -3,6 +3,7 @@ package com.recipe.jamanchu.api.controller;
 import com.recipe.jamanchu.core.exceptions.exception.MissingEmailException;
 import com.recipe.jamanchu.core.exceptions.exception.MissingNicknameException;
 import com.recipe.jamanchu.domain.model.dto.request.auth.PasswordCheckDTO;
+import com.recipe.jamanchu.domain.model.dto.request.auth.PasswordUpdateDTO;
 import com.recipe.jamanchu.domain.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.api.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -58,5 +59,20 @@ public class AuthController {
       HttpServletRequest request) {
 
     return ResponseEntity.ok(authService.checkPassword(passwordCheckDTO, request));
+  }
+
+  @GetMapping("/find-password")
+  public ResponseEntity<ResultResponse> findPassword(
+      @RequestParam(name = "email") String email,
+      @RequestParam(name = "nickname") String nickname
+  ) {
+    return ResponseEntity.ok(authService.findPassword(email, nickname));
+  }
+
+  @PostMapping("/update-password")
+  public ResponseEntity<ResultResponse> updatePassword(
+      @Valid @RequestBody PasswordUpdateDTO passwordUpdateDTO
+  ) {
+    return ResponseEntity.ok(authService.updatePassword(passwordUpdateDTO));
   }
 }

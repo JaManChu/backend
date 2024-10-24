@@ -7,6 +7,7 @@ import com.recipe.jamanchu.core.exceptions.exception.UserNotFoundException;
 import com.recipe.jamanchu.core.exceptions.exception.WithdrewUserException;
 import com.recipe.jamanchu.domain.entity.UserEntity;
 import com.recipe.jamanchu.domain.model.auth.KakaoUserDetails;
+import com.recipe.jamanchu.domain.model.dto.request.auth.PasswordUpdateDTO;
 import com.recipe.jamanchu.domain.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.domain.model.type.ResultCode;
 import com.recipe.jamanchu.domain.model.type.UserRole;
@@ -17,7 +18,9 @@ import com.recipe.jamanchu.domain.repository.RecipeRepository;
 import com.recipe.jamanchu.domain.repository.ScrapedRecipeRepository;
 import com.recipe.jamanchu.domain.repository.UserRepository;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -183,6 +186,27 @@ public class UserAccessHandler {
     ingredientRatingRepository.deleteAllByUser(user);
     // 작성한 레시피
     recipeRepository.deleteAllByUser(user);
+  }
+
+  public ResultResponse findPassword(String email, String nickname) {
+    if (!userRepository.existsByEmailAndNickname(email, nickname)) {
+      return ResultResponse.of(ResultCode.EMAIL_NICKNAME_MISMATCH, false);
+    }
+
+    UserEntity user = findByEmail(email);
+
+    Map<String, Object> responseData = new HashMap<>();
+    responseData.put("userId", user.getUserId());
+    responseData.put("boolean", true);
+    return ResultResponse.of(ResultCode.EMAIL_NICKNAME_MATCH, responseData);
+  }
+
+  public ResultResponse updatePassword(PasswordUpdateDTO passwordUpdateDTO) {
+    UserEntity user = findByUserId(passwordUpdateDTO.getUserId());
+
+    user.updatePassword(passwordEncoder.encode(passwordUpdateDTO.getPassword()));
+    saveUser(user);
+    return ResultResponse.of(ResultCode.SUCCESS_UPDATE_PASSWORD);
   }
 }
 

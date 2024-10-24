@@ -57,5 +57,9 @@ public class UserEntity extends BaseTimeEntity {
 
   @Column(name = "deletion_scheduled_at")
   private LocalDate deletionScheduledAt;
+
+  public void updatePassword(String password) {
+    this.password = password;
+  }
 }
 

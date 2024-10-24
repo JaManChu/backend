@@ -17,6 +17,7 @@ import com.recipe.jamanchu.core.exceptions.exception.PasswordMismatchException;
 import com.recipe.jamanchu.core.exceptions.exception.SocialAccountException;
 import com.recipe.jamanchu.core.exceptions.exception.UserNotFoundException;
 import com.recipe.jamanchu.core.exceptions.exception.WithdrewUserException;
+import com.recipe.jamanchu.domain.model.dto.request.auth.PasswordUpdateDTO;
 import com.recipe.jamanchu.domain.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.domain.model.type.ResultCode;
 import com.recipe.jamanchu.domain.repository.CommentRepository;
@@ -416,6 +417,96 @@ class UserAccessHandlerTest {
     // user 삭제 검증
     verify(userRepository, times(1)).deleteUserByUserId(user1.getUserId());
     verify(userRepository, times(1)).deleteUserByUserId(user2.getUserId());
+  }
+
+  @Test
+  @DisplayName("이메일과 닉네임이 일치할 때 비밀번호 찾기 성공")
+  void testFindPasswordSuccess() {
+    // given
+    String email = "test@example.com";
+    String nickname = "testNickname";
+    UserEntity user = UserEntity.builder()
+        .userId(1L)
+        .email(email)
+        .nickname(nickname)
+        .build();
+
+    // when
+    when(userRepository.existsByEmailAndNickname(email, nickname)).thenReturn(true);
+    when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+
+    // then
+    ResultResponse result = userAccessHandler.findPassword(email, nickname);
+    assertEquals("비밀번호를 수정할 수 있습니다.", result.getMessage());
+    Map<String, Object> responseData = (Map<String, Object>) result.getData();
+    assertEquals(1L, responseData.get("userId"));
+    assertEquals(true, responseData.get("boolean"));
+  }
+
+  @Test
+  @DisplayName("이메일과 닉네임이 일치하지 않을 때")
+  void testFindPasswordEmailNicknameMismatch() {
+    // given
+    String email = "test@example.com";
+    String nickname = "wrongNickname";
+
+    // when
+    Mockito.when(userRepository.existsByEmailAndNickname(email, nickname)).thenReturn(false);
+
+    // then
+    ResultResponse result = userAccessHandler.findPassword(email, nickname);
+    assertEquals("회원 정보를 다시 확인해주세요.", result.getMessage());
+    assertEquals(false, result.getData());
+  }
+
+  @Test
+  @DisplayName("이메일과 닉네임이 일치하지만 사용자가 존재하지 않는 경우")
+  void testFindPasswordUserNotFound() {
+    // given
+    String email = "test@example.com";
+    String nickname = "testNickname";
+
+    // when
+    Mockito.when(userRepository.existsByEmailAndNickname(email, nickname)).thenReturn(true);
+    Mockito.when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
+
+    // then
+    assertThrows(UserNotFoundException.class, () -> {
+      userAccessHandler.findPassword(email, nickname);
+    });
+  }
+
+  @Test
+  @DisplayName("비밀번호를 정상적으로 업데이트 한 경우")
+  public void testUpdatePassword() {
+    // Given
+    Long userId = 1L;
+    String newPassword = "newPassword123";
+    String encodedPassword = "encodedPassword123";
+    PasswordUpdateDTO passwordUpdateDTO = new PasswordUpdateDTO(
+        userId,
+        newPassword
+    );
+
+    UserEntity user = UserEntity.builder()
+        .userId(userId)
+        .build();
+
+    // When
+    when(userRepository.findByUserId(userId)).thenReturn(Optional.of(user));
+    when(passwordEncoder.encode(newPassword)).thenReturn(encodedPassword);
+
+    // 실제로 비밀번호가 업데이트되는지 확인
+    ResultResponse result = userAccessHandler.updatePassword(passwordUpdateDTO);
+
+    // Then
+    assertEquals("비밀번호를 수정했습니다.", result.getMessage());
+    assertEquals(encodedPassword, user.getPassword());
+
+    // verify
+    verify(userRepository).findByUserId(userId);
+    verify(passwordEncoder).encode(newPassword);
+    verify(userRepository).save(user);
   }
 
 }

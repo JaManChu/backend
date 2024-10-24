@@ -16,6 +16,13 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
   boolean existsByNickname(String nickname);
 
+  @Query("SELECT COUNT(u) > 0 FROM UserEntity u "
+      + "WHERE u.email = :email "
+      + "AND u.nickname = :nickname "
+      + "AND u.provider IS NULL "
+      + "AND u.deletionScheduledAt IS NULL")
+  boolean existsByEmailAndNickname(String email, String nickname);
+
   @Query("SELECT u FROM UserEntity u "
       + "WHERE u.email = :email "
       + "AND u.provider IS NULL ")
