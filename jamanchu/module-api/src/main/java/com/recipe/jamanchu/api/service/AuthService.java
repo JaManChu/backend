@@ -14,4 +14,8 @@ public interface AuthService {
   ResultResponse refreshToken(HttpServletRequest request, HttpServletResponse response);
 
   ResultResponse checkPassword(PasswordCheckDTO passwordCheckDTO, HttpServletRequest request);
+
+  ResultResponse findPassword(String email, String nickname);
+
+  ResultResponse updatePassword(Long userId, String password);
 }

@@ -82,4 +82,14 @@ public class AuthServiceImpl implements AuthService {
 
     return userAccessHandler.validateBeforePW(user.getPassword(), passwordCheckDTO.getPassword());
   }
+
+  @Override
+  public ResultResponse findPassword(String email, String nickname) {
+    return userAccessHandler.findPassword(email, nickname);
+  }
+
+  @Override
+  public ResultResponse updatePassword(Long userId, String password) {
+    return userAccessHandler.updatePassword(userId, password);
+  }
 }
