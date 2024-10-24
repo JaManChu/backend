@@ -59,4 +59,20 @@ public class AuthController {
 
     return ResponseEntity.ok(authService.checkPassword(passwordCheckDTO, request));
   }
+
+  @PostMapping("/find-password")
+  public ResponseEntity<ResultResponse> findPassword(
+      @RequestParam(name = "email") String email,
+      @RequestParam(name = "nickname") String nickname
+  ) {
+    return ResponseEntity.ok(authService.findPassword(email, nickname));
+  }
+
+  @PostMapping("/update-password")
+  public ResponseEntity<ResultResponse> updatePassword(
+      @RequestParam(name = "userId") Long userId,
+      @RequestParam(name = "password") String password
+  ) {
+    return ResponseEntity.ok(authService.updatePassword(userId, password));
+  }
 }
