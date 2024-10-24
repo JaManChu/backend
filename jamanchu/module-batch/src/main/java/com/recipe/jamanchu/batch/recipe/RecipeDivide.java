@@ -66,7 +66,7 @@ public class RecipeDivide {
       saveIngredientDetails(recipe, scrapedRecipe);  // 재료 상세 저장
     }
 
-    log.info("레시피 분산 저장 성공");
+    log.info("각 테이블에 맞게 데이터 저장 성공");
   }
 
   public void weeklyRecipeDivide() {
