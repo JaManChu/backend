@@ -71,7 +71,7 @@ public class AuthController {
 
   @PostMapping("/update-password")
   public ResponseEntity<ResultResponse> updatePassword(
-      @RequestBody PasswordUpdateDTO passwordUpdateDTO
+      @Valid @RequestBody PasswordUpdateDTO passwordUpdateDTO
   ) {
     return ResponseEntity.ok(authService.updatePassword(passwordUpdateDTO));
   }
