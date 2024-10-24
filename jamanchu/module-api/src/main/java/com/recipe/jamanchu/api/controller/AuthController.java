@@ -60,7 +60,7 @@ public class AuthController {
     return ResponseEntity.ok(authService.checkPassword(passwordCheckDTO, request));
   }
 
-  @PostMapping("/find-password")
+  @GetMapping("/find-password")
   public ResponseEntity<ResultResponse> findPassword(
       @RequestParam(name = "email") String email,
       @RequestParam(name = "nickname") String nickname
