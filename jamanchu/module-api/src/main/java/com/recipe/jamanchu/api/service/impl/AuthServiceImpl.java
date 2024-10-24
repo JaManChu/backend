@@ -6,6 +6,7 @@ import com.recipe.jamanchu.domain.entity.UserEntity;
 import com.recipe.jamanchu.core.exceptions.exception.CookieNotFoundException;
 import com.recipe.jamanchu.core.exceptions.exception.RefreshTokenExpiredException;
 import com.recipe.jamanchu.domain.model.dto.request.auth.PasswordCheckDTO;
+import com.recipe.jamanchu.domain.model.dto.request.auth.PasswordUpdateDTO;
 import com.recipe.jamanchu.domain.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.domain.model.type.ResultCode;
 import com.recipe.jamanchu.domain.model.type.TokenType;
@@ -89,7 +90,7 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
-  public ResultResponse updatePassword(Long userId, String password) {
-    return userAccessHandler.updatePassword(userId, password);
+  public ResultResponse updatePassword(PasswordUpdateDTO passwordUpdateDTO) {
+    return userAccessHandler.updatePassword(passwordUpdateDTO);
   }
 }
