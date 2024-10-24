@@ -22,6 +22,8 @@ import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -44,7 +46,7 @@ public class NotifyServiceImpl implements NotifyService {
 
     userAccessHandler.existsById(userId);
 
-    SseEmitter sseEmitter = new SseEmitter(600_000_000L); //  1000분간 알림 설정 (임시)
+    SseEmitter sseEmitter = new SseEmitter(); //30초 타임아웃
     subscribers.put(userId, sseEmitter);
 
     // SSE 연결 해제 시
@@ -73,6 +75,7 @@ public class NotifyServiceImpl implements NotifyService {
   }
 
   // 알림 전송
+  @Async
   @Override
   public void notifyUser(RecipeEntity recipe, Long userId, Notify notify) {
     userAccessHandler.existsById(userId);
@@ -151,5 +154,17 @@ public class NotifyServiceImpl implements NotifyService {
   private boolean isIgnoreAlarm(Long userId, Long recipeId) {
     return ignoreAlarmRecipeIds.containsKey(userId) && ignoreAlarmRecipeIds.get(userId)
         .contains(recipeId);
+  }
+
+  @Scheduled(fixedDelay = 20_000L) // 20초마다 실행
+  public void checkSubscribers() {
+    log.info("Check Subscribers");
+    subscribers.values().forEach(sseEmitter -> {
+      try {
+        sseEmitter.send("Check Connection");
+      } catch (IOException e) {
+        sseEmitter.complete();
+      }
+    });
   }
 }
