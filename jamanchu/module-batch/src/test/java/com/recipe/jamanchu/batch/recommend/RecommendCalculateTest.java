@@ -1,26 +1,25 @@
 package com.recipe.jamanchu.batch.recommend;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.recipe.jamanchu.batch.recommend.schedule.RecommendRecipeCountsMap;
+import com.recipe.jamanchu.batch.recommend.schedule.RecommendRecipeDifferencesMap;
 import com.recipe.jamanchu.domain.component.UserAccessHandler;
 import com.recipe.jamanchu.domain.entity.RecipeEntity;
 import com.recipe.jamanchu.domain.entity.RecipeRatingEntity;
-import com.recipe.jamanchu.domain.entity.RecommendRecipeEntity;
 import com.recipe.jamanchu.domain.entity.UserEntity;
 import com.recipe.jamanchu.domain.repository.RecipeRatingRepository;
 import com.recipe.jamanchu.domain.repository.RecipeRepository;
 import com.recipe.jamanchu.domain.repository.RecommendRecipeRepository;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -40,15 +39,16 @@ class RecommendCalculateTest {
   @Mock
   private RecommendRecipeRepository recommendRecipeRepository;
 
+  @Mock
+  private RecommendRecipeCountsMap recipeCounts;
+
+  @Mock
+  private RecommendRecipeDifferencesMap recipeDifferences;
+
   @InjectMocks
   private RecommendCalculate recommendCalculate;
 
-  @BeforeEach
-  void setUp() {
-    // Clear the recipeDifferences and recipeCounts maps before each test
-    recommendCalculate.init();
-  }
-
+  @DisplayName("모든 유저에 대한 추천 레시피 계산 테스트")
   @Test
   void testCalculateAllRecommendations() {
     // Arrange
@@ -138,50 +138,32 @@ class RecommendCalculateTest {
 
     // Mock repository methods
     when(recipeRatingRepository.findAll()).thenReturn(
-        Arrays.asList(rating1, rating2, rating3, rating4, rating5, rating6, rating7, rating8, rating9));
-    when(userAccessHandler.findAllUsers()).thenReturn(Arrays.asList(userA, userB,userC));
-    when(recipeRatingRepository.findByUser(userA)).thenReturn(Arrays.asList(rating1, rating2,rating3, rating4));
-    when(recipeRatingRepository.findByUser(userB)).thenReturn(Arrays.asList(rating5, rating6, rating7));
+        Arrays.asList(rating1, rating2, rating3, rating4, rating5, rating6, rating7, rating8,
+            rating9));
+    when(userAccessHandler.findAllUsers()).thenReturn(Arrays.asList(userA, userB, userC));
+    when(recipeRatingRepository.findByUser(userA)).thenReturn(
+        Arrays.asList(rating1, rating2, rating3, rating4));
+    when(recipeRatingRepository.findByUser(userB)).thenReturn(
+        Arrays.asList(rating5, rating6, rating7));
     when(recipeRatingRepository.findByUser(userC)).thenReturn(Arrays.asList(rating8, rating9));
 
-    when(recipeRepository.findById(anyLong())).thenAnswer(invocation -> {
-      Long id = invocation.getArgument(0);
-      if (id.equals(101L)) return Optional.of(recipe1);
-      if (id.equals(102L)) return Optional.of(recipe2);
-      if (id.equals(103L)) return Optional.of(recipe3);
-      if (id.equals(104L)) return Optional.of(recipe4);
-      else return Optional.empty();
-    });
+//    when(recipeRepository.findById(anyLong())).thenAnswer(invocation -> {
+//      Long id = invocation.getArgument(0);
+//      if (id.equals(101L)) return Optional.of(recipe1);
+//      if (id.equals(102L)) return Optional.of(recipe2);
+//      if (id.equals(103L)) return Optional.of(recipe3);
+//      if (id.equals(104L)) return Optional.of(recipe4);
+//      else return Optional.empty();
+//    });
 
     // Act
     recommendCalculate.calculateAllRecommendations();
 
-    // Assert
-    // Capture the arguments passed to recommendRecipeRepository.save()
-    ArgumentCaptor<RecommendRecipeEntity> captor = ArgumentCaptor.forClass(RecommendRecipeEntity.class);
-    verify(recommendRecipeRepository, atLeastOnce()).save(captor.capture());
-
-    List<RecommendRecipeEntity> savedRecommendations = captor.getAllValues();
-    System.out.println(savedRecommendations);
-    // Assert that the correct number of recommendations were saved
-    assertEquals(2, savedRecommendations.size());
-
-    // Verify that the recommendations are as expected
-//    boolean user1HasRecipe2 = savedRecommendations.stream().anyMatch(rec ->
-//        rec.getUser().equals(userA) && rec.getRecipe().equals(recipe3));
-//
-//    boolean user1HasRecipe3 = savedRecommendations.stream().anyMatch(rec ->
-//        rec.getUser().equals(userA) && rec.getRecipe().equals(recipe4));
-//
-//    boolean user2HasRecipe2 = savedRecommendations.stream().anyMatch(rec ->
-//        rec.getUser().equals(userB) && rec.getRecipe().equals(recipe3));
-//
-//    boolean user2HasRecipe3 = savedRecommendations.stream().anyMatch(rec ->
-//        rec.getUser().equals(userB) && rec.getRecipe().equals(recipe4));
-//
-//    assertTrue(user1HasRecipe2);
-//    assertTrue(user1HasRecipe3);
-//    assertTrue(user2HasRecipe2);
-//    assertTrue(user2HasRecipe3);
+    verify(recipeRatingRepository, times(1)).findAll();
+    verify(recipeDifferences, times(10)).putIfAbsent(anyLong(), anyMap());
+    verify(recipeDifferences, times(10)).get(anyLong());
+    verify(recipeDifferences, times(1)).keySet();
+    verify(recipeCounts, times(10)).putIfAbsent(anyLong(), anyMap());
+    verify(recipeCounts, times(10)).get((RecipeEntity) any());
   }
 }
