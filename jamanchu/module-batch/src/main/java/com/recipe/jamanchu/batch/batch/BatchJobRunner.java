@@ -3,6 +3,7 @@ package com.recipe.jamanchu.batch.batch;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.launch.JobLauncher;
@@ -19,6 +20,7 @@ public class BatchJobRunner implements ApplicationRunner {
   private final Job deleteUserInfo;
   private final Job calculate;
   private final Job crawlData;
+  private final JobExecutionHolder jobExecutionHolder;
 
   @Override
   public void run(ApplicationArguments args) throws Exception {
@@ -30,20 +32,27 @@ public class BatchJobRunner implements ApplicationRunner {
           .addLong("time", System.currentTimeMillis())
           .toJobParameters();
 
+      JobExecution jobExecution = null;
+
       switch (jobName) {
         case "deleteUserInfo" -> {
           log.info(">>> Delete user info");
-          jobLauncher.run(deleteUserInfo, jobParameters);
+          jobExecution = jobLauncher.run(deleteUserInfo, jobParameters);
         }
         case "calculate" -> {
           log.info(">>> Calculate");
-          jobLauncher.run(calculate, jobParameters);
+          jobExecution = jobLauncher.run(calculate, jobParameters);
         }
         case "crawlData" -> {
           log.info(">>> Crawl data");
-          jobLauncher.run(crawlData, jobParameters);
+          jobExecution = jobLauncher.run(crawlData, jobParameters);
         }
         case null, default -> log.warn("Unknown job name: {}", jobName);
+      }
+
+      if (jobExecution != null) {
+        log.info("작업 명 : '{}', 작업 결과 : {}", jobName, jobExecution.getStatus());
+        jobExecutionHolder.setJobExecution(jobExecution);
       }
     } else {
       log.warn("No job name specified");
