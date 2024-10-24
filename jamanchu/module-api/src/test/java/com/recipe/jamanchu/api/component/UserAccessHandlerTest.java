@@ -17,6 +17,7 @@ import com.recipe.jamanchu.core.exceptions.exception.PasswordMismatchException;
 import com.recipe.jamanchu.core.exceptions.exception.SocialAccountException;
 import com.recipe.jamanchu.core.exceptions.exception.UserNotFoundException;
 import com.recipe.jamanchu.core.exceptions.exception.WithdrewUserException;
+import com.recipe.jamanchu.domain.model.dto.request.auth.PasswordUpdateDTO;
 import com.recipe.jamanchu.domain.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.domain.model.type.ResultCode;
 import com.recipe.jamanchu.domain.repository.CommentRepository;
@@ -482,6 +483,10 @@ class UserAccessHandlerTest {
     Long userId = 1L;
     String newPassword = "newPassword123";
     String encodedPassword = "encodedPassword123";
+    PasswordUpdateDTO passwordUpdateDTO = new PasswordUpdateDTO(
+        userId,
+        newPassword
+    );
 
     UserEntity user = UserEntity.builder()
         .userId(userId)
@@ -492,7 +497,7 @@ class UserAccessHandlerTest {
     when(passwordEncoder.encode(newPassword)).thenReturn(encodedPassword);
 
     // 실제로 비밀번호가 업데이트되는지 확인
-    ResultResponse result = userAccessHandler.updatePassword(userId, newPassword);
+    ResultResponse result = userAccessHandler.updatePassword(passwordUpdateDTO);
 
     // Then
     assertEquals("비밀번호를 수정했습니다.", result.getMessage());
