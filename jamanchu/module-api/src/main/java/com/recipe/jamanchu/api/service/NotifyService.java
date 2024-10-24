@@ -19,4 +19,6 @@ public interface NotifyService {
 
   // 해당 유저의 알림 리스트 반환
   ResultResponse getNotifyList(HttpServletRequest request);
+
+  void checkSubscribers();
 }
