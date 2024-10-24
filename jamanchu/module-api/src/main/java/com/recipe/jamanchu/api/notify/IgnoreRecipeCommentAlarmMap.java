@@ -68,4 +68,17 @@ public class IgnoreRecipeCommentAlarmMap implements Map<Long, Set<Long>> {
   public Set<Entry<Long, Set<Long>>> entrySet() {
     return this.ignoreAlarmRecipeIds.entrySet();
   }
+
+  public boolean containsIgnore(Long userId, Long recipeId) {
+    return this.ignoreAlarmRecipeIds.containsKey(userId) && this.ignoreAlarmRecipeIds.get(userId)
+        .contains(recipeId);
+  }
+
+  public void addIgnore(Long userId, Long recipeId) {
+    this.ignoreAlarmRecipeIds.get(userId).add(recipeId);
+  }
+
+  public void removeIgnore(Long userId, Long recipeId) {
+    this.ignoreAlarmRecipeIds.get(userId).remove(recipeId);
+  }
 }

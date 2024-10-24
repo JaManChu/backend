@@ -28,7 +28,7 @@ public class NotifyController {
   }
 
   // 특정 레시피에 대한 알림 toggle
-  @GetMapping("/notify/ignore/{recipeId}")
+  @GetMapping("/notify/toggle/{recipeId}")
   public ResponseEntity<ResultResponse> toggleRecipeCommentAlarm(HttpServletRequest request,
       @PathVariable("recipeId") Long recipeId) {
     return ResponseEntity.ok(notifyService.toggleRecipeComment(request, recipeId));
