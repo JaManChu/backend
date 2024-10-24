@@ -17,7 +17,9 @@ import com.recipe.jamanchu.domain.repository.RecipeRepository;
 import com.recipe.jamanchu.domain.repository.ScrapedRecipeRepository;
 import com.recipe.jamanchu.domain.repository.UserRepository;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -183,6 +185,29 @@ public class UserAccessHandler {
     ingredientRatingRepository.deleteAllByUser(user);
     // 작성한 레시피
     recipeRepository.deleteAllByUser(user);
+  }
+
+  public ResultResponse findPassword(String email, String nickname) {
+    if (!userRepository.existsByEmailAndNickname(email, nickname)) {
+      return ResultResponse.of(ResultCode.EMAIL_NICKNAME_MISMATCH, false);
+    }
+
+    UserEntity user = userRepository.findByEmail(email)
+        .orElseThrow(UserNotFoundException::new);
+
+    Map<String, Object> responseData = new HashMap<>();
+    responseData.put("userId", user.getUserId());
+    responseData.put("boolean", true);
+    return ResultResponse.of(ResultCode.EMAIL_NICKNAME_MATCH, responseData);
+  }
+
+  public ResultResponse updatePassword(Long userId, String password) {
+    UserEntity user = userRepository.findByUserId(userId)
+        .orElseThrow(UserNotFoundException::new);
+
+    user.updatePassword(passwordEncoder.encode(password));
+    saveUser(user);
+    return ResultResponse.of(ResultCode.SUCCESS_UPDATE_PASSWORD);
   }
 }
 
