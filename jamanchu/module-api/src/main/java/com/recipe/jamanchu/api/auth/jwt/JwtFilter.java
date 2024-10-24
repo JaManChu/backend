@@ -35,6 +35,8 @@ public class JwtFilter extends OncePerRequestFilter {
       return;
     }
 
+    log.info("request uri >>> {}", request.getRequestURI());
+
     // Header에서 Access-Token 추출
     String tokenHeader = request.getHeader(TokenType.ACCESS.getValue());
 
