@@ -7,6 +7,7 @@ import com.recipe.jamanchu.core.exceptions.exception.UserNotFoundException;
 import com.recipe.jamanchu.core.exceptions.exception.WithdrewUserException;
 import com.recipe.jamanchu.domain.entity.UserEntity;
 import com.recipe.jamanchu.domain.model.auth.KakaoUserDetails;
+import com.recipe.jamanchu.domain.model.dto.request.auth.PasswordUpdateDTO;
 import com.recipe.jamanchu.domain.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.domain.model.type.ResultCode;
 import com.recipe.jamanchu.domain.model.type.UserRole;
@@ -192,8 +193,7 @@ public class UserAccessHandler {
       return ResultResponse.of(ResultCode.EMAIL_NICKNAME_MISMATCH, false);
     }
 
-    UserEntity user = userRepository.findByEmail(email)
-        .orElseThrow(UserNotFoundException::new);
+    UserEntity user = findByEmail(email);
 
     Map<String, Object> responseData = new HashMap<>();
     responseData.put("userId", user.getUserId());
@@ -201,11 +201,10 @@ public class UserAccessHandler {
     return ResultResponse.of(ResultCode.EMAIL_NICKNAME_MATCH, responseData);
   }
 
-  public ResultResponse updatePassword(Long userId, String password) {
-    UserEntity user = userRepository.findByUserId(userId)
-        .orElseThrow(UserNotFoundException::new);
+  public ResultResponse updatePassword(PasswordUpdateDTO passwordUpdateDTO) {
+    UserEntity user = findByUserId(passwordUpdateDTO.getUserId());
 
-    user.updatePassword(passwordEncoder.encode(password));
+    user.updatePassword(passwordEncoder.encode(passwordUpdateDTO.getPassword()));
     saveUser(user);
     return ResultResponse.of(ResultCode.SUCCESS_UPDATE_PASSWORD);
   }
