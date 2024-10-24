@@ -65,13 +65,13 @@ public class AuthServiceImpl implements AuthService {
     }
 
     Long userId = jwtUtil.getUserId(refreshToken);
-    UserRole role = UserRole.valueOf(jwtUtil.getRole(refreshToken));
-    String access = jwtUtil.createJwt("access", userId, role);
+    UserEntity user = userAccessHandler.findByUserId(userId);
+    String access = jwtUtil.createJwt("access", userId, user.getRole());
 
     log.info("access-token 재발급 성공!!!");
     response.addHeader(TokenType.ACCESS.getValue(), "Bearer " + access);
 
-    return ResultResponse.of(ResultCode.SUCCESS_REISSUE_REFRESH_TOKEN);
+    return ResultResponse.of(ResultCode.SUCCESS_REISSUE_REFRESH_TOKEN, user.getNickname());
   }
 
   @Override

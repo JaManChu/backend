@@ -18,5 +18,12 @@ spring:
     username: ${DEV.DATABASE.USERNAME}
     password: ${DEV.DATABASE.PASSWORD}
 
+  batch:
+    job:
+      names: "${job.name}"
+      enabled: false
+    jdbc:
+      initialize-schema: always
+
 server:
   port: 8081
