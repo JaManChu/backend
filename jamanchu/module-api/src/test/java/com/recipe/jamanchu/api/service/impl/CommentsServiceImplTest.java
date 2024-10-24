@@ -89,7 +89,7 @@ class CommentsServiceImplTest {
 
     // then
     assertEquals("댓글 작성 성공!", commentService.writeComment(request, requestDTO).getMessage());
-    verify(notifyService,times(1)).notifyUser(any(),any());
+    verify(notifyService,times(1)).notifyUser(any(), any(), any());
   }
 
   @DisplayName("댓글 작성 테스트 - 크롤링된 데이터인 경우")
@@ -125,7 +125,7 @@ class CommentsServiceImplTest {
 
     // then
     assertEquals("댓글 작성 성공!", commentService.writeComment(request, requestDTO).getMessage());
-    verify(notifyService,times(0)).notifyUser(any(),any());
+    verify(notifyService,times(0)).notifyUser(any(), any(), any());
   }
 
   @DisplayName("댓글 수정 테스트")
