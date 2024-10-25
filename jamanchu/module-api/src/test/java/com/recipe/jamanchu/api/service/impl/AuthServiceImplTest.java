@@ -142,8 +142,8 @@ class AuthServiceImplTest {
     when(request.getCookies()).thenReturn(cookies);
     when(jwtUtil.isExpired(REFRESH_TOKEN)).thenReturn(false);
     when(jwtUtil.getUserId(REFRESH_TOKEN)).thenReturn(USERID);
-    when(jwtUtil.getRole(REFRESH_TOKEN)).thenReturn(STR_ROLE);
-    when(jwtUtil.createJwt(TOKEN_TYPE, USERID, UserRole.valueOf(STR_ROLE))).thenReturn(NEW_ACCESS_TOKEN);
+    when(userAccessHandler.findByUserId(USERID)).thenReturn(user);
+    when(jwtUtil.createJwt(TOKEN_TYPE, user.getUserId(), user.getRole())).thenReturn(NEW_ACCESS_TOKEN);
 
     // when
     ResultResponse resultResponse = authService.refreshToken(request, response);
