@@ -22,8 +22,6 @@ import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -38,6 +36,8 @@ public class NotifyServiceImpl implements NotifyService {
   private final IgnoreRecipeCommentAlarmMap ignoreAlarmRecipeIds;
   private final RecipeRepository recipeRepository;
 
+  private final static long TIME_OUT = 1000 * 60 * 5L; // 5분
+
   // 레시피 아이디 구독
   @Override
   public SseEmitter subscribe(HttpServletRequest request) {
@@ -46,11 +46,14 @@ public class NotifyServiceImpl implements NotifyService {
 
     userAccessHandler.existsById(userId);
 
-    SseEmitter sseEmitter = new SseEmitter(); //30초 타임아웃
+    SseEmitter sseEmitter = new SseEmitter(TIME_OUT);
     subscribers.put(userId, sseEmitter);
 
     // SSE 연결 해제 시
-    sseEmitter.onCompletion(() -> subscribers.remove(userId, sseEmitter));
+    sseEmitter.onCompletion(() -> {
+      log.info("{}번 유저의 알림 Time Out. 연결 해제", userId);
+      subscribers.remove(userId, sseEmitter);
+    });
 
     // SSE 연결 시간 초과 시
     sseEmitter.onTimeout(() -> {
@@ -75,7 +78,6 @@ public class NotifyServiceImpl implements NotifyService {
   }
 
   // 알림 전송
-  @Async
   @Override
   public void notifyUser(RecipeEntity recipe, Long userId, Notify notify) {
     userAccessHandler.existsById(userId);
@@ -154,17 +156,5 @@ public class NotifyServiceImpl implements NotifyService {
   private boolean isIgnoreAlarm(Long userId, Long recipeId) {
     return ignoreAlarmRecipeIds.containsKey(userId) && ignoreAlarmRecipeIds.get(userId)
         .contains(recipeId);
-  }
-
-  @Scheduled(fixedDelay = 20_000L) // 20초마다 실행
-  public void checkSubscribers() {
-    log.info("Check Subscribers");
-    subscribers.values().forEach(sseEmitter -> {
-      try {
-        sseEmitter.send("Check Connection");
-      } catch (IOException e) {
-        sseEmitter.complete();
-      }
-    });
   }
 }
