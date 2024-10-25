@@ -1,5 +1,8 @@
 package com.recipe.jamanchu.batch.recommend;
 
+import com.recipe.jamanchu.batch.recommend.schedule.RecommendRecipeCountsMap;
+import com.recipe.jamanchu.batch.recommend.schedule.RecommendRecipeDifferencesMap;
+import com.recipe.jamanchu.core.exceptions.exception.RecipeNotFoundException;
 import com.recipe.jamanchu.domain.component.UserAccessHandler;
 import com.recipe.jamanchu.domain.entity.RecipeEntity;
 import com.recipe.jamanchu.domain.entity.RecipeRatingEntity;
@@ -8,7 +11,6 @@ import com.recipe.jamanchu.domain.entity.UserEntity;
 import com.recipe.jamanchu.domain.repository.RecipeRatingRepository;
 import com.recipe.jamanchu.domain.repository.RecipeRepository;
 import com.recipe.jamanchu.domain.repository.RecommendRecipeRepository;
-import jakarta.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,15 +35,9 @@ public class RecommendCalculate {
 
   private final RecommendRecipeRepository recommendRecipeRepository;
 
-  private Map<Long, Map<Long, Double>> recipeDifferences;
+  private final RecommendRecipeDifferencesMap recipeDifferences;
 
-  private Map<Long, Map<Long, Integer>> recipeCounts;
-
-  @PostConstruct
-  public void init(){
-    recipeDifferences = new ConcurrentHashMap<>();
-    recipeCounts = new ConcurrentHashMap<>();
-  }
+  private final RecommendRecipeCountsMap recipeCounts;
 
   /*
    * 모든 유저에 대해서 추천 레시피 계산
@@ -123,7 +119,6 @@ public class RecommendCalculate {
       log.info(diffLog.toString());
     });
 
-
     for (long recipeA : recipeDifferences.keySet()) {
       for (long recipeB : recipeDifferences.get(recipeA).keySet()) {
         double oldValue = recipeDifferences.get(recipeA).get(recipeB);
@@ -131,8 +126,6 @@ public class RecommendCalculate {
         recipeDifferences.get(recipeA).put(recipeB, oldValue / count);
       }
     }
-
-
 
     userAccessHandler.findAllUsers().forEach(user -> {
       Map<Long, Double> recommendations = new HashMap<>();
@@ -169,11 +162,11 @@ public class RecommendCalculate {
           .limit(topN)
           .forEachOrdered(e -> {
                 RecipeEntity recipe = recipeRepository.findById(e.getKey())
-                    .orElseThrow(IllegalArgumentException::new);
+                    .orElseThrow(RecipeNotFoundException::new);
                 recommendRecipeRepository.save(RecommendRecipeEntity.builder()
                     .user(user)
                     .recipe(recipe)
-                    .rating(5.0)
+                    .rating(e.getValue())
                     .build());
               }
           );
