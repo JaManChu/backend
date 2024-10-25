@@ -66,7 +66,8 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.GET,
                 "/api/v1/recipes",
                 "/api/v1/recipes/**",
-                "/api/v1/comments/**").permitAll()
+                "/api/v1/comments/**",
+                "/api/v1/notify/**").permitAll()
             .anyRequest().authenticated());
     http
         .addFilterBefore(new JwtFilter(jwtUtil),
