@@ -92,7 +92,6 @@ public class NotifyServiceImpl implements NotifyService {
       try {
         userSseEmitter.send(
             SseEmitter.event()
-                .name("댓글 알림!")
                 .data(notify)
         );
       } catch (Exception e) {
