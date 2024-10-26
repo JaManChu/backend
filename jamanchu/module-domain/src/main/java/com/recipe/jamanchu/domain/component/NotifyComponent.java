@@ -1,5 +1,7 @@
-package com.recipe.jamanchu.api.notify;
+package com.recipe.jamanchu.domain.component;
 
+import com.recipe.jamanchu.domain.component.bean.IgnoreRecipeCommentAlarmMap;
+import com.recipe.jamanchu.domain.component.bean.SseEmitterMap;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 

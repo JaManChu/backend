@@ -1,4 +1,4 @@
-package com.recipe.jamanchu.api.notify;
+package com.recipe.jamanchu.api.controller;
 
 import com.recipe.jamanchu.api.service.NotifyService;
 import com.recipe.jamanchu.domain.model.dto.response.ResultResponse;

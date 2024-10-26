@@ -3,8 +3,8 @@ package com.recipe.jamanchu.api.service.impl;
 import static com.recipe.jamanchu.domain.model.type.TokenType.ACCESS;
 
 import com.recipe.jamanchu.api.auth.jwt.JwtUtil;
-import com.recipe.jamanchu.api.notify.IgnoreRecipeCommentAlarmMap;
-import com.recipe.jamanchu.api.notify.SseEmitterMap;
+import com.recipe.jamanchu.domain.component.bean.IgnoreRecipeCommentAlarmMap;
+import com.recipe.jamanchu.domain.component.bean.SseEmitterMap;
 import com.recipe.jamanchu.api.service.NotifyService;
 import com.recipe.jamanchu.domain.component.UserAccessHandler;
 import com.recipe.jamanchu.domain.entity.RecipeEntity;
