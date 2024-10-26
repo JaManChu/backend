@@ -1,7 +1,10 @@
 package com.recipe.jamanchu.domain.model.dto.response.recipes;
 
 import com.recipe.jamanchu.domain.entity.RecipeEntity;
+import com.recipe.jamanchu.domain.entity.RecipeRatingEntity;
 import com.recipe.jamanchu.domain.entity.UserEntity;
+import com.recipe.jamanchu.domain.model.type.CookingTimeType;
+import com.recipe.jamanchu.domain.model.type.LevelType;
 import lombok.Getter;
 
 @Getter
@@ -15,14 +18,31 @@ public class RecommendRecipe {
 
   private final String recipeThumbnail;
 
-  private RecommendRecipe(Long recipeId, String recipeName, String recipeAuthor, String recipeThumbnail) {
+  private final Double rating;
+
+  private final String difficulty;
+
+  private final String cookingTime;
+
+  private RecommendRecipe(Long recipeId, String recipeName, String recipeAuthor, String recipeThumbnail, Double rating, LevelType difficulty, CookingTimeType cookingTime) {
     this.recipeId = recipeId;
     this.recipeName = recipeName;
     this.recipeAuthor = recipeAuthor;
     this.recipeThumbnail = recipeThumbnail;
+    this.rating = rating;
+    this.difficulty = difficulty.getLevel();
+    this.cookingTime = cookingTime.getTime();
   }
 
-  public static RecommendRecipe of(RecipeEntity recipe, UserEntity author) {
-    return new RecommendRecipe(recipe.getId(), recipe.getName(), author.getNickname(), recipe.getThumbnail());
+  public static RecommendRecipe of(RecipeEntity recipe, UserEntity author, LevelType difficulty, CookingTimeType cookingTime) {
+    return new RecommendRecipe(
+        recipe.getId(),
+        recipe.getName(),
+        author.getNickname(),
+        recipe.getThumbnail(),
+        recipe.getRating().stream().mapToDouble(RecipeRatingEntity::getRating).average().orElse(0),
+        difficulty,
+        cookingTime
+    );
   }
 }
