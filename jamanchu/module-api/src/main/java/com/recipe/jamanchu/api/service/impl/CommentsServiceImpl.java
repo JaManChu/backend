@@ -3,12 +3,16 @@ package com.recipe.jamanchu.api.service.impl;
 import static com.recipe.jamanchu.domain.model.type.RecipeProvider.SCRAP;
 
 import com.recipe.jamanchu.api.auth.jwt.JwtUtil;
-import com.recipe.jamanchu.domain.component.UserAccessHandler;
-import com.recipe.jamanchu.domain.entity.CommentEntity;
-import com.recipe.jamanchu.domain.entity.RecipeEntity;
-import com.recipe.jamanchu.domain.entity.UserEntity;
+import com.recipe.jamanchu.api.service.CommentsService;
+import com.recipe.jamanchu.api.service.NotifyService;
 import com.recipe.jamanchu.core.exceptions.exception.RecipeNotFoundException;
 import com.recipe.jamanchu.core.exceptions.exception.UnmatchedUserException;
+import com.recipe.jamanchu.domain.component.UserAccessHandler;
+import com.recipe.jamanchu.domain.entity.CommentEntity;
+import com.recipe.jamanchu.domain.entity.IngredientRatingEntity;
+import com.recipe.jamanchu.domain.entity.RecipeEntity;
+import com.recipe.jamanchu.domain.entity.RecipeRatingEntity;
+import com.recipe.jamanchu.domain.entity.UserEntity;
 import com.recipe.jamanchu.domain.model.dto.request.comments.CommentsDTO;
 import com.recipe.jamanchu.domain.model.dto.request.comments.CommentsDeleteDTO;
 import com.recipe.jamanchu.domain.model.dto.request.comments.CommentsUpdateDTO;
@@ -19,8 +23,9 @@ import com.recipe.jamanchu.domain.model.dto.response.notify.Notify;
 import com.recipe.jamanchu.domain.model.type.ResultCode;
 import com.recipe.jamanchu.domain.model.type.TokenType;
 import com.recipe.jamanchu.domain.repository.CommentRepository;
+import com.recipe.jamanchu.domain.repository.IngredientRatingRepository;
+import com.recipe.jamanchu.domain.repository.RecipeRatingRepository;
 import com.recipe.jamanchu.domain.repository.RecipeRepository;
-import com.recipe.jamanchu.api.service.CommentsService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import java.util.List;
@@ -35,11 +40,14 @@ public class CommentsServiceImpl implements CommentsService {
 
   private final CommentRepository commentRepository;
   private final RecipeRepository recipeRepository;
+  private final RecipeRatingRepository recipeRatingRepository;
+
   private final UserAccessHandler userAccessHandler;
 
-  private final NotifyServiceImpl notifyService;
+  private final NotifyService notifyService;
 
   private final JwtUtil jwtUtil;
+  private final IngredientRatingRepository ingredientRatingRepository;
 
   @Transactional(rollbackOn = RuntimeException.class)
   @Override
@@ -57,12 +65,37 @@ public class CommentsServiceImpl implements CommentsService {
     RecipeEntity recipe = recipeRepository.findById(recipeId)
         .orElseThrow(RecipeNotFoundException::new);
 
+    // 댓글 중복 검사
+    if(commentRepository.existsByUserAndRecipe(user, recipe)) {
+      return ResultResponse.of(ResultCode.FAIL_DUPLICATE_COMMENTS);
+    }
+
     CommentEntity userComment = CommentEntity.builder()
         .user(user)
         .recipe(recipe)
         .commentContent(commentsDTO.getComment())
         .commentLike(commentsDTO.getRating())
         .build();
+
+    // 레시피 평가 데이터 저장
+    RecipeRatingEntity recipeRating = RecipeRatingEntity.builder()
+        .user(user)
+        .recipe(recipe)
+        .rating(commentsDTO.getRating())
+        .build();
+
+    recipeRatingRepository.save(recipeRating);
+
+    // 재료 평가 데이터 저장
+    recipe.getMapping().forEach(
+        ingredient -> {
+          IngredientRatingEntity ingredientRating = IngredientRatingEntity.builder()
+              .user(user)
+              .ingredient(ingredient.getIngredient())
+              .rating(commentsDTO.getRating())
+              .build();
+          ingredientRatingRepository.save(ingredientRating);
+        });
 
     commentRepository.save(userComment);
 
