@@ -8,11 +8,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.recipe.jamanchu.api.auth.jwt.JwtUtil;
+import com.recipe.jamanchu.api.service.NotifyService;
+import com.recipe.jamanchu.core.exceptions.exception.UnmatchedUserException;
 import com.recipe.jamanchu.domain.component.UserAccessHandler;
 import com.recipe.jamanchu.domain.entity.CommentEntity;
+import com.recipe.jamanchu.domain.entity.IngredientEntity;
 import com.recipe.jamanchu.domain.entity.RecipeEntity;
+import com.recipe.jamanchu.domain.entity.RecipeIngredientMappingEntity;
 import com.recipe.jamanchu.domain.entity.UserEntity;
-import com.recipe.jamanchu.core.exceptions.exception.UnmatchedUserException;
 import com.recipe.jamanchu.domain.model.dto.request.comments.CommentsDTO;
 import com.recipe.jamanchu.domain.model.dto.request.comments.CommentsDeleteDTO;
 import com.recipe.jamanchu.domain.model.dto.request.comments.CommentsUpdateDTO;
@@ -21,6 +24,8 @@ import com.recipe.jamanchu.domain.model.type.RecipeProvider;
 import com.recipe.jamanchu.domain.model.type.TokenType;
 import com.recipe.jamanchu.domain.model.type.UserRole;
 import com.recipe.jamanchu.domain.repository.CommentRepository;
+import com.recipe.jamanchu.domain.repository.IngredientRatingRepository;
+import com.recipe.jamanchu.domain.repository.RecipeRatingRepository;
 import com.recipe.jamanchu.domain.repository.RecipeRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -45,7 +50,13 @@ class CommentsServiceImplTest {
   private UserAccessHandler userAccessHandler;
 
   @Mock
-  private NotifyServiceImpl notifyService;
+  private RecipeRatingRepository recipeRatingRepository;
+
+  @Mock
+  private IngredientRatingRepository ingredientRatingRepository;
+
+  @Mock
+  private NotifyService notifyService;
 
   @Mock
   private JwtUtil jwtUtil;
@@ -75,11 +86,28 @@ class CommentsServiceImplTest {
 
     Long recipeId = 1L;
 
+    List<RecipeIngredientMappingEntity> mapping = List.of(
+        RecipeIngredientMappingEntity.builder()
+            .ingredient(IngredientEntity.builder()
+                .ingredientId(1L)
+                .build())
+            .build(),
+        RecipeIngredientMappingEntity.builder()
+            .ingredient(IngredientEntity.builder()
+                .ingredientId(2L)
+                .build())
+            .build()
+    );
+
     RecipeEntity recipe = RecipeEntity.builder()
         .user(user)
         .id(recipeId)
+        .mapping(mapping)
         .user(user)
         .build();
+
+
+
     CommentsDTO requestDTO = new CommentsDTO(recipeId, "댓글 내용", 5.0);
 
     // when
@@ -90,6 +118,9 @@ class CommentsServiceImplTest {
     // then
     assertEquals("댓글 작성 성공!", commentService.writeComment(request, requestDTO).getMessage());
     verify(notifyService,times(1)).notifyUser(any(), any(), any());
+    verify(ingredientRatingRepository,times(recipe.getMapping().size())).save(any());
+    verify(recipeRatingRepository,times(1)).save(any());
+    verify(commentRepository,times(1)).save(any());
   }
 
   @DisplayName("댓글 작성 테스트 - 크롤링된 데이터인 경우")
@@ -111,20 +142,42 @@ class CommentsServiceImplTest {
 
     Long recipeId = 1L;
 
+    List<RecipeIngredientMappingEntity> mapping = List.of(
+        RecipeIngredientMappingEntity.builder()
+            .ingredient(IngredientEntity.builder()
+                .ingredientId(1L)
+                .build())
+            .build(),
+        RecipeIngredientMappingEntity.builder()
+            .ingredient(IngredientEntity.builder()
+                .ingredientId(2L)
+                .build())
+            .build()
+    );
+
     RecipeEntity recipe = RecipeEntity.builder()
         .user(user)
         .id(recipeId)
         .provider(RecipeProvider.SCRAP)
+        .mapping(mapping)
         .build();
+
+
+
     CommentsDTO requestDTO = new CommentsDTO(recipeId, "댓글 내용", 5.0);
 
     // when
     when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(userId);
     when(userAccessHandler.findByUserId(userId)).thenReturn(user);
     when(recipeRepository.findById(recipeId)).thenReturn(Optional.of(recipe));
+    when(commentRepository.existsByUserAndRecipe(user,recipe)).thenReturn(false);
+
 
     // then
     assertEquals("댓글 작성 성공!", commentService.writeComment(request, requestDTO).getMessage());
+    verify(ingredientRatingRepository,times(2)).save(any());
+    verify(recipeRatingRepository,times(1)).save(any());
+    verify(commentRepository,times(1)).save(any());
     verify(notifyService,times(0)).notifyUser(any(), any(), any());
   }
 
