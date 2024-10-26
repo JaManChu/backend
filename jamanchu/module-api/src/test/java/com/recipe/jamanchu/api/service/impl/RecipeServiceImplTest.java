@@ -467,7 +467,7 @@ class RecipeServiceImplTest {
     assertEquals("전체 레시피 조회 성공!", result.getMessage());
     List<RecipesSummary> summaries = (List<RecipesSummary>) result.getData();
     assertEquals(1, summaries.size());
-    assertEquals("Recipe2", summaries.get(0).getRecipeName());
+    assertEquals("Recipe2", summaries.getFirst().getRecipeName());
 
     // verify
     verify(scrapedRecipeRepository, times(1)).findRecipeIdsByUserIdAndScrapedType(user.getUserId(), ScrapedType.SCRAPED);
