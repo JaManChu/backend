@@ -15,4 +15,6 @@ public interface CommentRepository extends JpaRepository<CommentEntity, Long> {
   List<CommentEntity> findAllByRecipe(RecipeEntity recipe);
 
   void deleteAllByUser(UserEntity user);
+
+  boolean existsByUserAndRecipe(UserEntity user, RecipeEntity recipe);
 }
