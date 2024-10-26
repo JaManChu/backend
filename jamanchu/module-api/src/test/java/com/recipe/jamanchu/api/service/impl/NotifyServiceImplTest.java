@@ -112,7 +112,7 @@ class NotifyServiceImplTest {
         .user(user)
         .build();
 
-    Notify notify = Notify.of("recipe", "message", 5.0, "commentUser");
+    Notify notify = Notify.of(recipe.getId(),"recipe", "message", 5.0, "commentUser");
 
     // when
     doNothing().when(userAccessHandler).existsById(1L);
@@ -172,7 +172,7 @@ class NotifyServiceImplTest {
         .user(ignoreUser)
         .build();
 
-    Notify notify = Notify.of("recipe", "message", 5.0, "user");
+    Notify notify = Notify.of(recipe.getId(), "recipe", "message", 5.0, "user");
 
     // when
     when(jwtUtil.getUserId(request.getHeader(ACCESS.getValue()))).thenReturn(ignoreUserId);

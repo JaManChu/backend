@@ -68,7 +68,7 @@ public class CommentsServiceImpl implements CommentsService {
 
     //알림 전송 부분
     if(recipe.getProvider() != SCRAP){
-      Notify notify = Notify.of(recipe.getName(),commentsDTO.getComment(),commentsDTO.getRating(), user.getNickname());
+      Notify notify = Notify.of(recipeId, recipe.getName(), commentsDTO.getComment(),commentsDTO.getRating(), user.getNickname());
       notifyService.notifyUser(recipe,recipe.getUser().getUserId(), notify);
     }
 
