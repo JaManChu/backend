@@ -87,16 +87,18 @@ public class NotifyServiceImpl implements NotifyService {
       return;
     }
 
-    SseEmitter userSseEmitter = subscribers.get(userId);
-    if (userSseEmitter != null) {
-      try {
-        userSseEmitter.send(
-            SseEmitter.event()
-                .data(notify)
-        );
-      } catch (Exception e) {
-        userSseEmitter.completeWithError(e);
-        subscribers.remove(userId);
+    if(subscribers.containsKey(userId)){
+      SseEmitter userSseEmitter = subscribers.get(userId);
+      if (userSseEmitter != null) {
+        try {
+          userSseEmitter.send(
+              SseEmitter.event()
+                  .data(notify)
+          );
+        } catch (Exception e) {
+          userSseEmitter.completeWithError(e);
+          subscribers.remove(userId);
+        }
       }
     }
   }
