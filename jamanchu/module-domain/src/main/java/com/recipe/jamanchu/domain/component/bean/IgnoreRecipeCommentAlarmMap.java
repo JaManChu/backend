@@ -1,4 +1,4 @@
-package com.recipe.jamanchu.api.notify;
+package com.recipe.jamanchu.domain.component.bean;
 
 import java.util.Collection;
 import java.util.Map;
