@@ -41,7 +41,7 @@ public enum ResultCode {
   EMAIL_NICKNAME_MATCH(HttpStatus.OK, "비밀번호를 수정할 수 있습니다."),
   EMAIL_NICKNAME_MISMATCH(HttpStatus.OK, "회원 정보를 다시 확인해주세요."),
   SUCCESS_UPDATE_PASSWORD(HttpStatus.OK, "비밀번호를 수정했습니다."),
-  ;
+  FAIL_DUPLICATE_COMMENTS(HttpStatus.BAD_REQUEST, "이미 댓글을 작성했습니다." );
 
   private final HttpStatus statusCode;
   private final String message;
