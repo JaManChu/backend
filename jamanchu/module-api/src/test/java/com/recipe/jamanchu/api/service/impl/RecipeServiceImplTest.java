@@ -523,7 +523,7 @@ class RecipeServiceImplTest {
     assertEquals("레시피 조회 성공!", result.getMessage());
     List<RecipesSummary> summaries = (List<RecipesSummary>) result.getData();
     assertEquals(1, summaries.size());
-    assertEquals("Recipe1", summaries.get(0).getRecipeName());
+    assertEquals("Recipe1", summaries.getFirst().getRecipeName());
 
     // verify
     verify(recipeRepository, times(1)).searchAndRecipesQueryDSL(eq(searchDTO), anyList(), any(Pageable.class));
@@ -577,7 +577,7 @@ class RecipeServiceImplTest {
     assertEquals("레시피 조회 성공!", result.getMessage());
     List<RecipesSummary> summaries = (List<RecipesSummary>) result.getData();
     assertEquals(1, summaries.size());
-    assertEquals("Recipe2", summaries.get(0).getRecipeName());
+    assertEquals("Recipe2", summaries.getFirst().getRecipeName());
 
     // verify
     verify(recipeRepository, times(1)).searchAndRecipesQueryDSL(eq(searchDTO), anyList(), any(Pageable.class));
@@ -682,10 +682,10 @@ class RecipeServiceImplTest {
     assertNotNull(result.getData());
     List<RecipesSummary> recipesSummaries = (List<RecipesSummary>) result.getData();
     assertEquals(1, recipesSummaries.size());
-    assertEquals(2, recipesSummaries.get(0).getRecipeId());
-    assertEquals("Recipe2", recipesSummaries.get(0).getRecipeName());
-    assertEquals(recipe.getUser().getNickname(), recipesSummaries.get(0).getRecipeAuthor());
-    assertEquals(0.0, recipesSummaries.get(0).getRecipeRating());
+    assertEquals(2, recipesSummaries.getFirst().getRecipeId());
+    assertEquals("Recipe2", recipesSummaries.getFirst().getRecipeName());
+    assertEquals(recipe.getUser().getNickname(), recipesSummaries.getFirst().getRecipeAuthor());
+    assertEquals(0.0, recipesSummaries.getFirst().getRecipeRating());
 
     // verify
     verify(scrapedRecipeRepository, times(1)).findRecipeIdsByUserIdAndScrapedType(user.getUserId(), ScrapedType.SCRAPED);
@@ -726,10 +726,10 @@ class RecipeServiceImplTest {
     assertNotNull(result.getData());
     List<RecipesSummary> recipesSummaries = (List<RecipesSummary>) result.getData();
     assertEquals(2, recipesSummaries.size());
-    assertEquals(recipe.getId(), recipesSummaries.get(0).getRecipeId());
-    assertEquals(recipe.getName(), recipesSummaries.get(0).getRecipeName());
-    assertEquals(recipe.getUser().getNickname(), recipesSummaries.get(0).getRecipeAuthor());
-    assertEquals(0.0, recipesSummaries.get(0).getRecipeRating());
+    assertEquals(recipe.getId(), recipesSummaries.getFirst().getRecipeId());
+    assertEquals(recipe.getName(), recipesSummaries.getFirst().getRecipeName());
+    assertEquals(recipe.getUser().getNickname(), recipesSummaries.getFirst().getRecipeAuthor());
+    assertEquals(0.0, recipesSummaries.getFirst().getRecipeRating());
   }
 
   @Test
@@ -904,7 +904,7 @@ class RecipeServiceImplTest {
     assertEquals("추천 레시피 조회 성공", result.getMessage());
     RecommendRecipes recommendRecipes1 = (RecommendRecipes) result.getData();
     assertEquals("Recipe1", recommendRecipes1.getRecipes().getFirst().getRecipeName());
-    recommendRecipes1.getRecipes().stream().forEach(e -> {
+    recommendRecipes1.getRecipes().forEach(e -> {
       System.out.println(e.getRecipeId());
       System.out.println(e.getRecipeAuthor());
       System.out.println(e.getRecipeName());
