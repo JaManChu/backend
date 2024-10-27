@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @Slf4j
@@ -27,15 +28,11 @@ public class JwtFilter extends OncePerRequestFilter {
       HttpServletResponse response, FilterChain filterChain)
       throws ServletException, IOException {
 
-    // Options 요청 및 인증이 필요없는 경로 토큰 검증 제외
-    if (HttpMethod.OPTIONS.matches(request.getMethod())
-        || isExcludedPath(request.getRequestURI())) {
-
+    // 접근 권한 허용 경로 검증
+    if (isAllowedRequest(request)) {
       filterChain.doFilter(request, response);
       return;
     }
-
-    log.info("request uri >>> {}", request.getRequestURI());
 
     // Header에서 Access-Token 추출
     String tokenHeader = request.getHeader(TokenType.ACCESS.getValue());
@@ -86,14 +83,55 @@ public class JwtFilter extends OncePerRequestFilter {
     response.getWriter().write(objectMapper.writeValueAsString(body));
   }
 
+  // 접근 권한 허용 경로 검증
+  private boolean isAllowedRequest(HttpServletRequest request) {
+    AntPathMatcher pathMatcher = new AntPathMatcher();
+    String method = request.getMethod();
+    String path = request.getRequestURI();
+
+    // 1. Options 요청 검증
+    if (HttpMethod.OPTIONS.matches(request.getMethod())) {
+      return true;
+    }
+
+    log.info("request uri >>> {}", path);
+    // 2. 예외 경로 검증
+    if (isExcludedPath(pathMatcher, path)) {
+      return true;
+    }
+
+    // 3. 요청 메서드 검증
+    if ("GET".equalsIgnoreCase(method)) {
+
+      // 4. 토큰 검증
+      if (request.getHeader(TokenType.ACCESS.getValue()) == null) {
+
+        // 5. 비 로그인 사용자 요청 경로 검증
+        return isMatchingGetRequest(pathMatcher, path);
+      }
+    }
+
+    return false;
+  }
+
   // Jwt 검증 제외 경로
-  private boolean isExcludedPath(String requestURI) {
-    return requestURI.equals("/")
-        || requestURI.equals("/api/v1/users/login")
-        || requestURI.equals("/api/v1/users/signup")
-        || requestURI.equals("/api/v1/auth/email-check")
-        || requestURI.equals("/api/v1/auth/nickname-check")
-        || requestURI.equals("/api/v1/users/login/auth/kakao")
-        || requestURI.equals("/api/v1/auth/token/refresh");
+  private boolean isExcludedPath(AntPathMatcher pathMatcher, String requestURI) {
+
+    return pathMatcher.match("/", requestURI)
+        || pathMatcher.match("/api/v1/users/login/**", requestURI)
+        || pathMatcher.match("/api/v1/users/signup", requestURI)
+        || pathMatcher.match("/api/v1/auth/**", requestURI)
+        || pathMatcher.match("/v3/api-docs/**", requestURI)
+        || pathMatcher.match("/swagger-ui/**", requestURI)
+        || pathMatcher.match("/swagger-ui.html", requestURI)
+        || pathMatcher.match("/swagger-resources/**", requestURI);
+  }
+
+  // 비 로그인 사용자 레시피, 댓글 조회 시 토큰 검증 제외 경로
+  public boolean isMatchingGetRequest(AntPathMatcher pathMatcher, String requestURI) {
+
+    return pathMatcher.match("/api/v1/recipes/**", requestURI)
+        || pathMatcher.match("/api/v1/comments/**", requestURI)
+        || pathMatcher.match("/api/v1/notify/**", requestURI);
   }
 }
