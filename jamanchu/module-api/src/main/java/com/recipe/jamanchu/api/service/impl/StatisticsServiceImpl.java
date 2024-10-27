@@ -44,8 +44,6 @@ public class StatisticsServiceImpl implements StatisticsService {
   @Scheduled(cron = "0 0/30 * * * *")
   public void statistics() {
 
-    log.info("test");
-
     int visitors = dailyVisitors.size();
 
     LocalDateTime now = LocalDateTime.now();
