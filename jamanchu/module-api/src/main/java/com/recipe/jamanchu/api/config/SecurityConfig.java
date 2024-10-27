@@ -55,7 +55,6 @@ public class SecurityConfig {
                 "/api/v1/auth/**",
                 "/favicon.ico").permitAll()
             .requestMatchers(HttpMethod.GET,
-                "/api/v1/recipes",
                 "/api/v1/recipes/**",
                 "/api/v1/comments/**",
                 "/api/v1/notify/**").permitAll()

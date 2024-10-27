@@ -130,8 +130,7 @@ public class JwtFilter extends OncePerRequestFilter {
   // 비 로그인 사용자 레시피, 댓글 조회 시 토큰 검증 제외 경로
   public boolean isMatchingGetRequest(AntPathMatcher pathMatcher, String requestURI) {
 
-    return pathMatcher.match("/api/v1/recipes", requestURI)
-        || pathMatcher.match("/api/v1/recipes/**", requestURI)
+    return pathMatcher.match("/api/v1/recipes/**", requestURI)
         || pathMatcher.match("/api/v1/comments/**", requestURI)
         || pathMatcher.match("/api/v1/notify/**", requestURI);
   }
