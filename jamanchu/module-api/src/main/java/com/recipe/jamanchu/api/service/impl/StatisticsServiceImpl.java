@@ -41,7 +41,7 @@ public class StatisticsServiceImpl implements StatisticsService {
             .sum());
   }
 
-  @Scheduled(cron = "0/5 * * * * *")
+  @Scheduled(cron = "0 0/30 * * * *")
   public void statistics() {
 
     log.info("test");
