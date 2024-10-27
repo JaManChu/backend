@@ -2,6 +2,8 @@ package com.recipe.jamanchu.api.config;
 
 import com.recipe.jamanchu.api.auth.jwt.JwtFilter;
 import com.recipe.jamanchu.api.auth.jwt.JwtUtil;
+import com.recipe.jamanchu.api.filter.VisitorCountFilter;
+import com.recipe.jamanchu.domain.component.bean.StatisticsSet;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
@@ -23,6 +25,8 @@ public class SecurityConfig {
 
   private final AuthenticationConfiguration authenticationConfiguration;
   private final JwtUtil jwtUtil;
+  private final StatisticsSet dailyVisitors;
+
 
   @Bean
   public AuthenticationManager authenticationManager() throws Exception {
@@ -65,6 +69,9 @@ public class SecurityConfig {
     http
         .sessionManagement(session -> session
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
+    http.addFilterAfter(new VisitorCountFilter(dailyVisitors),
+        UsernamePasswordAuthenticationFilter.class);
 
     return http.build();
   }
