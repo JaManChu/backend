@@ -41,6 +41,8 @@ public enum ResultCode {
   EMAIL_NICKNAME_MATCH(HttpStatus.OK, "비밀번호를 수정할 수 있습니다."),
   EMAIL_NICKNAME_MISMATCH(HttpStatus.OK, "회원 정보를 다시 확인해주세요."),
   SUCCESS_UPDATE_PASSWORD(HttpStatus.OK, "비밀번호를 수정했습니다."),
+  SUCCESS_RETRIEVE_DAILY(HttpStatus.OK, "일별 방문자 수 조회 성공"),
+  SUCCESS_RETRIEVE_MONTHLY(HttpStatus.OK, "월별 방문자 수 조회 성공"),
   ;
 
   private final HttpStatus statusCode;
