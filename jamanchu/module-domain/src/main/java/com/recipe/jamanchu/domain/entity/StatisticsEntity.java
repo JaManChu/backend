@@ -8,12 +8,14 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Entity
 @Table(name = "statistics")
 public class StatisticsEntity {
@@ -25,14 +27,18 @@ public class StatisticsEntity {
 
   @NotNull
   @Column(name = "stat_days")
-  private Long days;
+  private Integer days;
 
   @NotNull
   @Column(name = "stat_months")
-  private Long months;
+  private Integer months;
 
   @NotNull
   @Column(name = "stat_years")
-  private Long years;
+  private Integer years;
+
+  @NotNull
+  @Column(name = "stat_visitors")
+  private Long visitors;
 
 }
