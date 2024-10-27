@@ -2,7 +2,6 @@ package com.recipe.jamanchu.api.config;
 
 import com.recipe.jamanchu.api.auth.jwt.JwtFilter;
 import com.recipe.jamanchu.api.auth.jwt.JwtUtil;
-import com.recipe.jamanchu.api.auth.service.CustomUserDetailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
@@ -24,7 +23,6 @@ public class SecurityConfig {
 
   private final AuthenticationConfiguration authenticationConfiguration;
   private final JwtUtil jwtUtil;
-  private final CustomUserDetailService userDetailService;
 
   @Bean
   public AuthenticationManager authenticationManager() throws Exception {
@@ -47,22 +45,15 @@ public class SecurityConfig {
             .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
             .requestMatchers(
                 "/v3/api-docs/**",
-                "/api/v1/scrape-recipes",
-                "/api/v1/divide",
                 "/swagger-ui/**",
                 "/swagger-ui.html",
                 "/swagger-resources/**").permitAll()
             .requestMatchers(HttpMethod.OPTIONS,"/**").permitAll()
             .requestMatchers("/",
                 "/api/v1/users/signup",
-                "/api/v1/users/login",
-                "/api/v1/auth/email-check",
-                "/api/v1/auth/nickname-check",
-                "/api/v1/auth/find-password",
-                "/api/v1/auth/update-password",
-                "/favicon.ico",
-                "/api/v1/users/login/auth/kakao",
-                "/api/v1/auth/token/refresh").permitAll()
+                "/api/v1/users/login/**",
+                "/api/v1/auth/**",
+                "/favicon.ico").permitAll()
             .requestMatchers(HttpMethod.GET,
                 "/api/v1/recipes",
                 "/api/v1/recipes/**",
