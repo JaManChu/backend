@@ -44,7 +44,6 @@ public enum ResultCode {
   FAIL_DUPLICATE_COMMENTS(HttpStatus.BAD_REQUEST, "이미 댓글을 작성했습니다." ),
   SUCCESS_RETRIEVE_MONTHLY(HttpStatus.OK, "월별 방문자 수 조회 성공"),
   SUCCESS_RETRIEVE_DAILY(HttpStatus.OK, "일별 방문자 수 조회 성공"),
-  SUCCESS_RETRIEVE_MONTHLY(HttpStatus.OK, "월별 방문자 수 조회 성공"),
   ;
 
   private final HttpStatus statusCode;
