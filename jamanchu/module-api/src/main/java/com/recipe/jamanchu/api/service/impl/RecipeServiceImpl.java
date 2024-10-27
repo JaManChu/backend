@@ -417,7 +417,7 @@ public class RecipeServiceImpl implements RecipeService {
             .stream()
             .map(recipe -> {
               UserEntity user = recipe.getUser();
-              return RecommendRecipe.of(recipe, user);
+              return RecommendRecipe.of(recipe, user, recipe.getLevel(), recipe.getTime());
             })
             .collect(Collectors.toList())
     );
@@ -436,7 +436,9 @@ public class RecipeServiceImpl implements RecipeService {
           .map(recommendRecipeEntity ->
             RecommendRecipe.of(
               recommendRecipeEntity.getRecipe(),
-              recommendRecipeEntity.getUser()
+              recommendRecipeEntity.getUser(),
+              recommendRecipeEntity.getRecipe().getLevel(),
+              recommendRecipeEntity.getRecipe().getTime()
             )
           )
           .toList()

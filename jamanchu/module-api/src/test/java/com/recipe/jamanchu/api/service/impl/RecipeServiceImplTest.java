@@ -15,6 +15,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.recipe.jamanchu.api.auth.jwt.JwtUtil;
+import com.recipe.jamanchu.core.exceptions.exception.RecipeNotFoundException;
+import com.recipe.jamanchu.core.exceptions.exception.UnmatchedUserException;
 import com.recipe.jamanchu.domain.component.UserAccessHandler;
 import com.recipe.jamanchu.domain.entity.IngredientEntity;
 import com.recipe.jamanchu.domain.entity.ManualEntity;
@@ -23,8 +25,6 @@ import com.recipe.jamanchu.domain.entity.RecipeIngredientEntity;
 import com.recipe.jamanchu.domain.entity.RecipeRatingEntity;
 import com.recipe.jamanchu.domain.entity.ScrapedRecipeEntity;
 import com.recipe.jamanchu.domain.entity.UserEntity;
-import com.recipe.jamanchu.core.exceptions.exception.RecipeNotFoundException;
-import com.recipe.jamanchu.core.exceptions.exception.UnmatchedUserException;
 import com.recipe.jamanchu.domain.model.dto.request.recipe.RecipesDTO;
 import com.recipe.jamanchu.domain.model.dto.request.recipe.RecipesDeleteDTO;
 import com.recipe.jamanchu.domain.model.dto.request.recipe.RecipesSearchDTO;
@@ -34,6 +34,7 @@ import com.recipe.jamanchu.domain.model.dto.response.ingredients.Ingredient;
 import com.recipe.jamanchu.domain.model.dto.response.recipes.RecipesInfo;
 import com.recipe.jamanchu.domain.model.dto.response.recipes.RecipesManual;
 import com.recipe.jamanchu.domain.model.dto.response.recipes.RecipesSummary;
+import com.recipe.jamanchu.domain.model.dto.response.recipes.RecommendRecipes;
 import com.recipe.jamanchu.domain.model.type.CookingTimeType;
 import com.recipe.jamanchu.domain.model.type.LevelType;
 import com.recipe.jamanchu.domain.model.type.ScrapedType;
@@ -85,7 +86,7 @@ class RecipeServiceImplTest {
   private ScrapedRecipeRepository scrapedRecipeRepository;
 
   @Mock
-  private RecipeRatingRepository ratingRepository;
+  private RecipeRatingRepository recipeRatingRepository;
 
   @Mock
   private SeasoningRepository seasoningRepository;
@@ -466,7 +467,7 @@ class RecipeServiceImplTest {
     assertEquals("전체 레시피 조회 성공!", result.getMessage());
     List<RecipesSummary> summaries = (List<RecipesSummary>) result.getData();
     assertEquals(1, summaries.size());
-    assertEquals("Recipe2", summaries.get(0).getRecipeName());
+    assertEquals("Recipe2", summaries.getFirst().getRecipeName());
 
     // verify
     verify(scrapedRecipeRepository, times(1)).findRecipeIdsByUserIdAndScrapedType(user.getUserId(), ScrapedType.SCRAPED);
@@ -522,7 +523,7 @@ class RecipeServiceImplTest {
     assertEquals("레시피 조회 성공!", result.getMessage());
     List<RecipesSummary> summaries = (List<RecipesSummary>) result.getData();
     assertEquals(1, summaries.size());
-    assertEquals("Recipe1", summaries.get(0).getRecipeName());
+    assertEquals("Recipe1", summaries.getFirst().getRecipeName());
 
     // verify
     verify(recipeRepository, times(1)).searchAndRecipesQueryDSL(eq(searchDTO), anyList(), any(Pageable.class));
@@ -576,7 +577,7 @@ class RecipeServiceImplTest {
     assertEquals("레시피 조회 성공!", result.getMessage());
     List<RecipesSummary> summaries = (List<RecipesSummary>) result.getData();
     assertEquals(1, summaries.size());
-    assertEquals("Recipe2", summaries.get(0).getRecipeName());
+    assertEquals("Recipe2", summaries.getFirst().getRecipeName());
 
     // verify
     verify(recipeRepository, times(1)).searchAndRecipesQueryDSL(eq(searchDTO), anyList(), any(Pageable.class));
@@ -631,7 +632,7 @@ class RecipeServiceImplTest {
         .build();
 
     when(recipeRepository.findById(recipe.getId())).thenReturn(Optional.of(recipe));
-    when(ratingRepository.findAverageRatingByRecipeId(recipe.getId())).thenReturn(4.5);
+    when(recipeRatingRepository.findAverageRatingByRecipeId(recipe.getId())).thenReturn(4.5);
 
     // when
     ResultResponse result = recipeService.getRecipeDetail(recipe.getId());
@@ -681,10 +682,10 @@ class RecipeServiceImplTest {
     assertNotNull(result.getData());
     List<RecipesSummary> recipesSummaries = (List<RecipesSummary>) result.getData();
     assertEquals(1, recipesSummaries.size());
-    assertEquals(2, recipesSummaries.get(0).getRecipeId());
-    assertEquals("Recipe2", recipesSummaries.get(0).getRecipeName());
-    assertEquals(recipe.getUser().getNickname(), recipesSummaries.get(0).getRecipeAuthor());
-    assertEquals(0.0, recipesSummaries.get(0).getRecipeRating());
+    assertEquals(2, recipesSummaries.getFirst().getRecipeId());
+    assertEquals("Recipe2", recipesSummaries.getFirst().getRecipeName());
+    assertEquals(recipe.getUser().getNickname(), recipesSummaries.getFirst().getRecipeAuthor());
+    assertEquals(0.0, recipesSummaries.getFirst().getRecipeRating());
 
     // verify
     verify(scrapedRecipeRepository, times(1)).findRecipeIdsByUserIdAndScrapedType(user.getUserId(), ScrapedType.SCRAPED);
@@ -725,10 +726,10 @@ class RecipeServiceImplTest {
     assertNotNull(result.getData());
     List<RecipesSummary> recipesSummaries = (List<RecipesSummary>) result.getData();
     assertEquals(2, recipesSummaries.size());
-    assertEquals(recipe.getId(), recipesSummaries.get(0).getRecipeId());
-    assertEquals(recipe.getName(), recipesSummaries.get(0).getRecipeName());
-    assertEquals(recipe.getUser().getNickname(), recipesSummaries.get(0).getRecipeAuthor());
-    assertEquals(0.0, recipesSummaries.get(0).getRecipeRating());
+    assertEquals(recipe.getId(), recipesSummaries.getFirst().getRecipeId());
+    assertEquals(recipe.getName(), recipesSummaries.getFirst().getRecipeName());
+    assertEquals(recipe.getUser().getNickname(), recipesSummaries.getFirst().getRecipeAuthor());
+    assertEquals(0.0, recipesSummaries.getFirst().getRecipeRating());
   }
 
   @Test
@@ -821,5 +822,97 @@ class RecipeServiceImplTest {
     // verify
     verify(scrapedRecipeRepository, times(1)).findByUserAndRecipe(any(), any());
     verify(scrapedRecipeRepository, times(1)).save(any());
+  }
+
+  @Test
+  @DisplayName("추천레시피 조홰 성공")
+  void getRecommendRecipes_Success (){
+    //given
+    Long userId = 1L;
+
+    UserEntity user = UserEntity.builder()
+        .userId(userId)
+        .nickname("Test User")
+        .build();
+
+
+    List<RecipeEntity> threePopularRecipe = List.of(
+        RecipeEntity.builder()
+            .id(1L)
+            .name("Recipe1")
+            .user(user)
+            .level(LevelType.LOW)
+            .time(CookingTimeType.TEN_MINUTES)
+            .rating(
+                List.of(
+                    RecipeRatingEntity.builder()
+                      .recipeRatingId(1L)
+                      .user(user)
+                      .recipe(RecipeEntity.builder().id(1L).build())
+                      .rating(4.5)
+                      .build()
+                )
+            )
+            .thumbnail("thumbnail1")
+            .build(),
+        RecipeEntity.builder()
+            .id(2L)
+            .name("Recipe2")
+            .user(user)
+            .level(LevelType.MEDIUM)
+            .time(CookingTimeType.TWENTY_MINUTES)
+            .rating(
+                List.of(
+                    RecipeRatingEntity.builder()
+                        .recipeRatingId(2L)
+                        .user(user)
+                        .recipe(RecipeEntity.builder().id(2L).build())
+                        .rating(4.5)
+                        .build()
+                )
+            )
+            .thumbnail("thumbnail2")
+            .build(),
+        RecipeEntity.builder()
+            .id(3L)
+            .name("Recipe3")
+            .user(user)
+            .level(LevelType.HIGH)
+            .time(CookingTimeType.THIRTY_MINUTES)
+            .rating(
+                List.of(
+                    RecipeRatingEntity.builder()
+                        .recipeRatingId(3L)
+                        .user(user)
+                        .recipe(RecipeEntity.builder().id(3L).build())
+                        .rating(4.5)
+                        .build()
+                )
+            )
+            .thumbnail("thumbnail3")
+            .build()
+    );
+
+    //whenㄱ
+    when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(userId);
+    when(userAccessHandler.findByUserId(userId)).thenReturn(user);
+    when(!recipeRatingRepository.existsByUser(user)).thenReturn(true);
+    when(recipeRatingRepository.findThreePopularRecipe()).thenReturn(threePopularRecipe);
+
+    ResultResponse result = recipeService.getRecommendRecipes(request);
+    //then
+    assertEquals("추천 레시피 조회 성공", result.getMessage());
+    RecommendRecipes recommendRecipes1 = (RecommendRecipes) result.getData();
+    assertEquals("Recipe1", recommendRecipes1.getRecipes().getFirst().getRecipeName());
+    recommendRecipes1.getRecipes().forEach(e -> {
+      System.out.println(e.getRecipeId());
+      System.out.println(e.getRecipeAuthor());
+      System.out.println(e.getRecipeName());
+      System.out.println(e.getRecipeThumbnail());
+      System.out.println(e.getRating());
+      System.out.println(e.getCookingTime());
+      System.out.println(e.getDifficulty());
+      System.out.println();
+    });
   }
 }
