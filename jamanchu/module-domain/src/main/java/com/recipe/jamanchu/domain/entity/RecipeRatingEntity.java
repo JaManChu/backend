@@ -25,7 +25,7 @@ public class RecipeRatingEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "rr_id")
-  private Long recipeRatingId;
+  private Long rrId;
 
   @NotNull
   @ManyToOne
@@ -39,6 +39,6 @@ public class RecipeRatingEntity {
 
   @NotNull
   @Column(name = "rr_rating", columnDefinition = "double default 1.0")
-  private Double rating;
+  private Double rrRating;
 
 }

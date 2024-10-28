@@ -25,7 +25,7 @@ public class ManualEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "mn_id")
-  private Long manualId;
+  private Long mnId;
 
   @NotNull
   @ManyToOne
@@ -34,12 +34,12 @@ public class ManualEntity {
 
   @NotNull
   @Column(name = "mn_content", columnDefinition = "TEXT")
-  private String manualContent;
+  private String mnContent;
 
   @Column(name = "mn_picture")
-  private String manualPicture;
+  private String mnPicture;
 
-  public void updateManualPicture(String newManualPicture) {
-    this.manualPicture = newManualPicture;
+  public void updateManualPicture(String newMnPicture) {
+    this.mnPicture = newMnPicture;
   }
 }
