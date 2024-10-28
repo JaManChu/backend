@@ -21,7 +21,7 @@ public class UserDetailsDTO implements UserDetails {
       @Override
       public String getAuthority() {
 
-        return userEntity.getRole().toString();
+        return userEntity.getUsrRole().toString();
       }
     });
 
@@ -31,13 +31,13 @@ public class UserDetailsDTO implements UserDetails {
   @Override
   public String getPassword() {
 
-    return userEntity.getPassword();
+    return userEntity.getUsrPassword();
   }
 
   @Override
   public String getUsername() {
 
-    return userEntity.getEmail();
+    return userEntity.getUsrEmail();
   }
 
   @Override

@@ -52,10 +52,10 @@ public class UserServiceImpl implements UserService {
 
     // 회원 정보 저장
     userAccessHandler.saveUser(UserEntity.builder()
-        .email(signupDTO.getEmail())
-        .password(passwordEncoder.encode(signupDTO.getPassword()))
-        .nickname(signupDTO.getNickname())
-        .role(UserRole.USER)
+        .usrEmail(signupDTO.getEmail())
+        .usrPassword(passwordEncoder.encode(signupDTO.getPassword()))
+        .usrNickname(signupDTO.getNickname())
+        .usrRole(UserRole.USER)
         .build());
 
     return ResultResponse.of(ResultCode.SUCCESS_SIGNUP);
@@ -67,15 +67,15 @@ public class UserServiceImpl implements UserService {
 
     UserEntity user = userAccessHandler.findByEmail(loginDTO.getEmail());
 
-    userAccessHandler.validatePassword(user.getPassword(), loginDTO.getPassword());
+    userAccessHandler.validatePassword(user.getUsrPassword(), loginDTO.getPassword());
 
-    String access = jwtUtil.createJwt("access", user.getUserId(), user.getRole());
-    String refresh = jwtUtil.createJwt("refresh", user.getUserId(), user.getRole());
+    String access = jwtUtil.createJwt("access", user.getUsrId(), user.getUsrRole());
+    String refresh = jwtUtil.createJwt("refresh", user.getUsrId(), user.getUsrRole());
 
     response.addHeader(TokenType.ACCESS.getValue(), "Bearer " + access);
     response.addHeader(HttpHeaders.SET_COOKIE, createCookie(refresh).toString());
 
-    return new ResultResponse(ResultCode.SUCCESS_LOGIN, user.getNickname());
+    return new ResultResponse(ResultCode.SUCCESS_LOGIN, user.getUsrNickname());
   }
 
   // 카카오 로그인
@@ -91,15 +91,15 @@ public class UserServiceImpl implements UserService {
     // 카카오ID로 회원가입 OR 로그인 처리
     UserEntity user = userAccessHandler.findOrCreateUser(userInfo);
 
-    String access = jwtUtil.createJwt("access", user.getUserId(), user.getRole());
-    String refresh = jwtUtil.createJwt("refresh", user.getUserId(), user.getRole());
+    String access = jwtUtil.createJwt("access", user.getUsrId(), user.getUsrRole());
+    String refresh = jwtUtil.createJwt("refresh", user.getUsrId(), user.getUsrRole());
 
     response.addHeader(HttpHeaders.SET_COOKIE, createCookie(refresh).toString());
 
     return UriComponentsBuilder.fromUriString(REDIRECT_URI)
         .queryParam(TokenType.ACCESS.getValue(), access)
-        .queryParam("nickname", user.getNickname())
-        .queryParam("provider", user.getProvider())
+        .queryParam("nickname", user.getUsrNickname())
+        .queryParam("provider", user.getUsrProvider())
         .build()
         .toUriString();
   }
@@ -112,15 +112,15 @@ public class UserServiceImpl implements UserService {
         .findByUserId(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue())));
 
     // 소셜 계정 체크
-    userAccessHandler.isSocialUser(user.getProvider());
+    userAccessHandler.isSocialUser(user.getUsrProvider());
 
     // 회원 정보 저장
     userAccessHandler.saveUser(UserEntity.builder()
-        .userId(user.getUserId())
-        .email(user.getEmail())
-        .password(passwordEncoder.encode(userUpdateDTO.getPassword()))
-        .nickname(userUpdateDTO.getNickname())
-        .role(user.getRole())
+        .usrId(user.getUsrId())
+        .usrEmail(user.getUsrEmail())
+        .usrPassword(passwordEncoder.encode(userUpdateDTO.getPassword()))
+        .usrNickname(userUpdateDTO.getNickname())
+        .usrRole(user.getUsrRole())
         .build());
 
     return ResultResponse.of(ResultCode.SUCCESS_UPDATE_USER_INFO);
@@ -145,7 +145,7 @@ public class UserServiceImpl implements UserService {
         .findByUserId(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue())));
 
     return new ResultResponse(SUCCESS_GET_USER_INFO,
-        new UserInfoDTO(user.getEmail(), user.getNickname()));
+        new UserInfoDTO(user.getUsrEmail(), user.getUsrNickname()));
   }
 
   // 내가 찜한 레시피 & 내가 스크랩한 레시피 조회
@@ -157,19 +157,19 @@ public class UserServiceImpl implements UserService {
     List<MyRecipes> myRecipes = recipeRepository.findAllByUser(user)
         .map(recipeEntities -> recipeEntities.stream()
             .map(recipe -> new MyRecipes(
-                recipe.getId(),
-                recipe.getName(),
-                recipe.getThumbnail()
+                recipe.getRcpId(),
+                recipe.getRcpName(),
+                recipe.getRcpThumbnail()
             )).toList())
         .orElse(new ArrayList<>());
 
     List<MyScrapedRecipes> myScrapedRecipes = recipeRepository.findScrapRecipeByUser(user, ScrapedType.SCRAPED)
         .map(recipeEntities -> recipeEntities.stream()
             .map(scraped -> new MyScrapedRecipes(
-                scraped.getId(),
-                scraped.getName(),
-                scraped.getUser().getNickname(),
-                scraped.getThumbnail()
+                scraped.getRcpId(),
+                scraped.getRcpName(),
+                scraped.getUser().getUsrNickname(),
+                scraped.getRcpThumbnail()
             )).toList())
         .orElse(new ArrayList<>());
 

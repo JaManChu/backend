@@ -36,11 +36,11 @@ public class RecommendRecipe {
 
   public static RecommendRecipe of(RecipeEntity recipe, UserEntity author, LevelType difficulty, CookingTimeType cookingTime) {
     return new RecommendRecipe(
-        recipe.getId(),
-        recipe.getName(),
-        author.getNickname(),
-        recipe.getThumbnail(),
-        recipe.getRating().stream().mapToDouble(RecipeRatingEntity::getRating).average().orElse(0),
+        recipe.getRcpId(),
+        recipe.getRcpName(),
+        author.getUsrNickname(),
+        recipe.getRcpThumbnail(),
+        recipe.getRating().stream().mapToDouble(RecipeRatingEntity::getRrRating).average().orElse(0),
         difficulty,
         cookingTime
     );
