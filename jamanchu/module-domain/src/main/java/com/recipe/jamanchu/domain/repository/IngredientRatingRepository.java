@@ -1,7 +1,9 @@
 package com.recipe.jamanchu.domain.repository;
 
+import com.recipe.jamanchu.domain.entity.IngredientEntity;
 import com.recipe.jamanchu.domain.entity.IngredientRatingEntity;
 import com.recipe.jamanchu.domain.entity.UserEntity;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -9,4 +11,6 @@ import org.springframework.stereotype.Repository;
 public interface IngredientRatingRepository extends JpaRepository<IngredientRatingEntity, Long> {
 
   void deleteAllByUser(UserEntity user);
+
+  List<IngredientRatingEntity> findAllByIngredient(IngredientEntity ingredient);
 }
