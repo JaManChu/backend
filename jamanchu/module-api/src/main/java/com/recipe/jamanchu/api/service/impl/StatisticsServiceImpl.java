@@ -28,7 +28,7 @@ public class StatisticsServiceImpl implements StatisticsService {
     LocalDate now = LocalDate.now();
 
     StatisticsEntity daily = statisticsRepository.findVisitorsByYearsAndMonthsAndDays(now.getYear(), now.getMonthValue(), now.getDayOfMonth())
-        .orElseGet(StatisticsEntity.builder().visitors(0L)::build);
+        .orElseGet(StatisticsEntity.builder().stVisitors(0L)::build);
     return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_DAILY, daily.getVisitors());
   }
 
@@ -38,8 +38,8 @@ public class StatisticsServiceImpl implements StatisticsService {
     LocalDate now = LocalDate.now();
 
     return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_MONTHLY,
-        statisticsRepository.findVisitorsByYearsAndMonths(now.getYear(), now.getMonthValue()).stream()
-            .map(StatisticsEntity::getVisitors)
+        statisticsRepository.findVisitorsByStYearsAndStMonths(now.getYear(), now.getMonthValue()).stream()
+            .map(StatisticsEntity::getStVisitors)
             .reduce(0L, Long::sum)
     );
   }
@@ -62,11 +62,11 @@ public class StatisticsServiceImpl implements StatisticsService {
     else{
       statisticsRepository.save(
         StatisticsEntity.builder()
-          .years(now.getYear())
-          .months(now.getMonthValue())
-          .days(now.getDayOfMonth())
-          .visitors((long) visitors)
-          .build()
+        .stYears(now.getYear())
+        .stMonths(now.getMonthValue())
+        .stDays(now.getDayOfMonth())
+        .stVisitors((long) visitors)
+        .build()
       );
     }
 

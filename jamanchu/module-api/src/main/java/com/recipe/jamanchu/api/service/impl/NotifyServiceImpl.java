@@ -83,7 +83,7 @@ public class NotifyServiceImpl implements NotifyService {
     userAccessHandler.existsById(userId);
 
     // 알림 무시한 레시피인 경우 알림 전송 X
-    if (isIgnoreAlarm(userId, recipe.getId())) {
+    if (isIgnoreAlarm(userId, recipe.getRcpId())) {
       return;
     }
 
@@ -140,7 +140,7 @@ public class NotifyServiceImpl implements NotifyService {
     List<Long> list = new ArrayList<>();
     if (allByUser.isPresent()) {
       list = new ArrayList<>(allByUser.get().stream()
-          .map(RecipeEntity::getId)
+          .map(RecipeEntity::getRcpId)
           .toList());
 
       if (ignoreAlarmRecipeIds.containsKey(userId)) {

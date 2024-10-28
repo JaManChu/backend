@@ -23,21 +23,21 @@ class RecipeRatingEntityTest {
 
     // given
     RecipeEntity recipe = RecipeEntity.builder()
-        .id(1L)
+        .rcpId(1L)
         .build();
 
     UserEntity user = UserEntity.builder()
-        .userId(1L)
-        .nickname("user")
-        .email("user@gmail.com")
-        .password("1234")
-        .role(UserRole.USER)
+        .usrId(1L)
+        .usrNickname("user")
+        .usrEmail("user@gmail.com")
+        .usrPassword("1234")
+        .usrRole(UserRole.USER)
         .build();
 
     RecipeRatingEntity recipeRatingEntity = RecipeRatingEntity.builder()
         .recipe(recipe)
         .user(user)
-        .rating(5.0)
+        .rrRating(5.0)
         .build();
 
     // when
@@ -47,6 +47,6 @@ class RecipeRatingEntityTest {
     RecipeRatingEntity savedRating = recipeRatingRepository.save(recipeRatingEntity);
 
     // then
-    assertEquals(recipeRatingEntity.getRecipe().getId(), savedRating.getRecipe().getId());
+    assertEquals(recipeRatingEntity.getRecipe().getRcpId(), savedRating.getRecipe().getRcpId());
   }
 }

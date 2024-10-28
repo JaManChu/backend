@@ -80,11 +80,11 @@ public class RecipeServiceImpl implements RecipeService {
 
     RecipeEntity recipe = RecipeEntity.builder()
         .user(user)
-        .name(recipesDTO.getRecipeName())
-        .level(recipesDTO.getRecipeLevel())
-        .time(recipesDTO.getRecipeCookingTime())
-        .thumbnail(thumbnail)
-        .provider(USER)
+        .rcpName(recipesDTO.getRecipeName())
+        .rcpLevel(recipesDTO.getRecipeLevel())
+        .rcpTime(recipesDTO.getRecipeCookingTime())
+        .rcpThumbnail(thumbnail)
+        .rcpProvider(USER)
         .build();
 
     recipeRepository.save(recipe);
@@ -93,8 +93,8 @@ public class RecipeServiceImpl implements RecipeService {
     for (int i = 0; i < recipesDTO.getRecipeIngredients().size(); i++) {
       RecipeIngredientEntity ingredient = RecipeIngredientEntity.builder()
           .recipe(recipe)
-          .name(recipesDTO.getRecipeIngredients().get(i).getIngredientName())
-          .quantity(recipesDTO.getRecipeIngredients().get(i).getIngredientQuantity())
+          .riName(recipesDTO.getRecipeIngredients().get(i).getIngredientName())
+          .riQuantity(recipesDTO.getRecipeIngredients().get(i).getIngredientQuantity())
           .build();
 
       recipeIngredientEntities.add(ingredient);
@@ -106,16 +106,16 @@ public class RecipeServiceImpl implements RecipeService {
 
     List<RecipeIngredientEntity> filteredIngredients = recipeIngredientEntities.stream()
         .filter(ingredient -> seasoningNames.stream()
-            .noneMatch(spice -> ingredient.getName().toLowerCase().contains(spice.toLowerCase()))) // 양념류 이름이 포함된 재료 제외
+            .noneMatch(spice -> ingredient.getRiName().toLowerCase().contains(spice.toLowerCase()))) // 양념류 이름이 포함된 재료 제외
         .toList();
 
     List<IngredientEntity> ingredientEntities = new ArrayList<>();
     List<RecipeIngredientMappingEntity> recipeIngredientMappings = new ArrayList<>();
     for (RecipeIngredientEntity recipeIngredient : filteredIngredients) {
-      IngredientEntity ingredient = ingredientRepository.findByIngredientName(recipeIngredient.getName())
+      IngredientEntity ingredient = ingredientRepository.findByIngName(recipeIngredient.getRiName())
           .orElseGet(() -> {
             IngredientEntity newIngredient = IngredientEntity.builder()
-                .ingredientName(recipeIngredient.getName())
+                .ingName(recipeIngredient.getRiName())
                 .build();
             ingredientEntities.add(newIngredient);
             return newIngredient;
@@ -136,8 +136,8 @@ public class RecipeServiceImpl implements RecipeService {
     for (int i = 0; i < recipesDTO.getRecipeOrderContents().size(); i++) {
       ManualEntity manual = ManualEntity.builder()
           .recipe(recipe)
-          .manualContent(recipesDTO.getRecipeOrderContents().get(i).getRecipeOrderContent())
-          .manualPicture(i < orderImages.size() ? orderImages.get(i) : null)
+          .mnContent(recipesDTO.getRecipeOrderContents().get(i).getRecipeOrderContent())
+          .mnPicture(i < orderImages.size() ? orderImages.get(i) : null)
           .build();
 
       manuals.add(manual);
@@ -145,7 +145,7 @@ public class RecipeServiceImpl implements RecipeService {
 
     manualRepository.saveAll(manuals);
 
-    return ResultResponse.of(ResultCode.SUCCESS_REGISTER_RECIPE, recipe.getId());
+    return ResultResponse.of(ResultCode.SUCCESS_REGISTER_RECIPE, recipe.getRcpId());
   }
 
   @Override
@@ -161,7 +161,7 @@ public class RecipeServiceImpl implements RecipeService {
     RecipeEntity recipe = recipeRepository.findById(recipeId)
         .orElseThrow(RecipeNotFoundException::new);
 
-    if (!Objects.equals(user.getUserId(), recipe.getUser().getUserId())) {
+    if (!Objects.equals(user.getUsrId(), recipe.getUser().getUsrId())) {
       throw new UnmatchedUserException();
     }
 
@@ -177,8 +177,8 @@ public class RecipeServiceImpl implements RecipeService {
     for (int i = 0; i < recipesUpdateDTO.getRecipeIngredients().size(); i++) {
       RecipeIngredientEntity ingredient = RecipeIngredientEntity.builder()
           .recipe(recipe)
-          .name(recipesUpdateDTO.getRecipeIngredients().get(i).getIngredientName())
-          .quantity(recipesUpdateDTO.getRecipeIngredients().get(i).getIngredientQuantity())
+          .riName(recipesUpdateDTO.getRecipeIngredients().get(i).getIngredientName())
+          .riQuantity(recipesUpdateDTO.getRecipeIngredients().get(i).getIngredientQuantity())
           .build();
 
       recipeIngredientEntities.add(ingredient);
@@ -190,16 +190,16 @@ public class RecipeServiceImpl implements RecipeService {
 
     List<RecipeIngredientEntity> filteredIngredients = recipeIngredientEntities.stream()
         .filter(ingredient -> seasoningNames.stream()
-            .noneMatch(spice -> ingredient.getName().toLowerCase().contains(spice.toLowerCase()))) // 양념류 이름이 포함된 재료 제외
+            .noneMatch(spice -> ingredient.getRiName().toLowerCase().contains(spice.toLowerCase()))) // 양념류 이름이 포함된 재료 제외
         .toList();
 
     List<IngredientEntity> ingredientEntities = new ArrayList<>();
     List<RecipeIngredientMappingEntity> recipeIngredientMappings = new ArrayList<>();
     for (RecipeIngredientEntity recipeIngredient : filteredIngredients) {
-      IngredientEntity ingredient = ingredientRepository.findByIngredientName(recipeIngredient.getName())
+      IngredientEntity ingredient = ingredientRepository.findByIngName(recipeIngredient.getRiName())
           .orElseGet(() -> {
             IngredientEntity newIngredient = IngredientEntity.builder()
-                .ingredientName(recipeIngredient.getName())
+                .ingName(recipeIngredient.getRiName())
                 .build();
             ingredientEntities.add(newIngredient);
             return newIngredient;
@@ -222,8 +222,8 @@ public class RecipeServiceImpl implements RecipeService {
     for (int i = 0; i < recipesUpdateDTO.getRecipeOrderContents().size(); i++) {
       ManualEntity manual = ManualEntity.builder()
           .recipe(recipe)
-          .manualContent(recipesUpdateDTO.getRecipeOrderContents().get(i).getRecipeOrderContent())
-          .manualPicture(i < orderImages.size() ? orderImages.get(i) : null)
+          .mnContent(recipesUpdateDTO.getRecipeOrderContents().get(i).getRecipeOrderContent())
+          .mnPicture(i < orderImages.size() ? orderImages.get(i) : null)
           .build();
 
       manuals.add(manual);
@@ -247,7 +247,7 @@ public class RecipeServiceImpl implements RecipeService {
     RecipeEntity recipe = recipeRepository.findById(recipeId)
         .orElseThrow(RecipeNotFoundException::new);
 
-      if (!Objects.equals(user.getUserId(), recipe.getUser().getUserId())) {
+      if (!Objects.equals(user.getUsrId(), recipe.getUser().getUsrId())) {
       throw new UnmatchedUserException();
     }
 
@@ -264,7 +264,7 @@ public class RecipeServiceImpl implements RecipeService {
     // 만약 scrapedRecipeIds가 비어있지 않다면 SCRAPED한 레시피를 제외한 나머지 레시피 조회
     Page<RecipeEntity> recipes;
     if (!scrapedRecipeIds.isEmpty()) {
-      recipes = recipeRepository.findByIdNotIn(scrapedRecipeIds, pageable);
+      recipes = recipeRepository.findByRcpIdNotIn(scrapedRecipeIds, pageable);
     } else {
       // SCRAPED한 레시피가 없거나 Token이 없으면 모든 레시피를 조회
       recipes = recipeRepository.findAll(pageable);
@@ -306,28 +306,28 @@ public class RecipeServiceImpl implements RecipeService {
 
     List<Ingredient> ingredients = recipe.getIngredients().stream()
         .map(ingredient -> new Ingredient(
-            ingredient.getName(),
-            ingredient.getQuantity()
+            ingredient.getRiName(),
+            ingredient.getRiQuantity()
         ))
         .toList();
 
     List<RecipesManual> recipesManuals = recipe.getManuals().stream()
         .map(manual -> new RecipesManual(
-            manual.getManualContent(),
-            manual.getManualPicture()
+            manual.getMnContent(),
+            manual.getMnPicture()
         ))
         .toList();
 
     RecipesInfo recipesInfo = new RecipesInfo(
-        recipe.getId(),
-        recipe.getUser().getNickname(),
-        recipe.getName(),
-        recipe.getLevel(),
-        recipe.getTime(),
-        recipe.getThumbnail(),
+        recipe.getRcpId(),
+        recipe.getUser().getUsrNickname(),
+        recipe.getRcpName(),
+        recipe.getRcpLevel(),
+        recipe.getRcpTime(),
+        recipe.getRcpThumbnail(),
         ingredients,
         recipesManuals,
-        Optional.ofNullable(recipeRatingRepository.findAverageRatingByRecipeId(recipe.getId()))
+        Optional.ofNullable(recipeRatingRepository.findAverageRatingByRecipeRcpId(recipe.getRcpId()))
             .orElse(0.0)
     );
 
@@ -342,10 +342,10 @@ public class RecipeServiceImpl implements RecipeService {
     // 만약 scrapedRecipeIds가 비어있지 않다면 SCRAPED한 레시피를 제외한 나머지 레시피를 평점순으로 조회
     Page<RecipeEntity> recipes;
     if (!scrapedRecipeIds.isEmpty()) {
-      recipes = recipeRepository.findByIdNotInOrderByRating(scrapedRecipeIds, pageable);
+      recipes = recipeRepository.findByRcpIdNotInOrderByRrRating(scrapedRecipeIds, pageable);
     } else {
       // SCRAPED한 레시피가 없거나 Token이 없으면 모든 레시피를 평점순으로 조회
-      recipes = recipeRepository.findAllOrderByRating(pageable);
+      recipes = recipeRepository.findAllOrderByRrRating(pageable);
     }
 
     if (recipes.isEmpty()) {
@@ -417,7 +417,7 @@ public class RecipeServiceImpl implements RecipeService {
             .stream()
             .map(recipe -> {
               UserEntity user = recipe.getUser();
-              return RecommendRecipe.of(recipe, user, recipe.getLevel(), recipe.getTime());
+              return RecommendRecipe.of(recipe, user, recipe.getRcpLevel(), recipe.getRcpTime());
             })
             .collect(Collectors.toList())
     );
@@ -437,8 +437,8 @@ public class RecipeServiceImpl implements RecipeService {
             RecommendRecipe.of(
               recommendRecipeEntity.getRecipe(),
               recommendRecipeEntity.getUser(),
-              recommendRecipeEntity.getRecipe().getLevel(),
-              recommendRecipeEntity.getRecipe().getTime()
+              recommendRecipeEntity.getRecipe().getRcpLevel(),
+              recommendRecipeEntity.getRecipe().getRcpTime()
             )
           )
           .toList()
@@ -459,7 +459,7 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     if (userId != null) {
-      scrapedRecipeIds = scrapedRecipeRepository.findRecipeIdsByUserIdAndScrapedType(userId,
+      scrapedRecipeIds = scrapedRecipeRepository.findRecipeIdsByUsrIdAndScrapedType(userId,
           ScrapedType.SCRAPED);
     }
 
@@ -470,14 +470,14 @@ public class RecipeServiceImpl implements RecipeService {
   private Map<String, Object> convertToRecipesSummary(Page<RecipeEntity> recipes) {
     List<RecipesSummary> recipesSummaries = recipes.stream().map(
         recipeEntity -> new RecipesSummary(
-            recipeEntity.getId(),
-            recipeEntity.getName(),
-            recipeEntity.getUser().getNickname(),
-            recipeEntity.getLevel(),
-            recipeEntity.getTime(),
-            recipeEntity.getThumbnail(),
+            recipeEntity.getRcpId(),
+            recipeEntity.getRcpName(),
+            recipeEntity.getUser().getUsrNickname(),
+            recipeEntity.getRcpLevel(),
+            recipeEntity.getRcpTime(),
+            recipeEntity.getRcpThumbnail(),
             Optional.ofNullable(
-                    recipeRatingRepository.findAverageRatingByRecipeId(recipeEntity.getId()))
+                    recipeRatingRepository.findAverageRatingByRecipeRcpId(recipeEntity.getRcpId()))
                 .orElse(0.0)
         )
     ).toList();

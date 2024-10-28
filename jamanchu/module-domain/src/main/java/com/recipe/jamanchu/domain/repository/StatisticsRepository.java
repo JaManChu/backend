@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface StatisticsRepository extends JpaRepository<StatisticsEntity, Long> {
 
-  Optional<StatisticsEntity> findVisitorsByYearsAndMonthsAndDays(Integer years, Integer months, Integer days);
+  Optional<StatisticsEntity> findVisitorsByStYearsAndStMonthsAndStDays(Integer years, Integer months, Integer days);
 
-  List<StatisticsEntity> findVisitorsByYearsAndMonths(Integer year, Integer months);
+  List<StatisticsEntity> findVisitorsByStYearsAndStMonths(Integer year, Integer months);
 }

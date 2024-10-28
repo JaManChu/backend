@@ -25,7 +25,7 @@ public class RecipeIngredientEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "ri_id")
-  private Long ingredientId;
+  private Long riId;
 
   @NotNull
   @ManyToOne
@@ -33,9 +33,9 @@ public class RecipeIngredientEntity {
   private RecipeEntity recipe;
 
   @NotNull
-  @Column(name = "ing_name", length = 30)
-  private String name;
+  @Column(name = "ri_name", length = 30)
+  private String riName;
 
-  @Column(name = "quantity")
-  private String quantity;
+  @Column(name = "ri_quantity")
+  private String riQuantity;
 }

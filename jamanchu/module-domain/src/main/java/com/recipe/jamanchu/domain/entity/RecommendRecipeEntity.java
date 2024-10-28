@@ -18,13 +18,13 @@ import lombok.ToString;
 @Builder
 @Getter
 @Entity
-@Table(name = "recommend_recipe")
+@Table(name = "recommend_rcp")
 @ToString
 public class RecommendRecipeEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  private Long recId;
 
   @ManyToOne
   @JoinColumn(name = "usr_id")
@@ -36,6 +36,6 @@ public class RecommendRecipeEntity {
   @ToString.Exclude
   private RecipeEntity recipe;
 
-  private Double rating;
+  private Double recRating;
 
 }

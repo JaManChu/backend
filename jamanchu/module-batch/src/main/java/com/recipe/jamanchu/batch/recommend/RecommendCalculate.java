@@ -56,13 +56,13 @@ public class RecommendCalculate {
     /* 유저가 어떻게 평가했는지에 대한 로그 출력 */
     userRatings.forEach((user, ratings2) -> {
       StringBuilder ratingLog = new StringBuilder();
-      ratingLog.append("User: ").append(user.getUserId()).append(", Ratings: ");
+      ratingLog.append("User: ").append(user.getUsrId()).append(", Ratings: ");
 
       ratings2.forEach(rating -> {
         ratingLog.append("[Recipe: ")
-            .append(rating.getRecipe().getId())
+            .append(rating.getRecipe().getRcpId())
             .append(", Rating: ")
-            .append(rating.getRating())
+            .append(rating.getRrRating())
             .append("], ");
       });
 
@@ -82,10 +82,10 @@ public class RecommendCalculate {
           RecipeRatingEntity r2 = userRating.get(j);
 
           // RecipeA, RecipeB 쌍
-          long recipeA = r1.getRecipe().getId();
-          long recipeB = r2.getRecipe().getId();
+          long recipeA = r1.getRecipe().getRcpId();
+          long recipeB = r2.getRecipe().getRcpId();
 
-          double diff = r1.getRating() - r2.getRating();
+          double diff = r1.getRrRating() - r2.getRrRating();
 
           // RecipeA와 RecipeB 간의 차이 저장
           recipeDifferences.putIfAbsent(recipeA, new ConcurrentHashMap<>());
@@ -134,7 +134,7 @@ public class RecommendCalculate {
       List<RecipeRatingEntity> innerUserRatings = recipeRatingRepository.findByUser(user);
 
       for (RecipeRatingEntity rating : innerUserRatings) {
-        long recipeId = rating.getRecipe().getId();
+        long recipeId = rating.getRecipe().getRcpId();
 
         // 사용자가 평가한 레시피와 차이를 계산하여 추천 점수 갱신
 
@@ -144,7 +144,7 @@ public class RecommendCalculate {
           double diff = entry.getValue();
 
           recommendations.put(otherRecipeId,
-              recommendations.getOrDefault(otherRecipeId, 0.0) + (diff + rating.getRating()));
+              recommendations.getOrDefault(otherRecipeId, 0.0) + (diff + rating.getRrRating()));
           frequencies.put(otherRecipeId,
               frequencies.getOrDefault(otherRecipeId, 0) + 1);
         }
@@ -166,7 +166,7 @@ public class RecommendCalculate {
                 recommendRecipeRepository.save(RecommendRecipeEntity.builder()
                     .user(user)
                     .recipe(recipe)
-                    .rating(e.getValue())
+                    .recRating(e.getValue())
                     .build());
               }
           );

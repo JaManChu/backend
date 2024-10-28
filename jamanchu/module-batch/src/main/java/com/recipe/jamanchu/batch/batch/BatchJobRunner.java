@@ -47,7 +47,7 @@ public class BatchJobRunner implements ApplicationRunner {
           log.info(">>> Crawl data");
           jobExecution = jobLauncher.run(crawlData, jobParameters);
         }
-        case null, default -> log.warn("Unknown job name: {}", jobName);
+        default -> log.warn("Unknown job name: {}", jobName);
       }
 
       if (jobExecution != null) {

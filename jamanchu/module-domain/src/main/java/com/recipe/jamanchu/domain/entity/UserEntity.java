@@ -31,35 +31,35 @@ public class UserEntity extends BaseTimeEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "usr_id")
-  private Long userId;
+  private Long usrId;
 
   @NotNull
   @Column(name = "usr_email")
-  private String email;
+  private String usrEmail;
 
   @NotNull
   @Column(name = "usr_password")
-  private String password;
+  private String usrPassword;
 
   @NotNull
   @Column(name = "usr_nickname")
-  private String nickname;
+  private String usrNickname;
 
   @Column(name = "usr_provider")
-  private String provider;
+  private String usrProvider;
 
   @Column(name = "usr_provider_sub")
-  private String providerId;
+  private String usrProviderSub;
 
   @NotNull
   @Enumerated(EnumType.STRING)
-  private UserRole role;
+  private UserRole usrRole;
 
   @Column(name = "deletion_scheduled_at")
   private LocalDate deletionScheduledAt;
 
   public void updatePassword(String password) {
-    this.password = password;
+    this.usrPassword = password;
   }
 }
 

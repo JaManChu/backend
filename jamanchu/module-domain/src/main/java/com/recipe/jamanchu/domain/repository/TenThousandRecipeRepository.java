@@ -8,8 +8,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface TenThousandRecipeRepository extends JpaRepository<TenThousandRecipeEntity, Long> {
-  List<TenThousandRecipeEntity> findByRecipeIdBetween(Long startId, Long endId);
+  List<TenThousandRecipeEntity> findByTrOriginIdBetween(Long startId, Long endId);
 
-  @Query("SELECT MAX(t.recipeId) FROM TenThousandRecipeEntity t")
-  Long findMaxRecipeId();
+  @Query("SELECT MAX(t.trOriginId) FROM TenThousandRecipeEntity t")
+  Long findMaxTrOriginId();
 }

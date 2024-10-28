@@ -26,7 +26,7 @@ public class CommentEntity extends BaseTimeEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "cmt_id")
-  private Long commentId;
+  private Long cmtId;
 
   @NotNull
   @ManyToOne(optional = false)
@@ -40,14 +40,14 @@ public class CommentEntity extends BaseTimeEntity {
 
   @NotNull
   @Column(name = "cmt_content", length = 300)
-  private String commentContent;
+  private String cmtContent;
 
   @NotNull
   @Column(name = "cmt_like", columnDefinition = "double default 1.0")
-  private Double commentLike;
+  private Double cmtLike;
 
-  public void updateComment(String commentContent, Double commentLike) {
-    this.commentContent = commentContent;
-    this.commentLike = commentLike;
+  public void updateComment(String cmtContent, Double cmtLike) {
+    this.cmtContent = cmtContent;
+    this.cmtLike = cmtLike;
   }
 }

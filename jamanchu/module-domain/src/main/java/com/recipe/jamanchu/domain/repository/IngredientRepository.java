@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface IngredientRepository extends JpaRepository<IngredientEntity, Long> {
 
-  Optional<IngredientEntity> findByIngredientName(String ingredientName);
+  Optional<IngredientEntity> findByIngName(String ingredientName);
 }

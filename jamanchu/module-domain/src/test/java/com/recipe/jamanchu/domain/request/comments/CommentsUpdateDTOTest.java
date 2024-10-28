@@ -65,7 +65,7 @@ class CommentsUpdateDTOTest {
     Set<ConstraintViolation<CommentsUpdateDTO>> violations = validator.validate(commentsUpdateDTO);
     //then
     assertFalse(violations.isEmpty());
-    assertEquals("평점은 1.0이상으로 입력해주세요.", violations.iterator().next().getMessage());
+    assertEquals("평점은 1.0 이상으로 입력해주세요.", violations.iterator().next().getMessage());
   }
 
   @DisplayName("평점은 5.0 미만으로 입력해야 한다.")
@@ -77,6 +77,6 @@ class CommentsUpdateDTOTest {
     Set<ConstraintViolation<CommentsUpdateDTO>> violations = validator.validate(commentsUpdateDTO);
     //then
     assertFalse(violations.isEmpty());
-    assertEquals("평점은 5.0이하로 입력해주세요.", violations.iterator().next().getMessage());
+    assertEquals("평점은 5.0 이하로 입력해주세요.", violations.iterator().next().getMessage());
   }
 }
