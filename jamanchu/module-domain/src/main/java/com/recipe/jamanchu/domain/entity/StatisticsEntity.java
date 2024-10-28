@@ -41,4 +41,8 @@ public class StatisticsEntity {
   @Column(name = "st_visitors")
   private Long stVisitors;
 
+  public void addVisitors(Long visitors) {
+    this.visitors += visitors;
+  }
+
 }
