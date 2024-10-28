@@ -99,20 +99,20 @@ class NotifyServiceImplTest {
     Long userId = 1L;
 
     UserEntity user = UserEntity.builder()
-        .userId(userId)
+        .usrId(userId)
         .build();
 
     RecipeEntity recipe = RecipeEntity.builder()
-        .id(1L)
-        .name("recipe")
+        .rcpId(1L)
+        .rcpName("recipe")
         .rating(List.of(
-                RecipeRatingEntity.builder().rating(5.0).build()
+                RecipeRatingEntity.builder().rrRating(5.0).build()
             )
         )
         .user(user)
         .build();
 
-    Notify notify = Notify.of(recipe.getId(),"recipe", "message", 5.0, "commentUser");
+    Notify notify = Notify.of(recipe.getRcpId(),"recipe", "message", 5.0, "commentUser");
 
     // when
     doNothing().when(userAccessHandler).existsById(1L);
@@ -150,29 +150,29 @@ class NotifyServiceImplTest {
     Long ignoreRecipeId = 1L;
 
     UserEntity ignoreUser = UserEntity.builder()
-        .userId(ignoreUserId)
-        .nickname("user")
+        .usrId(ignoreUserId)
+        .usrNickname("user")
         .build();
 
 
     Long userId = 2L;
 
     UserEntity user = UserEntity.builder()
-        .userId(userId)
-        .nickname("user")
+        .usrId(userId)
+        .usrNickname("user")
         .build();
 
     RecipeEntity recipe = RecipeEntity.builder()
-        .id(1L)
-        .name("recipe")
+        .rcpId(1L)
+        .rcpName("recipe")
         .rating(List.of(
-                RecipeRatingEntity.builder().rating(5.0).build()
+                RecipeRatingEntity.builder().rrRating(5.0).build()
             )
         )
         .user(ignoreUser)
         .build();
 
-    Notify notify = Notify.of(recipe.getId(), "recipe", "message", 5.0, "user");
+    Notify notify = Notify.of(recipe.getRcpId(), "recipe", "message", 5.0, "user");
 
     // when
     when(jwtUtil.getUserId(request.getHeader(ACCESS.getValue()))).thenReturn(ignoreUserId);

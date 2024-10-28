@@ -23,23 +23,23 @@ class IngredientRatingEntityTest {
 
     // given
     UserEntity ratingUser = UserEntity.builder()
-        .userId(1L)
-        .nickname("test")
-        .email("test@gmail.com")
-        .password("test")
-        .role(USER)
+        .usrId(1L)
+        .usrNickname("test")
+        .usrEmail("test@gmail.com")
+        .usrPassword("test")
+        .usrRole(USER)
         .build();
 
     IngredientEntity ingredient = IngredientEntity.builder()
-        .ingredientId(1L)
-        .ingredientName("ingredient")
+        .ingId(1L)
+        .ingName("ingredient")
         .build();
 
     IngredientRatingEntity ingredientRatingEntity = IngredientRatingEntity.builder()
         .user(ratingUser)
         .ingredient(ingredient)
-        .rating(5.0)
-        .point(5.0)
+        .irRating(5.0)
+        .irPoint(5.0)
         .build();
 
     // when
@@ -49,9 +49,9 @@ class IngredientRatingEntityTest {
     IngredientRatingEntity result = ingredientRatingRepository.save(ingredientRatingEntity);
 
     // then
-    assertEquals(ingredientRatingEntity.getIngredient().getIngredientId(), result.getIngredient().getIngredientId());
-    assertEquals(ingredientRatingEntity.getUser().getUserId(), result.getUser().getUserId());
-    assertEquals(ingredientRatingEntity.getRating(), result.getRating());
-    assertEquals(ingredientRatingEntity.getPoint(), result.getPoint());
+    assertEquals(ingredientRatingEntity.getIngredient().getIngId(), result.getIngredient().getIngId());
+    assertEquals(ingredientRatingEntity.getUser().getUsrId(), result.getUser().getUsrId());
+    assertEquals(ingredientRatingEntity.getIrRating(), result.getIrRating());
+    assertEquals(ingredientRatingEntity.getIrPoint(), result.getIrPoint());
   }
 }

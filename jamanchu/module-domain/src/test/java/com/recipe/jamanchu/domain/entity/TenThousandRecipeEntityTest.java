@@ -24,16 +24,16 @@ class TenThousandRecipeEntityTest {
 
     // given
     TenThousandRecipeEntity recipeEntity = TenThousandRecipeEntity.builder()
-        .crawledRecipeId(1L)
-        .name("TenThousandRecipeName")
-        .recipeId(1L)
-        .levelType(LOW)
-        .cookingTimeType(TEN_MINUTES)
-        .rating(4.50)
-        .thumbnail("thumbnail")
-        .ingredients("ingredients")
-        .crManualContents("contents")
-        .crManualPictures("pictures")
+        .trId(1L)
+        .trName("TenThousandRecipeName")
+        .trOriginId(1L)
+        .trLevel(LOW)
+        .trCookTime(TEN_MINUTES)
+        .trRating(4.50)
+        .trThumbnail("thumbnail")
+        .trIngredients("ingredients")
+        .trMnContents("contents")
+        .trMnPictures("pictures")
         .build();
 
     // when
@@ -43,15 +43,15 @@ class TenThousandRecipeEntityTest {
     TenThousandRecipeEntity savedRecipe = tenThousandRecipeRepository.save(recipeEntity);
 
     // then
-    assertEquals(recipeEntity.getCrawledRecipeId(), savedRecipe.getCrawledRecipeId());
-    assertEquals(recipeEntity.getName(), savedRecipe.getName());
-    assertEquals(recipeEntity.getRecipeId(), savedRecipe.getRecipeId());
-    assertEquals(recipeEntity.getLevelType(), savedRecipe.getLevelType());
-    assertEquals(recipeEntity.getCookingTimeType(), savedRecipe.getCookingTimeType());
-    assertEquals(recipeEntity.getRating(), savedRecipe.getRating());
-    assertEquals(recipeEntity.getThumbnail(), savedRecipe.getThumbnail());
-    assertEquals(recipeEntity.getIngredients(), savedRecipe.getIngredients());
-    assertEquals(recipeEntity.getCrManualContents(), savedRecipe.getCrManualContents());
-    assertEquals(recipeEntity.getCrManualPictures(), savedRecipe.getCrManualPictures());
+    assertEquals(recipeEntity.getTrId(), savedRecipe.getTrId());
+    assertEquals(recipeEntity.getTrName(), savedRecipe.getTrName());
+    assertEquals(recipeEntity.getTrOriginId(), savedRecipe.getTrOriginId());
+    assertEquals(recipeEntity.getTrLevel(), savedRecipe.getTrLevel());
+    assertEquals(recipeEntity.getTrCookTime(), savedRecipe.getTrCookTime());
+    assertEquals(recipeEntity.getTrRating(), savedRecipe.getTrRating());
+    assertEquals(recipeEntity.getTrThumbnail(), savedRecipe.getTrThumbnail());
+    assertEquals(recipeEntity.getTrIngredients(), savedRecipe.getTrIngredients());
+    assertEquals(recipeEntity.getTrMnContents(), savedRecipe.getTrMnContents());
+    assertEquals(recipeEntity.getTrMnPictures(), savedRecipe.getTrMnPictures());
   }
 }

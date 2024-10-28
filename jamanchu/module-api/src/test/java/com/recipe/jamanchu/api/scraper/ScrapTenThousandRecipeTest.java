@@ -101,12 +101,12 @@ class ScrapTenThousandRecipeTest {
   @DisplayName("스케쥴링 함수 정상 동작")
   void testWeeklyRecipeScrape() {
     // given
-    when(tenThousandRecipeRepository.findMaxRecipeId()).thenReturn(100L);
+    when(tenThousandRecipeRepository.findMaxTrOriginId()).thenReturn(100L);
 
     // when
     scrapTenThousandRecipe.weeklyRecipeScrape();
 
     // then
-    verify(tenThousandRecipeRepository).findMaxRecipeId();
+    verify(tenThousandRecipeRepository).findMaxTrOriginId();
   }
 }

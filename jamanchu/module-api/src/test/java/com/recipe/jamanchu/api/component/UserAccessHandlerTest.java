@@ -75,13 +75,13 @@ class UserAccessHandlerTest {
   @BeforeEach
   void setUp() {
     user = UserEntity.builder()
-        .userId(1L)
-        .email("test@example.com")
-        .nickname("testNickname")
-        .password("encodedPassword")
-        .provider("kakao")
-        .providerId("providerId")
-        .role(com.recipe.jamanchu.domain.model.type.UserRole.USER)
+        .usrId(1L)
+        .usrEmail("test@example.com")
+        .usrNickname("testNickname")
+        .usrPassword("encodedPassword")
+        .usrProvider("kakao")
+        .usrProviderSub("providerId")
+        .usrRole(com.recipe.jamanchu.domain.model.type.UserRole.USER)
         .build();
 
     Map<String, Object> kakaoAccount = new HashMap<>();
@@ -103,14 +103,14 @@ class UserAccessHandlerTest {
   void testFindByUserId_Success() {
     // given
     Long userId = 1L;
-    when(userRepository.findByUserId(userId)).thenReturn(Optional.of(user));
+    when(userRepository.findByUsrId(userId)).thenReturn(Optional.of(user));
 
     // when
     UserEntity result = userAccessHandler.findByUserId(userId);
 
     // then
     assertNotNull(result);
-    assertEquals(userId, result.getUserId());
+    assertEquals(userId, result.getUsrId());
   }
 
   @Test
@@ -118,11 +118,11 @@ class UserAccessHandlerTest {
   void testFindByUserId_UserNotFound() {
     // given
     Long userId = 2L;
-    when(userRepository.findByUserId(userId)).thenReturn(Optional.empty());
+    when(userRepository.findByUsrId(userId)).thenReturn(Optional.empty());
 
     // when & then
     assertThrows(UserNotFoundException.class, () -> userAccessHandler.findByUserId(userId));
-    verify(userRepository, times(1)).findByUserId(userId);
+    verify(userRepository, times(1)).findByUsrId(userId);
   }
 
   @Test
@@ -176,7 +176,7 @@ class UserAccessHandlerTest {
 
     // then
     assertNotNull(result);
-    assertEquals(user.getEmail(), result.getEmail());
+    assertEquals(user.getUsrEmail(), result.getUsrEmail());
     verify(userRepository, times(1)).findKakaoUser(kakaoUserDetails.getEmail());
     verify(userRepository, times(0)).save(any(UserEntity.class));
   }
@@ -226,7 +226,7 @@ class UserAccessHandlerTest {
     String email = "test@example.com";
 
     UserEntity user = Mockito.mock(UserEntity.class);
-    when(userRepository.existsByEmail(email)).thenReturn(true);
+    when(userRepository.existsByUsrEmail(email)).thenReturn(true);
     when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
     when(user.getDeletionScheduledAt()).thenReturn(null);
 
@@ -242,7 +242,7 @@ class UserAccessHandlerTest {
   void existsByEmail_NotDuplicated() {
     // given
     String email = "test@example.com";
-    when(userRepository.existsByEmail(email)).thenReturn(false);
+    when(userRepository.existsByUsrEmail(email)).thenReturn(false);
 
     // when
     ResultResponse resultResponse = userAccessHandler.existsByEmail(email);
@@ -258,7 +258,7 @@ class UserAccessHandlerTest {
     String email = "test@example.com";
 
     UserEntity user = Mockito.mock(UserEntity.class);
-    when(userRepository.existsByEmail(email)).thenReturn(true);
+    when(userRepository.existsByUsrEmail(email)).thenReturn(true);
     when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
     when(user.getDeletionScheduledAt()).thenReturn(LocalDate.now());
 
@@ -271,7 +271,7 @@ class UserAccessHandlerTest {
   void existsByNickname_Duplicated() {
     // given
     String nickname = "nickname";
-    when(userRepository.existsByNickname(nickname)).thenReturn(true);
+    when(userRepository.existsByUsrNickname(nickname)).thenReturn(true);
 
     // when
     ResultResponse resultResponse = userAccessHandler.existsByNickname(nickname);
@@ -285,7 +285,7 @@ class UserAccessHandlerTest {
   void existsByNickname_NotDuplicated() {
     // given
     String nickname = "nickname";
-    when(userRepository.existsByNickname(nickname)).thenReturn(false);
+    when(userRepository.existsByUsrNickname(nickname)).thenReturn(false);
 
     // when
     ResultResponse resultResponse = userAccessHandler.existsByNickname(nickname);
@@ -349,8 +349,8 @@ class UserAccessHandlerTest {
 
     // then
     assertEquals(newUser, user);
-    assertEquals(newUser.getUserId(), user.getUserId());
-    assertEquals(newUser.getNickname(), user.getNickname());
+    assertEquals(newUser.getUsrId(), user.getUsrId());
+    assertEquals(newUser.getUsrNickname(), user.getUsrNickname());
   }
 
   @Test
@@ -415,8 +415,8 @@ class UserAccessHandlerTest {
     verify(recipeRepository, times(1)).deleteAllByUser(user2);
 
     // user 삭제 검증
-    verify(userRepository, times(1)).deleteUserByUserId(user1.getUserId());
-    verify(userRepository, times(1)).deleteUserByUserId(user2.getUserId());
+    verify(userRepository, times(1)).deleteUserByUserId(user1.getUsrId());
+    verify(userRepository, times(1)).deleteUserByUserId(user2.getUsrId());
   }
 
   @Test
@@ -426,9 +426,9 @@ class UserAccessHandlerTest {
     String email = "test@example.com";
     String nickname = "testNickname";
     UserEntity user = UserEntity.builder()
-        .userId(1L)
-        .email(email)
-        .nickname(nickname)
+        .usrId(1L)
+        .usrEmail(email)
+        .usrNickname(nickname)
         .build();
 
     // when
@@ -489,11 +489,11 @@ class UserAccessHandlerTest {
     );
 
     UserEntity user = UserEntity.builder()
-        .userId(userId)
+        .usrId(userId)
         .build();
 
     // When
-    when(userRepository.findByUserId(userId)).thenReturn(Optional.of(user));
+    when(userRepository.findByUsrId(userId)).thenReturn(Optional.of(user));
     when(passwordEncoder.encode(newPassword)).thenReturn(encodedPassword);
 
     // 실제로 비밀번호가 업데이트되는지 확인
@@ -501,10 +501,10 @@ class UserAccessHandlerTest {
 
     // Then
     assertEquals("비밀번호를 수정했습니다.", result.getMessage());
-    assertEquals(encodedPassword, user.getPassword());
+    assertEquals(encodedPassword, user.getUsrPassword());
 
     // verify
-    verify(userRepository).findByUserId(userId);
+    verify(userRepository).findByUsrId(userId);
     verify(passwordEncoder).encode(newPassword);
     verify(userRepository).save(user);
   }

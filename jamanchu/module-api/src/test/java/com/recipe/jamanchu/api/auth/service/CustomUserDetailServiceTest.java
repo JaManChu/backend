@@ -29,19 +29,19 @@ class CustomUserDetailServiceTest {
     Long userId = 1L;
 
     UserEntity user = UserEntity.builder()
-        .userId(userId)
-        .email("email")
-        .nickname("nickname")
-        .role(UserRole.USER)
-        .password("password")
-        .provider(null)
+        .usrId(userId)
+        .usrEmail("email")
+        .usrNickname("nickname")
+        .usrRole(UserRole.USER)
+        .usrPassword("password")
+        .usrProvider(null)
         .build();
     //when
     when(userAccessHandler.findByUserId(userId)).thenReturn(user);
 
     //then
     assertEquals(
-        user.getEmail(),
+        user.getUsrEmail(),
         userDetailService.loadUserByUsername(userId.toString()).getUsername()
     );
   }

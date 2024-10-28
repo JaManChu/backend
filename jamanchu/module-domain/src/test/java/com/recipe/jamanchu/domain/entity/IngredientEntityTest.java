@@ -22,8 +22,8 @@ class IngredientEntityTest {
   void builder() {
     // given
     IngredientEntity ingredientEntity = IngredientEntity.builder()
-        .ingredientId(1L)
-        .ingredientName("양배추")
+        .ingId(1L)
+        .ingName("양배추")
         .build();
 
     // when
@@ -33,8 +33,8 @@ class IngredientEntityTest {
     IngredientEntity savedIngredient = ingredientRepository.save(ingredientEntity);
 
     // then
-    assertEquals(ingredientEntity.getIngredientId(), savedIngredient.getIngredientId());
-    assertEquals(ingredientEntity.getIngredientName(), savedIngredient.getIngredientName());
+    assertEquals(ingredientEntity.getIngId(), savedIngredient.getIngId());
+    assertEquals(ingredientEntity.getIngName(), savedIngredient.getIngName());
   }
 
 }
