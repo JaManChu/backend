@@ -10,7 +10,6 @@ import com.recipe.jamanchu.domain.model.dto.request.auth.PasswordUpdateDTO;
 import com.recipe.jamanchu.domain.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.domain.model.type.ResultCode;
 import com.recipe.jamanchu.domain.model.type.TokenType;
-import com.recipe.jamanchu.domain.model.type.UserRole;
 import com.recipe.jamanchu.api.service.AuthService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -66,12 +65,12 @@ public class AuthServiceImpl implements AuthService {
 
     Long userId = jwtUtil.getUserId(refreshToken);
     UserEntity user = userAccessHandler.findByUserId(userId);
-    String access = jwtUtil.createJwt("access", userId, user.getRole());
+    String access = jwtUtil.createJwt("access", userId, user.getUsrRole());
 
     log.info("access-token 재발급 성공!!!");
     response.addHeader(TokenType.ACCESS.getValue(), "Bearer " + access);
 
-    return ResultResponse.of(ResultCode.SUCCESS_REISSUE_REFRESH_TOKEN, user.getNickname());
+    return ResultResponse.of(ResultCode.SUCCESS_REISSUE_REFRESH_TOKEN, user.getUsrNickname());
   }
 
   @Override
@@ -81,7 +80,7 @@ public class AuthServiceImpl implements AuthService {
     UserEntity user = userAccessHandler
         .findByUserId(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue())));
 
-    return userAccessHandler.validateBeforePW(user.getPassword(), passwordCheckDTO.getPassword());
+    return userAccessHandler.validateBeforePW(user.getUsrPassword(), passwordCheckDTO.getPassword());
   }
 
   @Override

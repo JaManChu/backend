@@ -23,13 +23,13 @@ class RecipeIngredientEntityTest {
 
     // given
     RecipeEntity recipe = RecipeEntity.builder()
-        .id(1L)
+        .rcpId(1L)
         .build();
 
     RecipeIngredientEntity recipeIngredientEntity = RecipeIngredientEntity.builder()
         .recipe(recipe)
-        .name("양배추")
-        .quantity("1/2개")
+        .riName("양배추")
+        .riQuantity("1/2개")
         .build();
 
     // when
@@ -39,8 +39,8 @@ class RecipeIngredientEntityTest {
     RecipeIngredientEntity savedIngredient = recipeIngredientRepository.save(recipeIngredientEntity);
 
     // then
-    assertEquals(recipeIngredientEntity.getRecipe().getId(), savedIngredient.getRecipe().getId());
-    assertEquals(recipeIngredientEntity.getName(), savedIngredient.getName());
-    assertEquals(recipeIngredientEntity.getQuantity(), savedIngredient.getQuantity());
+    assertEquals(recipeIngredientEntity.getRecipe().getRcpId(), savedIngredient.getRecipe().getRcpId());
+    assertEquals(recipeIngredientEntity.getRiName(), savedIngredient.getRiName());
+    assertEquals(recipeIngredientEntity.getRiQuantity(), savedIngredient.getRiQuantity());
   }
 }

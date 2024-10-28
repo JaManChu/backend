@@ -117,22 +117,22 @@ class UserServiceImplTest {
 
     // 일반 회원
     user = UserEntity.builder()
-        .userId(1L)
-        .email(EMAIL)
-        .nickname(NICKNAME)
-        .role(UserRole.USER)
-        .password(PASSWORD)
-        .provider(null)
+        .usrId(1L)
+        .usrEmail(EMAIL)
+        .usrNickname(NICKNAME)
+        .usrRole(UserRole.USER)
+        .usrPassword(PASSWORD)
+        .usrProvider(null)
         .build();
 
     // 카카오로 로그인한 회원
     kakaoUser = UserEntity.builder()
-        .userId(1L)
-        .email(EMAIL)
-        .nickname(NICKNAME)
-        .role(UserRole.USER)
-        .password(PASSWORD)
-        .provider(PROVIDER)
+        .usrId(1L)
+        .usrEmail(EMAIL)
+        .usrNickname(NICKNAME)
+        .usrRole(UserRole.USER)
+        .usrPassword(PASSWORD)
+        .usrProvider(PROVIDER)
         .build();
 
     Map<String, Object> kakaoAccount = new HashMap<>();
@@ -169,18 +169,18 @@ class UserServiceImplTest {
     myRecipes = myRecipeList.stream()
         .limit(20)
         .map(recipe -> new MyRecipes(
-            recipe.getId(),
-            recipe.getName(),
-            recipe.getThumbnail()
+            recipe.getRcpId(),
+            recipe.getRcpName(),
+            recipe.getRcpThumbnail()
         )).toList();
 
     myScrapedRecipes = myScrapRecipeList.stream()
         .limit(20)
         .map(scraped -> new MyScrapedRecipes(
-            scraped.getId(),
-            scraped.getName(),
-            scraped.getUser().getNickname(),
-            scraped.getThumbnail()
+            scraped.getRcpId(),
+            scraped.getRcpName(),
+            scraped.getUser().getUsrNickname(),
+            scraped.getRcpThumbnail()
         )).toList();
   }
 
@@ -200,15 +200,15 @@ class UserServiceImplTest {
   void login_Success() {
     // given
     when(userAccessHandler.findByEmail(loginDTO.getEmail())).thenReturn(user);
-    doNothing().when(userAccessHandler).validatePassword(user.getPassword(), loginDTO.getPassword());
-    when(jwtUtil.createJwt("access", user.getUserId(), user.getRole())).thenReturn(ACCESS);
-    when(jwtUtil.createJwt("refresh", user.getUserId(), user.getRole())).thenReturn(REFRESH);
+    doNothing().when(userAccessHandler).validatePassword(user.getUsrPassword(), loginDTO.getPassword());
+    when(jwtUtil.createJwt("access", user.getUsrId(), user.getUsrRole())).thenReturn(ACCESS);
+    when(jwtUtil.createJwt("refresh", user.getUsrId(), user.getUsrRole())).thenReturn(REFRESH);
 
     // when
     ResultResponse resultResponse = userServiceimpl.login(loginDTO, response);
 
     assertEquals(resultResponse.getCode(), HttpStatus.OK);
-    assertEquals(resultResponse.getData(), user.getNickname());
+    assertEquals(resultResponse.getData(), user.getUsrNickname());
   }
 
   @Test
@@ -230,7 +230,7 @@ class UserServiceImplTest {
     when(userAccessHandler.findByEmail(loginDTO.getEmail())).thenReturn(user);
 
     doThrow(new PasswordMismatchException()).when(userAccessHandler)
-        .validatePassword(user.getPassword(), loginDTO.getPassword());
+        .validatePassword(user.getUsrPassword(), loginDTO.getPassword());
 
     // when then
     assertThrows(PasswordMismatchException.class,
@@ -244,8 +244,8 @@ class UserServiceImplTest {
     when(customOauth2UserService.getAccessToken(CODE)).thenReturn(KAKAO_ACCESS_TOKEN);
     when(customOauth2UserService.getUserDetails(KAKAO_ACCESS_TOKEN)).thenReturn(kakaoUserDetails);
     when(userAccessHandler.findOrCreateUser(kakaoUserDetails)).thenReturn(user);
-    when(jwtUtil.createJwt("access", user.getUserId(), user.getRole())).thenReturn(ACCESS);
-    when(jwtUtil.createJwt("refresh", user.getUserId(), user.getRole())).thenReturn(REFRESH);
+    when(jwtUtil.createJwt("access", user.getUsrId(), user.getUsrRole())).thenReturn(ACCESS);
+    when(jwtUtil.createJwt("refresh", user.getUsrId(), user.getUsrRole())).thenReturn(REFRESH);
 
     // when
     String resultResponse = userServiceimpl.kakaoLogin(CODE, response);
@@ -253,8 +253,8 @@ class UserServiceImplTest {
     // then
     String response = UriComponentsBuilder.fromUriString(REDIRECT_URI)
         .queryParam(TokenType.ACCESS.getValue(), ACCESS)
-        .queryParam("nickname", user.getNickname())
-        .queryParam("provider", user.getProvider())
+        .queryParam("nickname", user.getUsrNickname())
+        .queryParam("provider", user.getUsrProvider())
         .build()
         .toUriString();
 
@@ -289,7 +289,7 @@ class UserServiceImplTest {
     when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(USERID);
     when(userAccessHandler.findByUserId(USERID)).thenReturn(user);
 
-    doNothing().when(userAccessHandler).isSocialUser(user.getProvider());
+    doNothing().when(userAccessHandler).isSocialUser(user.getUsrProvider());
 
     // when
     ResultResponse result = userServiceimpl.updateUserInfo(request, userUpdateDTO);
@@ -317,7 +317,7 @@ class UserServiceImplTest {
     when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(USERID);
     when(userAccessHandler.findByUserId(USERID)).thenReturn(kakaoUser);
 
-    doThrow(new SocialAccountException()).when(userAccessHandler).isSocialUser(kakaoUser.getProvider());
+    doThrow(new SocialAccountException()).when(userAccessHandler).isSocialUser(kakaoUser.getUsrProvider());
 
     // when then
     assertThrows(SocialAccountException.class,

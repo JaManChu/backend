@@ -25,17 +25,17 @@ class RecipeEntityTest {
 
     // given
     UserEntity user = UserEntity.builder()
-        .userId(1L)
+        .usrId(1L)
         .build();
 
     RecipeEntity recipeEntity = RecipeEntity.builder()
-        .id(1L)
+        .rcpId(1L)
         .user(user)
-        .name("Recipe1")
-        .level(LOW)
-        .time(TEN_MINUTES)
-        .thumbnail("thumbnail1")
-        .provider(USER)
+        .rcpName("Recipe1")
+        .rcpLevel(LOW)
+        .rcpTime(TEN_MINUTES)
+        .rcpThumbnail("thumbnail1")
+        .rcpProvider(USER)
         .build();
 
     // when
@@ -43,11 +43,11 @@ class RecipeEntityTest {
     // act
     RecipeEntity savedRecipe = recipeRepository.save(recipeEntity);
     // then
-    assertEquals(recipeEntity.getUser().getUserId(), savedRecipe.getUser().getUserId());
-    assertEquals(recipeEntity.getName(), savedRecipe.getName());
-    assertEquals(recipeEntity.getLevel(), savedRecipe.getLevel());
-    assertEquals(recipeEntity.getTime(), savedRecipe.getTime());
-    assertEquals(recipeEntity.getThumbnail(), savedRecipe.getThumbnail());
-    assertEquals(recipeEntity.getProvider(), savedRecipe.getProvider());
+    assertEquals(recipeEntity.getUser().getUsrId(), savedRecipe.getUser().getUsrId());
+    assertEquals(recipeEntity.getRcpName(), savedRecipe.getRcpName());
+    assertEquals(recipeEntity.getRcpLevel(), savedRecipe.getRcpLevel());
+    assertEquals(recipeEntity.getRcpTime(), savedRecipe.getRcpTime());
+    assertEquals(recipeEntity.getRcpThumbnail(), savedRecipe.getRcpThumbnail());
+    assertEquals(recipeEntity.getRcpProvider(), savedRecipe.getRcpProvider());
   }
 }

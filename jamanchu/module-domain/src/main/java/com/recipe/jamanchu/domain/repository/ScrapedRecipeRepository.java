@@ -14,8 +14,8 @@ public interface ScrapedRecipeRepository extends JpaRepository<ScrapedRecipeEnti
 
   ScrapedRecipeEntity findByUserAndRecipe(UserEntity user, RecipeEntity recipe);
 
-  @Query("SELECT sr.recipe.id FROM ScrapedRecipeEntity sr WHERE sr.user.userId = :userId AND sr.scrapedType = :scrapedType")
-  List<Long> findRecipeIdsByUserIdAndScrapedType(Long userId, ScrapedType scrapedType);
+  @Query("SELECT sr.recipe.rcpId FROM ScrapedRecipeEntity sr WHERE sr.user.usrId = :userId AND sr.scrapedType = :scrapedType")
+  List<Long> findRecipeIdsByUsrIdAndScrapedType(Long userId, ScrapedType scrapedType);
 
   void deleteAllByUser(UserEntity user);
 }

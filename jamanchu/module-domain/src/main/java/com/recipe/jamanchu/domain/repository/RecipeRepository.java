@@ -17,30 +17,30 @@ public interface RecipeRepository extends JpaRepository<RecipeEntity, Long>, Rec
   // 평점순으로 레시피 가져오는 쿼리
   @Query("SELECT r FROM RecipeEntity r " +
       "LEFT JOIN r.rating rat " +
-      "GROUP BY r.id " +
-      "ORDER BY AVG(rat.rating) DESC")
-  Page<RecipeEntity> findAllOrderByRating(Pageable pageable);
+      "GROUP BY r.rcpId " +
+      "ORDER BY AVG(rat.rrRating) DESC")
+  Page<RecipeEntity> findAllOrderByRrRating(Pageable pageable);
 
-  @Query("SELECT MAX(r.originRcpId) FROM RecipeEntity r")
-  Long findMaxOriginRcpId();
+  @Query("SELECT MAX(r.rcpOriginId) FROM RecipeEntity r")
+  Long findMaxRcpOriginId();
 
   @Query(value = "SELECT r FROM RecipeEntity r " +
-      "JOIN ScrapedRecipeEntity s ON s.recipe.id = r.id " +
+      "JOIN ScrapedRecipeEntity s ON s.recipe.rcpId = r.rcpId " +
       "WHERE s.user = :user AND (s.scrapedType = :scrapedType)")
   Optional<List<RecipeEntity>> findScrapRecipeByUser(UserEntity user, ScrapedType scrapedType);
 
   Optional<List<RecipeEntity>> findAllByUser(UserEntity user);
 
   // 찜 레시피에 해당하는 ids(레시피)는 제외하고 모든 레시피 검색하는 쿼리
-  Page<RecipeEntity> findByIdNotIn(List<Long> ids, Pageable pageable);
+  Page<RecipeEntity> findByRcpIdNotIn(List<Long> ids, Pageable pageable);
 
   // 찜 레시피에 해당하는 ids(레시피)는 제외하고 평점순으로 검색하는 쿼리
   @Query("SELECT r FROM RecipeEntity r " +
       "LEFT JOIN r.rating rat " +
-      "WHERE r.id NOT IN :ids " +
-      "GROUP BY r.id " +
-      "ORDER BY AVG(rat.rating) DESC")
-  Page<RecipeEntity> findByIdNotInOrderByRating(@Param("ids") List<Long> ids, Pageable pageable);
+      "WHERE r.rcpId NOT IN :ids " +
+      "GROUP BY r.rcpId " +
+      "ORDER BY AVG(rat.rrRating) DESC")
+  Page<RecipeEntity> findByRcpIdNotInOrderByRrRating(@Param("ids") List<Long> ids, Pageable pageable);
 
   void deleteAllByUser(UserEntity user);
 }

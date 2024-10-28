@@ -54,86 +54,86 @@ class RecommendCalculateTest {
     // Arrange
     // Create mock users
     UserEntity userA = UserEntity.builder()
-        .userId(1L)
+        .usrId(1L)
         .build();
 
     UserEntity userB = UserEntity.builder()
-        .userId(2L)
+        .usrId(2L)
         .build();
 
     UserEntity userC = UserEntity.builder()
-        .userId(3L)
+        .usrId(3L)
         .build();
 
     // Create mock recipes
     RecipeEntity recipe1 = RecipeEntity.builder()
-        .id(101L)
+        .rcpId(101L)
         .build();
 
     RecipeEntity recipe2 = RecipeEntity.builder()
-        .id(102L)
+        .rcpId(102L)
         .build();
 
     RecipeEntity recipe3 = RecipeEntity.builder()
-        .id(103L)
+        .rcpId(103L)
         .build();
 
     RecipeEntity recipe4 = RecipeEntity.builder()
-        .id(104L)
+        .rcpId(104L)
         .build();
 
     // Create mock ratings
     RecipeRatingEntity rating1 = RecipeRatingEntity.builder()
         .user(userA)
         .recipe(recipe1)
-        .rating(4.5)
+        .rrRating(4.5)
         .build();
 
     RecipeRatingEntity rating2 = RecipeRatingEntity.builder()
         .user(userA)
         .recipe(recipe2)
-        .rating(2.0)
+        .rrRating(2.0)
         .build();
 
     RecipeRatingEntity rating3 = RecipeRatingEntity.builder()
         .user(userA)
         .recipe(recipe3)
-        .rating(5.0)
+        .rrRating(5.0)
         .build();
 
     RecipeRatingEntity rating4 = RecipeRatingEntity.builder()
         .user(userA)
         .recipe(recipe4)
-        .rating(4.5)
+        .rrRating(4.5)
         .build();
     RecipeRatingEntity rating5 = RecipeRatingEntity.builder()
         .user(userB)
         .recipe(recipe1)
-        .rating(3.5)
+        .rrRating(3.5)
         .build();
 
     RecipeRatingEntity rating6 = RecipeRatingEntity.builder()
         .user(userB)
         .recipe(recipe2)
-        .rating(5.0)
+        .rrRating(5.0)
         .build();
 
     RecipeRatingEntity rating7 = RecipeRatingEntity.builder()
         .user(userB)
         .recipe(recipe4)
-        .rating(4.5)
+        .rrRating(4.5)
         .build();
 
     RecipeRatingEntity rating8 = RecipeRatingEntity.builder()
         .user(userC)
         .recipe(recipe2)
-        .rating(4.5)
+        .rrRating(4.5)
         .build();
 
     RecipeRatingEntity rating9 = RecipeRatingEntity.builder()
         .user(userC)
         .recipe(recipe4)
-        .rating(4.5)
+        .rrRating(4.5)
         .build();
 
     // Mock repository methods

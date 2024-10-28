@@ -27,7 +27,7 @@ public class StatisticsServiceImpl implements StatisticsService {
     LocalDate now = LocalDate.now();
 
     return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_DAILY,
-        statisticsRepository.findVisitorsByYearsAndMonthsAndDays(now.getYear(), now.getMonthValue(),
+        statisticsRepository.findStVisitorsByStYearsAndStMonthsAndStDays(now.getYear(), now.getMonthValue(),
             now.getDayOfMonth()));
   }
 
@@ -37,7 +37,7 @@ public class StatisticsServiceImpl implements StatisticsService {
     LocalDate now = LocalDate.now();
 
     return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_MONTHLY,
-        statisticsRepository.findVisitorsByYears(now.getYear()).stream().mapToLong(Long::longValue)
+        statisticsRepository.findStVisitorsByStYears(now.getYear()).stream().mapToLong(Long::longValue)
             .sum());
   }
 
@@ -49,10 +49,10 @@ public class StatisticsServiceImpl implements StatisticsService {
     LocalDateTime now = LocalDateTime.now();
 
     statisticsRepository.save(StatisticsEntity.builder()
-        .years(now.getYear())
-        .months(now.getMonthValue())
-        .days(now.getDayOfMonth())
-        .visitors((long) visitors)
+        .stYears(now.getYear())
+        .stMonths(now.getMonthValue())
+        .stDays(now.getDayOfMonth())
+        .stVisitors((long) visitors)
         .build()
     );
     // 자정마다 dailyVisitors 저장 후 초기화

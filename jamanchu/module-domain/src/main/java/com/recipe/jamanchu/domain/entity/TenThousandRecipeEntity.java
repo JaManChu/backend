@@ -27,38 +27,38 @@ public class TenThousandRecipeEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "tr_id")
-  private Long crawledRecipeId;
+  private Long trId;
 
   @Column(name = "tr_name")
-  private String name;
+  private String trName;
 
-  @Column(name = "recipe_id")
-  private Long recipeId;
+  @Column(name = "tr_origin_id")
+  private Long trOriginId;
 
   @Enumerated(EnumType.STRING)
   @Column(name = "tr_level")
-  private LevelType levelType;
+  private LevelType trLevel;
 
   @Enumerated(EnumType.STRING)
   @Column(name = "tr_cook_time")
-  private CookingTimeType cookingTimeType;
+  private CookingTimeType trCookTime;
 
   @Column(name = "tr_rating")
-  private Double rating;
+  private Double trRating;
 
   @Column(name = "tr_review_count")
-  private Integer crReviewCount;
+  private Integer trReviewCount;
 
   @Column(name = "tr_thumbnail")
-  private String thumbnail;
+  private String trThumbnail;
 
   @Column(name = "tr_ingredients")
-  private String ingredients;
+  private String trIngredients;
 
   @NotNull
   @Column(name = "tr_mn_contents", columnDefinition = "TEXT")
-  private String crManualContents;
+  private String trMnContents;
 
   @Column(name = "tr_mn_pictures", columnDefinition = "TEXT")
-  private String crManualPictures;
+  private String trMnPictures;
 }

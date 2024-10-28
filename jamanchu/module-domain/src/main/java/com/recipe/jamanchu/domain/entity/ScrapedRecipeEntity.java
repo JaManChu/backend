@@ -22,13 +22,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "scraped_recipe")
+@Table(name = "scraped_rcp")
 public class ScrapedRecipeEntity extends BaseTimeEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "sr_id")
-  private Long scrapedRecipeId;
+  private Long srId;
 
   @NotNull
   @ManyToOne

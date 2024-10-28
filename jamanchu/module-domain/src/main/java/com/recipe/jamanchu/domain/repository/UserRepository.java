@@ -12,23 +12,23 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
-  boolean existsByEmail(String email);
+  boolean existsByUsrEmail(String email);
 
-  boolean existsByNickname(String nickname);
+  boolean existsByUsrNickname(String nickname);
 
   @Query("SELECT COUNT(u) > 0 FROM UserEntity u "
-      + "WHERE u.email = :email "
-      + "AND u.nickname = :nickname "
-      + "AND u.provider IS NULL "
+      + "WHERE u.usrEmail = :email "
+      + "AND u.usrNickname = :nickname "
+      + "AND u.usrProvider IS NULL "
       + "AND u.deletionScheduledAt IS NULL")
   boolean existsByEmailAndNickname(String email, String nickname);
 
   @Query("SELECT u FROM UserEntity u "
-      + "WHERE u.email = :email "
-      + "AND u.provider IS NULL ")
+      + "WHERE u.usrEmail = :email "
+      + "AND u.usrProvider IS NULL ")
   Optional<UserEntity> findByEmail(String email);
 
-  Optional<UserEntity> findByUserId(Long userId);
+  Optional<UserEntity> findByUsrId(Long userId);
 
   @Query("SELECT u FROM UserEntity u WHERE u.deletionScheduledAt = CURRENT_DATE")
   List<UserEntity> findAllDeletedToday();
@@ -38,7 +38,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
   void deleteUserByUserId(@Param("userId") Long userId);
 
   @Query("SELECT u FROM UserEntity u "
-      + "WHERE u.email = :email "
-      + "AND u.provider IS NOT NULL ")
+      + "WHERE u.usrEmail = :email "
+      + "AND u.usrProvider IS NOT NULL ")
   Optional<UserEntity> findKakaoUser(@Param("email") String email);
 }

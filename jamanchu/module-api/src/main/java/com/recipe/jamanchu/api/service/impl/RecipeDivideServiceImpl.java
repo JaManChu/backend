@@ -25,7 +25,6 @@ import com.recipe.jamanchu.api.service.RecipeDivideService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -46,7 +45,7 @@ public class RecipeDivideServiceImpl implements RecipeDivideService {
 
   @Override
   public ResultResponse processAndSaveAllData(Long startId, Long endId) {
-    List<TenThousandRecipeEntity> scrapedRecipes = tenThousandRecipeRepository.findByRecipeIdBetween(startId, endId);
+    List<TenThousandRecipeEntity> scrapedRecipes = tenThousandRecipeRepository.findByTrOriginIdBetween(startId, endId);
 
     // 데이터가 없으면 종료
     if (scrapedRecipes.isEmpty()) {
@@ -55,12 +54,12 @@ public class RecipeDivideServiceImpl implements RecipeDivideService {
 
     // 각 레시피 데이터를 처리
     for (TenThousandRecipeEntity scrapedRecipe : scrapedRecipes) {
-      String[] contents = scrapedRecipe.getCrManualContents().split("\\$%\\^");
-      String[] pictures = scrapedRecipe.getCrManualPictures().split(",");
+      String[] contents = scrapedRecipe.getTrMnContents().split("\\$%\\^");
+      String[] pictures = scrapedRecipe.getTrMnPictures().split(",");
       // 메뉴얼이 없는 경우 건너뜀
-      if (scrapedRecipe.getCrManualContents().isEmpty()) continue;
+      if (scrapedRecipe.getTrMnContents().isEmpty()) continue;
       // 재료가 없는 경우 건너뜀
-      if (scrapedRecipe.getIngredients().isEmpty()) continue;
+      if (scrapedRecipe.getTrIngredients().isEmpty()) continue;
       // 조리 순서와 조리 순서 사진의 갯수가 같지 않은 경우 건너뜀
       if (contents.length != pictures.length) continue;
 
@@ -75,8 +74,8 @@ public class RecipeDivideServiceImpl implements RecipeDivideService {
 
   @Scheduled(cron = "0 30 0 * * SUN")
   public void weeklyRecipeDivide() {
-    Long lastOriginRecipeId = recipeRepository.findMaxOriginRcpId();
-    Long lastScrapRecipeId = tenThousandRecipeRepository.findMaxRecipeId();
+    Long lastOriginRecipeId = recipeRepository.findMaxRcpOriginId();
+    Long lastScrapRecipeId = tenThousandRecipeRepository.findMaxTrOriginId();
     processAndSaveAllData(lastOriginRecipeId + 1, lastScrapRecipeId);
   }
 
@@ -86,12 +85,12 @@ public class RecipeDivideServiceImpl implements RecipeDivideService {
 
     RecipeEntity recipe = RecipeEntity.builder()
         .user(user)
-        .name(scrapedRecipe.getName())
-        .level(scrapedRecipe.getLevelType())
-        .time(scrapedRecipe.getCookingTimeType())
-        .thumbnail(scrapedRecipe.getThumbnail())
-        .provider(RecipeProvider.SCRAP)
-        .originRcpId(scrapedRecipe.getRecipeId())
+        .rcpName(scrapedRecipe.getTrName())
+        .rcpLevel(scrapedRecipe.getTrLevel())
+        .rcpTime(scrapedRecipe.getTrCookTime())
+        .rcpThumbnail(scrapedRecipe.getTrThumbnail())
+        .rcpProvider(RecipeProvider.SCRAP)
+        .rcpOriginId(scrapedRecipe.getTrOriginId())
         .build();
 
     recipeRepository.save(recipe);
@@ -102,26 +101,26 @@ public class RecipeDivideServiceImpl implements RecipeDivideService {
     RecipeRatingEntity rating = RecipeRatingEntity.builder()
         .recipe(recipe)
         .user(recipe.getUser())
-        .rating(scrapedRecipe.getRating())
+        .rrRating(scrapedRecipe.getTrRating())
         .build();
 
     recipeRatingRepository.save(rating);
   }
 
   public void saveManualData(RecipeEntity recipe, TenThousandRecipeEntity scrapedRecipe) {
-    String[] contents = scrapedRecipe.getCrManualContents().split("\\$%\\^");
+    String[] contents = scrapedRecipe.getTrMnContents().split("\\$%\\^");
     String[] pictures;
     List<ManualEntity> manualEntities = new ArrayList<>();
-    if(scrapedRecipe.getCrManualPictures() == null || scrapedRecipe.getCrManualPictures().isEmpty()) {
+    if(scrapedRecipe.getTrMnPictures() == null || scrapedRecipe.getTrMnPictures().isEmpty()) {
       pictures = new String[contents.length];
     } else {
-      pictures = scrapedRecipe.getCrManualPictures().split(",");
+      pictures = scrapedRecipe.getTrMnPictures().split(",");
     }
     for (int i = 0; i < contents.length; i++) {
       ManualEntity manual = ManualEntity.builder()
           .recipe(recipe)
-          .manualContent(contents[i])
-          .manualPicture(pictures[i] != null ? pictures[i] : "")
+          .mnContent(contents[i])
+          .mnPicture(pictures[i] != null ? pictures[i] : "")
           .build();
 
       manualEntities.add(manual);
@@ -130,13 +129,13 @@ public class RecipeDivideServiceImpl implements RecipeDivideService {
   }
 
   public void saveIngredientDetails(RecipeEntity recipe, TenThousandRecipeEntity scrapedRecipe) {
-    String[] scrapIngredients = scrapedRecipe.getIngredients().split(",");  // 재료 분리 로직
+    String[] scrapIngredients = scrapedRecipe.getTrIngredients().split(",");  // 재료 분리 로직
     List<RecipeIngredientEntity> recipeIngredientEntities = new ArrayList<>();
     List<IngredientEntity> ingredientEntities = new ArrayList<>();
     List<RecipeIngredientMappingEntity> recipeIngredientMappingEntities = new ArrayList<>();
 
     List<String> seasoningNames = seasoningRepository.findAll().stream()
-        .map(SeasoningEntity::getName)
+        .map(SeasoningEntity::getSsName)
         .toList();
 
     for (String recipeIngredient : scrapIngredients) {
@@ -161,8 +160,8 @@ public class RecipeDivideServiceImpl implements RecipeDivideService {
 
       RecipeIngredientEntity recipeIngredientEntity = RecipeIngredientEntity.builder()
           .recipe(recipe)
-          .name(name)
-          .quantity(quantity)
+          .riName(name)
+          .riQuantity(quantity)
           .build();
 
       recipeIngredientEntities.add(recipeIngredientEntity);
@@ -172,13 +171,13 @@ public class RecipeDivideServiceImpl implements RecipeDivideService {
         continue;  // 재료명이 양념류를 포함하면 Ingredient entity 에는 저장하지 않고 건너뜀
       }
 
-      Optional<IngredientEntity> ingredientEntity = ingredientRepository.findByIngredientName(name);
+      Optional<IngredientEntity> ingredientEntity = ingredientRepository.findByIngName(name);
       IngredientEntity ingredient;
       if (ingredientEntity.isPresent()) {
         ingredient = ingredientEntity.get();
       } else {
         ingredient = IngredientEntity.builder()
-            .ingredientName(name)
+            .ingName(name)
             .build();
         ingredientEntities.add(ingredient);
       }

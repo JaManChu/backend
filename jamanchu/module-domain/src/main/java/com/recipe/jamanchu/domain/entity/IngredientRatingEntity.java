@@ -25,7 +25,7 @@ public class IngredientRatingEntity{
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "ir_id")
-  private Long ingredientRatingId;
+  private Long irId;
 
   // 유저와 재료 평가 테이블 연관 관계 매핑
   // 1 : N
@@ -43,10 +43,10 @@ public class IngredientRatingEntity{
 
   @NotNull
   @Column(name = "ir_rating")
-  private Double rating;
+  private Double irRating;
 
   @NotNull
   @Column(name = "ir_point", columnDefinition = "double default 1.0")
-  private Double point;
+  private Double irPoint;
 
 }
