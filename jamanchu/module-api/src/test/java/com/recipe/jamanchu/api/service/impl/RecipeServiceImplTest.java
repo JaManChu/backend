@@ -51,6 +51,7 @@ import com.recipe.jamanchu.domain.repository.SeasoningRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -115,13 +116,13 @@ class RecipeServiceImplTest {
   @BeforeEach
   void setUp() {
     user = UserEntity.builder()
-        .userId(1L)
-        .email("test@example.com")
-        .nickname("nickname")
-        .password("password")
-        .role(UserRole.USER)
-        .provider(null)
-        .providerId(null)
+        .usrId(1L)
+        .usrEmail("test@example.com")
+        .usrNickname("nickname")
+        .usrPassword("password")
+        .usrRole(UserRole.USER)
+        .usrProvider(null)
+        .usrProviderSub(null)
         .build();
 
     List<Ingredient> ingredients =
@@ -158,8 +159,8 @@ class RecipeServiceImplTest {
     for (int i = 0; i < recipesDTO.getRecipeIngredients().size(); i++) {
       RecipeIngredientEntity ingredient = RecipeIngredientEntity.builder()
           .recipe(recipe)
-          .name(recipesDTO.getRecipeIngredients().get(i).getIngredientName())
-          .quantity(recipesDTO.getRecipeIngredients().get(i).getIngredientQuantity())
+          .riName(recipesDTO.getRecipeIngredients().get(i).getIngredientName())
+          .riQuantity(recipesDTO.getRecipeIngredients().get(i).getIngredientQuantity())
           .build();
 
       recipeIngredientEntities.add(ingredient);
@@ -169,20 +170,20 @@ class RecipeServiceImplTest {
     for (int i = 0; i < recipesDTO.getRecipeOrderContents().size(); i++) {
       ManualEntity manual = ManualEntity.builder()
           .recipe(recipe)
-          .manualContent(recipesDTO.getRecipeOrderContents().get(i).getRecipeOrderContent())
-          .manualPicture(recipesDTO.getRecipeOrderContents().get(i).getRecipeOrderImage())
+          .mnContent(recipesDTO.getRecipeOrderContents().get(i).getRecipeOrderContent())
+          .mnPicture(recipesDTO.getRecipeOrderContents().get(i).getRecipeOrderImage())
           .build();
 
       manualEntities.add(manual);
     }
 
     recipe = RecipeEntity.builder()
-        .id(1L)
+        .rcpId(1L)
         .user(user)
-        .name(recipesDTO.getRecipeName())
-        .level(recipesDTO.getRecipeLevel())
-        .time(recipesDTO.getRecipeCookingTime())
-        .thumbnail(String.valueOf(recipesDTO.getRecipeThumbnail()))
+        .rcpName(recipesDTO.getRecipeName())
+        .rcpLevel(recipesDTO.getRecipeLevel())
+        .rcpTime(recipesDTO.getRecipeCookingTime())
+        .rcpThumbnail(String.valueOf(recipesDTO.getRecipeThumbnail()))
         .ingredients(recipeIngredientEntities)
         .manuals(manualEntities)
         .build();
@@ -203,15 +204,15 @@ class RecipeServiceImplTest {
   void registerRecipe_ExistingIngredient() {
     // given
     IngredientEntity existingIngredient = IngredientEntity.builder()
-        .ingredientId(1L)
-        .ingredientName("설탕")
+        .ingId(1L)
+        .ingName("설탕")
         .build();
 
-    when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(user.getUserId());
-    when(userAccessHandler.findByUserId(user.getUserId())).thenReturn(user);
+    when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(user.getUsrId());
+    when(userAccessHandler.findByUserId(user.getUsrId())).thenReturn(user);
     when(recipeIngredientRepository.saveAll(anyList())).thenReturn(new ArrayList<>());
     when(recipeIngredientMappingRepository.saveAll(anyList())).thenReturn(new ArrayList<>());
-    when(ingredientRepository.findByIngredientName(anyString()))
+    when(ingredientRepository.findByIngName(anyString()))
         .thenReturn(Optional.of(existingIngredient));
     when(seasoningRepository.findAllName()).thenReturn(anyList());
 
@@ -226,7 +227,7 @@ class RecipeServiceImplTest {
     verify(recipeIngredientRepository, times(1)).saveAll(anyList());
     verify(recipeIngredientMappingRepository, times(1)).saveAll(anyList());
     verify(manualRepository, times(1)).saveAll(anyList());
-    verify(ingredientRepository, times(2)).findByIngredientName(anyString());
+    verify(ingredientRepository, times(2)).findByIngName(anyString());
     verify(seasoningRepository, times(1)).findAllName();
   }
 
@@ -235,17 +236,17 @@ class RecipeServiceImplTest {
   void registerRecipe_NewIngredient() {
     // given
     when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(
-        user.getUserId());
-    when(userAccessHandler.findByUserId(user.getUserId())).thenReturn(user);
+        user.getUsrId());
+    when(userAccessHandler.findByUserId(user.getUsrId())).thenReturn(user);
     when(recipeIngredientRepository.saveAll(anyList())).thenReturn(new ArrayList<>());
     when(recipeIngredientMappingRepository.saveAll(anyList())).thenReturn(new ArrayList<>());
-    when(ingredientRepository.findByIngredientName(anyString()))
+    when(ingredientRepository.findByIngName(anyString()))
         .thenReturn(Optional.empty());
 
     when(ingredientRepository.saveAll(anyList()))
         .thenReturn(List.of(IngredientEntity.builder()
-            .ingredientId(2L)
-            .ingredientName("새로운 재료")
+            .ingId(2L)
+            .ingName("새로운 재료")
             .build()));
 
     // when
@@ -259,7 +260,7 @@ class RecipeServiceImplTest {
     verify(recipeIngredientRepository, times(1)).saveAll(anyList());
     verify(recipeIngredientMappingRepository, times(1)).saveAll(anyList());
     verify(manualRepository, times(1)).saveAll(anyList());
-    verify(ingredientRepository, times(2)).findByIngredientName(anyString());
+    verify(ingredientRepository, times(2)).findByIngName(anyString());
     verify(ingredientRepository, times(1)).saveAll(anyList());
     verify(seasoningRepository, times(1)).findAllName();
   }
@@ -269,33 +270,33 @@ class RecipeServiceImplTest {
   void updateRecipe_Success() {
     // Given
     recipe = RecipeEntity.builder()
-        .id(1L)
+        .rcpId(1L)
         .user(user)
-        .name(recipesDTO.getRecipeName())
-        .level(recipesDTO.getRecipeLevel())
-        .time(recipesDTO.getRecipeCookingTime())
-        .thumbnail(String.valueOf(recipesDTO.getRecipeThumbnail()))
+        .rcpName(recipesDTO.getRecipeName())
+        .rcpLevel(recipesDTO.getRecipeLevel())
+        .rcpTime(recipesDTO.getRecipeCookingTime())
+        .rcpThumbnail(String.valueOf(recipesDTO.getRecipeThumbnail()))
         .ingredients(recipeIngredientEntities)
         .manuals(manualEntities)
         .build();
 
     IngredientEntity existingIngredientEntity = IngredientEntity.builder()
-        .ingredientId(1L)
-        .ingredientName("재료")
+        .ingId(1L)
+        .ingName("재료")
         .build();
     IngredientEntity newIngredient = IngredientEntity.builder()
-        .ingredientId(1L)
-        .ingredientName("재료1")
+        .ingId(1L)
+        .ingName("재료1")
         .build();
 
     // 모킹된 재료 데이터
-    when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(user.getUserId());
+    when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(user.getUsrId());
     when(userAccessHandler.findByUserId(1L)).thenReturn(user);
     when(recipeRepository.findById(1L)).thenReturn(Optional.of(recipe));
 
-    when(ingredientRepository.findByIngredientName("재료"))
+    when(ingredientRepository.findByIngName("재료"))
         .thenReturn(Optional.of(existingIngredientEntity));
-    when(ingredientRepository.findByIngredientName("재료1"))
+    when(ingredientRepository.findByIngName("재료1"))
         .thenReturn(Optional.empty());
 
     // 새로운 재료가 저장될 때 모킹
@@ -316,8 +317,8 @@ class RecipeServiceImplTest {
     verify(recipeIngredientMappingRepository, times(1)).saveAll(anyList());
     verify(manualRepository, times(1)).deleteAllByRecipeId(1L);
     verify(manualRepository, times(1)).saveAll(anyList());
-    verify(ingredientRepository, times(1)).findByIngredientName("재료");
-    verify(ingredientRepository, times(1)).findByIngredientName("재료1");
+    verify(ingredientRepository, times(1)).findByIngName("재료");
+    verify(ingredientRepository, times(1)).findByIngName("재료1");
     verify(ingredientRepository, times(1)).saveAll(anyList());
     verify(seasoningRepository, times(1)).findAllName();
   }
@@ -327,12 +328,12 @@ class RecipeServiceImplTest {
   void updateRecipe_FailUnMatchedUser() {
     // given
     UserEntity requestUser = UserEntity.builder()
-        .userId(2L)
+        .usrId(2L)
         .build();
 
     when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(2L);
-    when(userAccessHandler.findByUserId(requestUser.getUserId())).thenReturn(requestUser);
-    when(recipeRepository.findById(recipe.getId())).thenReturn(Optional.ofNullable(recipe));
+    when(userAccessHandler.findByUserId(requestUser.getUsrId())).thenReturn(requestUser);
+    when(recipeRepository.findById(recipe.getRcpId())).thenReturn(Optional.ofNullable(recipe));
 
     // when & then
     assertThrows(UnmatchedUserException.class,
@@ -354,9 +355,9 @@ class RecipeServiceImplTest {
         1L
     );
 
-    when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(user.getUserId());
+    when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(user.getUsrId());
     when(userAccessHandler.findByUserId(1L)).thenReturn(user);
-    when(recipeRepository.findById(recipe.getId())).thenReturn(Optional.of(recipe));
+    when(recipeRepository.findById(recipe.getRcpId())).thenReturn(Optional.of(recipe));
 
     // When
     ResultResponse result = recipeService.deleteRecipe(request, deleteDTO);
@@ -365,7 +366,7 @@ class RecipeServiceImplTest {
     assertEquals("레시피를 정상적으로 삭제하였습니다.", result.getMessage());
 
     // verify
-    verify(recipeRepository, times(1)).deleteById(recipe.getId());
+    verify(recipeRepository, times(1)).deleteById(recipe.getRcpId());
   }
 
   @Test
@@ -373,15 +374,15 @@ class RecipeServiceImplTest {
   void deleteRecipe_FailUnMatchedUser() {
     // given
     UserEntity requestUser = UserEntity.builder()
-        .userId(2L)
+        .usrId(2L)
         .build();
     RecipesDeleteDTO deleteDTO = new RecipesDeleteDTO(
         1L
     );
 
     when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(2L);
-    when(userAccessHandler.findByUserId(requestUser.getUserId())).thenReturn(requestUser);
-    when(recipeRepository.findById(recipe.getId())).thenReturn(Optional.ofNullable(recipe));
+    when(userAccessHandler.findByUserId(requestUser.getUsrId())).thenReturn(requestUser);
+    when(recipeRepository.findById(recipe.getRcpId())).thenReturn(Optional.ofNullable(recipe));
 
     // when & then
     assertThrows(UnmatchedUserException.class,
@@ -389,7 +390,7 @@ class RecipeServiceImplTest {
 
     // verify
     verify(recipeRepository, times(1)).findById(1L);
-    verify(recipeRepository, times(0)).deleteById(recipe.getId());
+    verify(recipeRepository, times(0)).deleteById(recipe.getRcpId());
   }
 
   @Test
@@ -398,20 +399,20 @@ class RecipeServiceImplTest {
     // given
     List<RecipeEntity> recipeEntities = List.of(
         RecipeEntity.builder()
-            .id(1L)
-            .name("Recipe1")
+            .rcpId(1L)
+            .rcpName("Recipe1")
             .user(user)
-            .level(LevelType.LOW)
-            .time(CookingTimeType.TEN_MINUTES)
-            .thumbnail("thumbnail1")
+            .rcpLevel(LevelType.LOW)
+            .rcpTime(CookingTimeType.TEN_MINUTES)
+            .rcpThumbnail("thumbnail1")
             .build(),
         RecipeEntity.builder()
-            .id(2L)
-            .name("Recipe2")
+            .rcpId(2L)
+            .rcpName("Recipe2")
             .user(user)
-            .level(LevelType.MEDIUM)
-            .time(CookingTimeType.TWENTY_MINUTES)
-            .thumbnail("thumbnail2")
+            .rcpLevel(LevelType.MEDIUM)
+            .rcpTime(CookingTimeType.TWENTY_MINUTES)
+            .rcpThumbnail("thumbnail2")
             .build()
     );
 
@@ -425,14 +426,15 @@ class RecipeServiceImplTest {
 
     // then
     assertEquals("전체 레시피 조회 성공!", result.getMessage());
-    List<RecipesSummary> summaries = (List<RecipesSummary>) result.getData();
-    assertEquals(2, summaries.size());
-    assertEquals("Recipe1", summaries.get(0).getRecipeName());
-    assertEquals("Recipe2", summaries.get(1).getRecipeName());
+    Map<String, Object> responseData = (Map<String, Object>) result.getData();
+    List<RecipesSummary> recipesSummaries = (List<RecipesSummary>) responseData.get("recipes");
+    assertEquals(2, recipesSummaries.size());
+    assertEquals("Recipe1", recipesSummaries.get(0).getRecipeName());
+    assertEquals("Recipe2", recipesSummaries.get(1).getRecipeName());
 
     // verify
     verify(recipeRepository, times(1)).findAll(any(Pageable.class));
-    verify(scrapedRecipeRepository, never()).findRecipeIdsByUserIdAndScrapedType(anyLong(), any());
+    verify(scrapedRecipeRepository, never()).findRecipeIdsByUsrIdAndScrapedType(anyLong(), any());
   }
 
   @Test
@@ -441,12 +443,12 @@ class RecipeServiceImplTest {
     // given
     List<RecipeEntity> recipeEntities = List.of(
         RecipeEntity.builder()
-            .id(2L)
-            .name("Recipe2")
+            .rcpId(2L)
+            .rcpName("Recipe2")
             .user(user)
-            .level(LevelType.MEDIUM)
-            .time(CookingTimeType.TWENTY_MINUTES)
-            .thumbnail("thumbnail2")
+            .rcpLevel(LevelType.MEDIUM)
+            .rcpTime(CookingTimeType.TWENTY_MINUTES)
+            .rcpThumbnail("thumbnail2")
             .build()
     );
     Page<RecipeEntity> recipePage = new PageImpl<>(recipeEntities);
@@ -457,21 +459,22 @@ class RecipeServiceImplTest {
 
     when(request.getHeader(TokenType.ACCESS.getValue())).thenReturn(token);
     when(jwtUtil.getUserId(token)).thenReturn(userId);
-    when(scrapedRecipeRepository.findRecipeIdsByUserIdAndScrapedType(userId, ScrapedType.SCRAPED)).thenReturn(scrapedRecipeIds);
-    when(recipeRepository.findByIdNotIn(eq(scrapedRecipeIds), any(Pageable.class))).thenReturn(recipePage);
+    when(scrapedRecipeRepository.findRecipeIdsByUsrIdAndScrapedType(userId, ScrapedType.SCRAPED)).thenReturn(scrapedRecipeIds);
+    when(recipeRepository.findByRcpIdNotIn(eq(scrapedRecipeIds), any(Pageable.class))).thenReturn(recipePage);
 
     // when
     ResultResponse result = recipeService.getRecipes(request, 0, 10);
 
     // then
     assertEquals("전체 레시피 조회 성공!", result.getMessage());
-    List<RecipesSummary> summaries = (List<RecipesSummary>) result.getData();
-    assertEquals(1, summaries.size());
-    assertEquals("Recipe2", summaries.getFirst().getRecipeName());
+    Map<String, Object> responseData = (Map<String, Object>) result.getData();
+    List<RecipesSummary> recipesSummaries = (List<RecipesSummary>) responseData.get("recipes");
+    assertEquals(1, recipesSummaries.size());
+    assertEquals("Recipe2", recipesSummaries.get(0).getRecipeName());
 
     // verify
-    verify(scrapedRecipeRepository, times(1)).findRecipeIdsByUserIdAndScrapedType(user.getUserId(), ScrapedType.SCRAPED);
-    verify(recipeRepository, times(1)).findByIdNotIn(eq(scrapedRecipeIds), any(Pageable.class));
+    verify(scrapedRecipeRepository, times(1)).findRecipeIdsByUsrIdAndScrapedType(user.getUsrId(), ScrapedType.SCRAPED);
+    verify(recipeRepository, times(1)).findByRcpIdNotIn(eq(scrapedRecipeIds), any(Pageable.class));
   }
 
   @Test
@@ -499,12 +502,12 @@ class RecipeServiceImplTest {
 
     List<RecipeEntity> recipeEntities = List.of(
         RecipeEntity.builder()
-            .id(1L)
-            .name("Recipe1")
+            .rcpId(1L)
+            .rcpName("Recipe1")
             .user(user)
-            .level(LevelType.LOW)
-            .time(CookingTimeType.TEN_MINUTES)
-            .thumbnail("thumbnail1")
+            .rcpLevel(LevelType.LOW)
+            .rcpTime(CookingTimeType.TEN_MINUTES)
+            .rcpThumbnail("thumbnail1")
             .build()
     );
 
@@ -521,9 +524,10 @@ class RecipeServiceImplTest {
 
     // then
     assertEquals("레시피 조회 성공!", result.getMessage());
-    List<RecipesSummary> summaries = (List<RecipesSummary>) result.getData();
-    assertEquals(1, summaries.size());
-    assertEquals("Recipe1", summaries.getFirst().getRecipeName());
+    Map<String, Object> responseData = (Map<String, Object>) result.getData();
+    List<RecipesSummary> recipesSummaries = (List<RecipesSummary>) responseData.get("recipes");
+    assertEquals(1, recipesSummaries.size());
+    assertEquals("Recipe1", recipesSummaries.get(0).getRecipeName());
 
     // verify
     verify(recipeRepository, times(1)).searchAndRecipesQueryDSL(eq(searchDTO), anyList(), any(Pageable.class));
@@ -542,12 +546,12 @@ class RecipeServiceImplTest {
 
     List<RecipeEntity> recipeEntities = List.of(
         RecipeEntity.builder()
-            .id(2L)
-            .name("Recipe2")
+            .rcpId(2L)
+            .rcpName("Recipe2")
             .user(user)
-            .level(LevelType.LOW)
-            .time(CookingTimeType.TEN_MINUTES)
-            .thumbnail("thumbnail2")
+            .rcpLevel(LevelType.LOW)
+            .rcpTime(CookingTimeType.TEN_MINUTES)
+            .rcpThumbnail("thumbnail2")
             .build()
     );
 
@@ -559,7 +563,7 @@ class RecipeServiceImplTest {
 
     when(request.getHeader(TokenType.ACCESS.getValue())).thenReturn(token);
     when(jwtUtil.getUserId(token)).thenReturn(userId);
-    when(scrapedRecipeRepository.findRecipeIdsByUserIdAndScrapedType(userId, ScrapedType.SCRAPED)).thenReturn(scrapedRecipeIds);
+    when(scrapedRecipeRepository.findRecipeIdsByUsrIdAndScrapedType(userId, ScrapedType.SCRAPED)).thenReturn(scrapedRecipeIds);
     when(recipeRepository.searchAndRecipesQueryDSL(eq(searchDTO),
         eq(scrapedRecipeIds),
         any(Pageable.class)))
@@ -575,9 +579,10 @@ class RecipeServiceImplTest {
 
     // then
     assertEquals("레시피 조회 성공!", result.getMessage());
-    List<RecipesSummary> summaries = (List<RecipesSummary>) result.getData();
-    assertEquals(1, summaries.size());
-    assertEquals("Recipe2", summaries.getFirst().getRecipeName());
+    Map<String, Object> responseData = (Map<String, Object>) result.getData();
+    List<RecipesSummary> recipesSummaries = (List<RecipesSummary>) responseData.get("recipes");
+    assertEquals(1, recipesSummaries.size());
+    assertEquals("Recipe2", recipesSummaries.get(0).getRecipeName());
 
     // verify
     verify(recipeRepository, times(1)).searchAndRecipesQueryDSL(eq(searchDTO), anyList(), any(Pageable.class));
@@ -613,35 +618,35 @@ class RecipeServiceImplTest {
     // given
     List<RecipeRatingEntity> ratingEntities = new ArrayList<>();
     ratingEntities.add(RecipeRatingEntity.builder()
-        .recipeRatingId(1L)
+        .rrId(1L)
         .user(user)
         .recipe(recipe)
-        .rating(4.5)
+        .rrRating(4.5)
         .build());
 
     recipe = RecipeEntity.builder()
-        .id(1L)
+        .rcpId(1L)
         .user(user)
-        .name("recipeName")
-        .level(LevelType.LOW)
-        .time(CookingTimeType.FIFTEEN_MINUTES)
-        .thumbnail("thumbnail")
+        .rcpName("recipeName")
+        .rcpLevel(LevelType.LOW)
+        .rcpTime(CookingTimeType.FIFTEEN_MINUTES)
+        .rcpThumbnail("thumbnail")
         .ingredients(recipeIngredientEntities)
         .manuals(manualEntities)
         .rating(ratingEntities)
         .build();
 
-    when(recipeRepository.findById(recipe.getId())).thenReturn(Optional.of(recipe));
-    when(recipeRatingRepository.findAverageRatingByRecipeId(recipe.getId())).thenReturn(4.5);
+    when(recipeRepository.findById(recipe.getRcpId())).thenReturn(Optional.of(recipe));
+    when(recipeRatingRepository.findAverageRatingByRecipeRcpId(recipe.getRcpId())).thenReturn(4.5);
 
     // when
-    ResultResponse result = recipeService.getRecipeDetail(recipe.getId());
+    ResultResponse result = recipeService.getRecipeDetail(recipe.getRcpId());
 
     // then
     assertEquals("레시피 상세 조회 성공", result.getMessage());
     RecipesInfo recipesInfo = (RecipesInfo) result.getData();
-    assertEquals(recipe.getName(), recipesInfo.getRecipeName());
-    assertEquals(recipe.getUser().getNickname(), recipesInfo.getRecipeAuthor());
+    assertEquals(recipe.getRcpName(), recipesInfo.getRecipeName());
+    assertEquals(recipe.getUser().getUsrNickname(), recipesInfo.getRecipeAuthor());
     assertEquals(4.5, recipesInfo.getRecipeRating());
     assertFalse(recipesInfo.getRecipeIngredients().isEmpty());
     assertFalse(recipesInfo.getRecipesManuals().isEmpty());
@@ -653,12 +658,12 @@ class RecipeServiceImplTest {
     // given
     List<RecipeEntity> recipeEntities = List.of(
         RecipeEntity.builder()
-            .id(2L)
-            .name("Recipe2")
+            .rcpId(2L)
+            .rcpName("Recipe2")
             .user(user)
-            .level(LevelType.MEDIUM)
-            .time(CookingTimeType.TWENTY_MINUTES)
-            .thumbnail("thumbnail2")
+            .rcpLevel(LevelType.MEDIUM)
+            .rcpTime(CookingTimeType.TWENTY_MINUTES)
+            .rcpThumbnail("thumbnail2")
             .build()
     );
     Page<RecipeEntity> recipePage = new PageImpl<>(recipeEntities);
@@ -671,8 +676,8 @@ class RecipeServiceImplTest {
     when(jwtUtil.getUserId(token)).thenReturn(userId);
 
     // Mocking repository methods
-    when(scrapedRecipeRepository.findRecipeIdsByUserIdAndScrapedType(userId, ScrapedType.SCRAPED)).thenReturn(scrapedRecipeIds);
-    when(recipeRepository.findByIdNotInOrderByRating(eq(scrapedRecipeIds), any(Pageable.class))).thenReturn(recipePage); // Empty for no scraped case
+    when(scrapedRecipeRepository.findRecipeIdsByUsrIdAndScrapedType(userId, ScrapedType.SCRAPED)).thenReturn(scrapedRecipeIds);
+    when(recipeRepository.findByRcpIdNotInOrderByRrRating(eq(scrapedRecipeIds), any(Pageable.class))).thenReturn(recipePage); // Empty for no scraped case
 
     // when
     ResultResponse result = recipeService.getRecipesByRating(request, 0, 10);
@@ -680,16 +685,17 @@ class RecipeServiceImplTest {
     // then
     assertEquals("인기 레시피 조회 성공", result.getMessage());
     assertNotNull(result.getData());
-    List<RecipesSummary> recipesSummaries = (List<RecipesSummary>) result.getData();
+    Map<String, Object> responseData = (Map<String, Object>) result.getData();
+    List<RecipesSummary> recipesSummaries = (List<RecipesSummary>) responseData.get("recipes");
     assertEquals(1, recipesSummaries.size());
-    assertEquals(2, recipesSummaries.getFirst().getRecipeId());
-    assertEquals("Recipe2", recipesSummaries.getFirst().getRecipeName());
-    assertEquals(recipe.getUser().getNickname(), recipesSummaries.getFirst().getRecipeAuthor());
-    assertEquals(0.0, recipesSummaries.getFirst().getRecipeRating());
+    assertEquals(2, recipesSummaries.get(0).getRecipeId());
+    assertEquals("Recipe2", recipesSummaries.get(0).getRecipeName());
+    assertEquals(recipe.getUser().getUsrNickname(), recipesSummaries.get(0).getRecipeAuthor());
+    assertEquals(0.0, recipesSummaries.get(0).getRecipeRating());
 
     // verify
-    verify(scrapedRecipeRepository, times(1)).findRecipeIdsByUserIdAndScrapedType(user.getUserId(), ScrapedType.SCRAPED);
-    verify(recipeRepository,times(1)).findByIdNotInOrderByRating(eq(scrapedRecipeIds), any(Pageable.class));
+    verify(scrapedRecipeRepository, times(1)).findRecipeIdsByUsrIdAndScrapedType(user.getUsrId(), ScrapedType.SCRAPED);
+    verify(recipeRepository,times(1)).findByRcpIdNotInOrderByRrRating(eq(scrapedRecipeIds), any(Pageable.class));
   }
 
   @Test
@@ -698,15 +704,15 @@ class RecipeServiceImplTest {
     // given
     List<RecipeRatingEntity> ratingEntities = new ArrayList<>();
     ratingEntities.add(RecipeRatingEntity.builder()
-        .recipeRatingId(1L)
+        .rrId(1L)
         .user(user)
         .recipe(recipe)
-        .rating(4.5)
+        .rrRating(4.5)
         .build());
     List<RecipeEntity> recipeList = new ArrayList<>();
     RecipeEntity recipe1 = RecipeEntity.builder()
-        .id(2L)
-        .name("recipe2")
+        .rcpId(2L)
+        .rcpName("recipe2")
         .user(user)
         .rating(ratingEntities)
         .build();
@@ -716,7 +722,7 @@ class RecipeServiceImplTest {
     Page<RecipeEntity> recipePage = new PageImpl<>(recipeList);
 
     // Mocking repository methods
-    when(recipeRepository.findAllOrderByRating(any(Pageable.class))).thenReturn(recipePage);
+    when(recipeRepository.findAllOrderByRrRating(any(Pageable.class))).thenReturn(recipePage);
 
     // when
     ResultResponse result = recipeService.getRecipesByRating(request, 0, 10);
@@ -724,12 +730,13 @@ class RecipeServiceImplTest {
     // then
     assertEquals("인기 레시피 조회 성공", result.getMessage());
     assertNotNull(result.getData());
-    List<RecipesSummary> recipesSummaries = (List<RecipesSummary>) result.getData();
+    Map<String, Object> responseData = (Map<String, Object>) result.getData();
+    List<RecipesSummary> recipesSummaries = (List<RecipesSummary>) responseData.get("recipes");
     assertEquals(2, recipesSummaries.size());
-    assertEquals(recipe.getId(), recipesSummaries.getFirst().getRecipeId());
-    assertEquals(recipe.getName(), recipesSummaries.getFirst().getRecipeName());
-    assertEquals(recipe.getUser().getNickname(), recipesSummaries.getFirst().getRecipeAuthor());
-    assertEquals(0.0, recipesSummaries.getFirst().getRecipeRating());
+    assertEquals(recipe.getRcpId(), recipesSummaries.get(0).getRecipeId());
+    assertEquals(recipe.getRcpName(), recipesSummaries.get(0).getRecipeName());
+    assertEquals(recipe.getUser().getUsrNickname(), recipesSummaries.get(0).getRecipeAuthor());
+    assertEquals(0.0, recipesSummaries.get(0).getRecipeRating());
   }
 
   @Test
@@ -742,7 +749,7 @@ class RecipeServiceImplTest {
     Pageable pageable = PageRequest.of(page, size);
     Page<RecipeEntity> emptyPage = new PageImpl<>(new ArrayList<>(), pageable, 0);
 
-    when(recipeRepository.findAllOrderByRating(pageable)).thenReturn(emptyPage);
+    when(recipeRepository.findAllOrderByRrRating(pageable)).thenReturn(emptyPage);
 
     // when & Then
     assertThrows(RecipeNotFoundException.class,
@@ -759,13 +766,13 @@ class RecipeServiceImplTest {
         .scrapedType(ScrapedType.SCRAPED)
         .build();
 
-    when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(user.getUserId());
-    when(userAccessHandler.findByUserId(user.getUserId())).thenReturn(user);
-    when(recipeRepository.findById(recipe.getId())).thenReturn(Optional.of(recipe));
+    when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(user.getUsrId());
+    when(userAccessHandler.findByUserId(user.getUsrId())).thenReturn(user);
+    when(recipeRepository.findById(recipe.getRcpId())).thenReturn(Optional.of(recipe));
     when(scrapedRecipeRepository.findByUserAndRecipe(user, recipe)).thenReturn(scrapedRecipe);
 
     // when
-    ResultResponse result = recipeService.scrapedRecipe(request, recipe.getId());
+    ResultResponse result = recipeService.scrapedRecipe(request, recipe.getRcpId());
 
     // then
     assertEquals("레시피 찜하기 취소 성공", result.getMessage());
@@ -786,13 +793,13 @@ class RecipeServiceImplTest {
         .scrapedType(ScrapedType.CANCELED)
         .build();
 
-    when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(user.getUserId());
-    when(userAccessHandler.findByUserId(user.getUserId())).thenReturn(user);
-    when(recipeRepository.findById(recipe.getId())).thenReturn(Optional.of(recipe));
+    when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(user.getUsrId());
+    when(userAccessHandler.findByUserId(user.getUsrId())).thenReturn(user);
+    when(recipeRepository.findById(recipe.getRcpId())).thenReturn(Optional.of(recipe));
     when(scrapedRecipeRepository.findByUserAndRecipe(user, recipe)).thenReturn(scrapedRecipe);
 
     // when
-    ResultResponse result = recipeService.scrapedRecipe(request, recipe.getId());
+    ResultResponse result = recipeService.scrapedRecipe(request, recipe.getRcpId());
 
     // then
     assertEquals("레시피 찜하기 성공", result.getMessage());
@@ -807,13 +814,13 @@ class RecipeServiceImplTest {
   @DisplayName("레시피 스크랩 성공 - 기존 스크랩 없음")
   void scrapedRecipe_Success_NewScraped() {
     // given
-    when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(user.getUserId());
-    when(userAccessHandler.findByUserId(user.getUserId())).thenReturn(user);
-    when(recipeRepository.findById(recipe.getId())).thenReturn(Optional.of(recipe));
+    when(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()))).thenReturn(user.getUsrId());
+    when(userAccessHandler.findByUserId(user.getUsrId())).thenReturn(user);
+    when(recipeRepository.findById(recipe.getRcpId())).thenReturn(Optional.of(recipe));
     when(scrapedRecipeRepository.findByUserAndRecipe(user, recipe)).thenReturn(null); // 기존 스크랩 없음
 
     // when
-    ResultResponse result = recipeService.scrapedRecipe(request, recipe.getId());
+    ResultResponse result = recipeService.scrapedRecipe(request, recipe.getRcpId());
 
     // then
     assertEquals("레시피 찜하기 성공", result.getMessage());
@@ -831,65 +838,65 @@ class RecipeServiceImplTest {
     Long userId = 1L;
 
     UserEntity user = UserEntity.builder()
-        .userId(userId)
-        .nickname("Test User")
+        .usrId(userId)
+        .usrNickname("Test User")
         .build();
 
 
     List<RecipeEntity> threePopularRecipe = List.of(
         RecipeEntity.builder()
-            .id(1L)
-            .name("Recipe1")
+            .rcpId(1L)
+            .rcpName("Recipe1")
             .user(user)
-            .level(LevelType.LOW)
-            .time(CookingTimeType.TEN_MINUTES)
+            .rcpLevel(LevelType.LOW)
+            .rcpTime(CookingTimeType.TEN_MINUTES)
             .rating(
                 List.of(
                     RecipeRatingEntity.builder()
-                      .recipeRatingId(1L)
+                      .rrId(1L)
                       .user(user)
-                      .recipe(RecipeEntity.builder().id(1L).build())
-                      .rating(4.5)
+                      .recipe(RecipeEntity.builder().rcpId(1L).build())
+                      .rrRating(4.5)
                       .build()
                 )
             )
-            .thumbnail("thumbnail1")
+            .rcpThumbnail("thumbnail1")
             .build(),
         RecipeEntity.builder()
-            .id(2L)
-            .name("Recipe2")
+            .rcpId(2L)
+            .rcpName("Recipe2")
             .user(user)
-            .level(LevelType.MEDIUM)
-            .time(CookingTimeType.TWENTY_MINUTES)
+            .rcpLevel(LevelType.MEDIUM)
+            .rcpTime(CookingTimeType.TWENTY_MINUTES)
             .rating(
                 List.of(
                     RecipeRatingEntity.builder()
-                        .recipeRatingId(2L)
+                        .rrId(2L)
                         .user(user)
-                        .recipe(RecipeEntity.builder().id(2L).build())
-                        .rating(4.5)
+                        .recipe(RecipeEntity.builder().rcpId(2L).build())
+                        .rrRating(4.5)
                         .build()
                 )
             )
-            .thumbnail("thumbnail2")
+            .rcpThumbnail("thumbnail2")
             .build(),
         RecipeEntity.builder()
-            .id(3L)
-            .name("Recipe3")
+            .rcpId(3L)
+            .rcpName("Recipe3")
             .user(user)
-            .level(LevelType.HIGH)
-            .time(CookingTimeType.THIRTY_MINUTES)
+            .rcpLevel(LevelType.HIGH)
+            .rcpTime(CookingTimeType.THIRTY_MINUTES)
             .rating(
                 List.of(
                     RecipeRatingEntity.builder()
-                        .recipeRatingId(3L)
+                        .rrId(3L)
                         .user(user)
-                        .recipe(RecipeEntity.builder().id(3L).build())
-                        .rating(4.5)
+                        .recipe(RecipeEntity.builder().rcpId(3L).build())
+                        .rrRating(4.5)
                         .build()
                 )
             )
-            .thumbnail("thumbnail3")
+            .rcpThumbnail("thumbnail3")
             .build()
     );
 
@@ -903,7 +910,7 @@ class RecipeServiceImplTest {
     //then
     assertEquals("추천 레시피 조회 성공", result.getMessage());
     RecommendRecipes recommendRecipes1 = (RecommendRecipes) result.getData();
-    assertEquals("Recipe1", recommendRecipes1.getRecipes().getFirst().getRecipeName());
+    assertEquals("Recipe1", recommendRecipes1.getRecipes().get(0).getRecipeName());
     recommendRecipes1.getRecipes().forEach(e -> {
       System.out.println(e.getRecipeId());
       System.out.println(e.getRecipeAuthor());

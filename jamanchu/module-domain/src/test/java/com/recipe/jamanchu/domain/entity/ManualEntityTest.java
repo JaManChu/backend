@@ -26,14 +26,14 @@ class ManualEntityTest {
 
     // given
     RecipeEntity recipe = RecipeEntity.builder()
-        .id(1L)
+        .rcpId(1L)
         .build();
 
     ManualEntity manual = ManualEntity.builder()
-        .manualId(1L)
+        .mnId(1L)
         .recipe(recipe)
-        .manualContent("content")
-        .manualPicture("picture")
+        .mnContent("content")
+        .mnPicture("picture")
         .build();
 
     // when
@@ -41,8 +41,8 @@ class ManualEntityTest {
     // act
     ManualEntity savedManual = manualRepository.save(manual);
     // then
-    assertEquals(manual.getRecipe().getId(), savedManual.getRecipe().getId());
-    assertEquals(manual.getManualContent(), savedManual.getManualContent());
-    assertEquals(manual.getManualPicture(), savedManual.getManualPicture());
+    assertEquals(manual.getRecipe().getRcpId(), savedManual.getRecipe().getRcpId());
+    assertEquals(manual.getMnContent(), savedManual.getMnContent());
+    assertEquals(manual.getMnPicture(), savedManual.getMnPicture());
   }
 }

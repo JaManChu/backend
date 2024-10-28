@@ -73,15 +73,15 @@ public class CommentsServiceImpl implements CommentsService {
     CommentEntity userComment = CommentEntity.builder()
         .user(user)
         .recipe(recipe)
-        .commentContent(commentsDTO.getComment())
-        .commentLike(commentsDTO.getRating())
+        .cmtContent(commentsDTO.getComment())
+        .cmtLike(commentsDTO.getRating())
         .build();
 
     // 레시피 평가 데이터 저장
     RecipeRatingEntity recipeRating = RecipeRatingEntity.builder()
         .user(user)
         .recipe(recipe)
-        .rating(commentsDTO.getRating())
+        .rrRating(commentsDTO.getRating())
         .build();
 
     recipeRatingRepository.save(recipeRating);
@@ -92,8 +92,8 @@ public class CommentsServiceImpl implements CommentsService {
           IngredientRatingEntity ingredientRating = IngredientRatingEntity.builder()
               .user(user)
               .ingredient(ingredient.getIngredient())
-              .rating(commentsDTO.getRating())
-              .point(
+              .irRating(commentsDTO.getRating())
+              .irPoint(
                   ingredientRatingRepository.findAllByIngredient(ingredient.getIngredient()).stream().mapToDouble(IngredientRatingEntity::getRating).sum() + commentsDTO.getRating() / (ingredientRatingRepository.findAll().size()+1)
               )
               .build();
@@ -103,9 +103,9 @@ public class CommentsServiceImpl implements CommentsService {
     commentRepository.save(userComment);
 
     //알림 전송 부분
-    if(recipe.getProvider() != SCRAP){
-      Notify notify = Notify.of(recipeId, recipe.getName(), commentsDTO.getComment(),commentsDTO.getRating(), user.getNickname());
-      notifyService.notifyUser(recipe,recipe.getUser().getUserId(), notify);
+    if(recipe.getRcpProvider() != SCRAP){
+      Notify notify = Notify.of(recipeId, recipe.getRcpName(), commentsDTO.getComment(),commentsDTO.getRating(), user.getUsrNickname());
+      notifyService.notifyUser(recipe,recipe.getUser().getUsrId(), notify);
     }
 
     return ResultResponse.of(ResultCode.SUCCESS_COMMENTS);
@@ -128,7 +128,7 @@ public class CommentsServiceImpl implements CommentsService {
         .orElseThrow(RecipeNotFoundException::new);
 
     // 유저 일치 검사
-    if(!Objects.equals(user.getUserId(), comment.getUser().getUserId())) {
+    if(!Objects.equals(user.getUsrId(), comment.getUser().getUsrId())) {
       throw new UnmatchedUserException();
     }
 
@@ -154,7 +154,7 @@ public class CommentsServiceImpl implements CommentsService {
         .orElseThrow(RecipeNotFoundException::new);
 
     // 유저 일치 검사
-    if(!Objects.equals(user.getUserId(), comment.getUser().getUserId())) {
+    if(!Objects.equals(user.getUsrId(), comment.getUser().getUsrId())) {
       throw new UnmatchedUserException();
     }
 

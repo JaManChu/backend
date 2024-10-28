@@ -17,7 +17,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -55,7 +54,7 @@ public class ScrapTenThousandRecipe {
   }
 
   public void weeklyRecipeScrape() {
-    Long lastRecipeId = tenThousandRecipeRepository.findMaxRecipeId();
+    Long lastRecipeId = tenThousandRecipeRepository.findMaxTrOriginId();
     scrap(lastRecipeId + 1, lastRecipeId + 200);
   }
 
@@ -165,16 +164,16 @@ public class ScrapTenThousandRecipe {
   public void saveCrawlRecipe(List<ScrapResult> scrapResults) {
     crawledRecipeRepository.saveAll(scrapResults.stream()
         .map(scrapResult -> TenThousandRecipeEntity.builder()
-            .name(scrapResult.getTitle())
-            .recipeId(scrapResult.getRecipeId())
-            .levelType(scrapResult.getLevelType())
-            .cookingTimeType(scrapResult.getCookTime())
-            .ingredients(scrapResult.getIngredients())
-            .thumbnail(scrapResult.getThumbnail())
-            .rating(scrapResult.getRating())
-            .crReviewCount(scrapResult.getReviewCount())
-            .crManualContents(scrapResult.getManualContents())
-            .crManualPictures(scrapResult.getManualPictures())
+            .trName(scrapResult.getTitle())
+            .trOriginId(scrapResult.getRecipeId())
+            .trLevel(scrapResult.getLevelType())
+            .trCookTime(scrapResult.getCookTime())
+            .trIngredients(scrapResult.getIngredients())
+            .trThumbnail(scrapResult.getThumbnail())
+            .trRating(scrapResult.getRating())
+            .trReviewCount(scrapResult.getReviewCount())
+            .trMnContents(scrapResult.getManualContents())
+            .trMnPictures(scrapResult.getManualPictures())
             .build())
         .collect(Collectors.toList()));
   }

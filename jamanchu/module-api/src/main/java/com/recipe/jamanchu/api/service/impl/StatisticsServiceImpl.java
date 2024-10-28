@@ -8,6 +8,7 @@ import com.recipe.jamanchu.domain.model.type.ResultCode;
 import com.recipe.jamanchu.domain.repository.StatisticsRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -26,9 +27,9 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     LocalDate now = LocalDate.now();
 
-    return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_DAILY,
-        statisticsRepository.findVisitorsByYearsAndMonthsAndDays(now.getYear(), now.getMonthValue(),
-            now.getDayOfMonth()));
+    StatisticsEntity daily = statisticsRepository.findVisitorsByYearsAndMonthsAndDays(now.getYear(), now.getMonthValue(), now.getDayOfMonth())
+        .orElseGet(StatisticsEntity.builder().stVisitors(0L)::build);
+    return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_DAILY, daily.getVisitors());
   }
 
   @Override
@@ -37,8 +38,10 @@ public class StatisticsServiceImpl implements StatisticsService {
     LocalDate now = LocalDate.now();
 
     return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_MONTHLY,
-        statisticsRepository.findVisitorsByYears(now.getYear()).stream().mapToLong(Long::longValue)
-            .sum());
+        statisticsRepository.findVisitorsByStYearsAndStMonths(now.getYear(), now.getMonthValue()).stream()
+            .map(StatisticsEntity::getStVisitors)
+            .reduce(0L, Long::sum)
+    );
   }
 
   @Scheduled(cron = "0 0/30 * * * *")
@@ -48,15 +51,29 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     LocalDateTime now = LocalDateTime.now();
 
-    statisticsRepository.save(StatisticsEntity.builder()
-        .years(now.getYear())
-        .months(now.getMonthValue())
-        .days(now.getDayOfMonth())
-        .visitors((long) visitors)
+    Optional<StatisticsEntity> visitorsByYearsAndMonthsAndDays = statisticsRepository.findVisitorsByYearsAndMonthsAndDays(
+        now.getYear(), now.getMonthValue(), now.getDayOfMonth());
+
+    if (visitorsByYearsAndMonthsAndDays.isPresent()) {
+      StatisticsEntity statisticsEntity = visitorsByYearsAndMonthsAndDays.get();
+      statisticsEntity.addVisitors((long) visitors - statisticsEntity.getVisitors());
+      statisticsRepository.save(statisticsEntity);
+    }
+    else{
+      statisticsRepository.save(
+        StatisticsEntity.builder()
+        .stYears(now.getYear())
+        .stMonths(now.getMonthValue())
+        .stDays(now.getDayOfMonth())
+        .stVisitors((long) visitors)
         .build()
-    );
-    // 자정마다 dailyVisitors 저장 후 초기화
-    dailyVisitors.clear();
+      );
+    }
+
+    // 정각에 방문자 수 초기화
+    if(now.getHour() == 0 && now.getMinute() == 0){
+      dailyVisitors.clear();
+    }
   }
 
 }

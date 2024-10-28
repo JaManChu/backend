@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface SeasoningRepository extends JpaRepository<SeasoningEntity, Long> {
-  boolean existsByName(String name);
-  @Query("SELECT s.name FROM SeasoningEntity s")
+  boolean existsBySsName(String name);
+  @Query("SELECT s.ssName FROM SeasoningEntity s")
   List<String> findAllName();
 }

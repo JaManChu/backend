@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,7 +51,7 @@ public class UserAccessHandler {
   public UserEntity findByUserId(Long userId) {
 
     log.info("findByUserId -> userId : {}", userId);
-    return userRepository.findByUserId(userId)
+    return userRepository.findByUsrId(userId)
         .orElseThrow(UserNotFoundException::new);
   }
 
@@ -71,12 +70,12 @@ public class UserAccessHandler {
     log.info("findOrCreateUser -> email : {}", kakaoUserDetails.getEmail());
     return userRepository.findKakaoUser(kakaoUserDetails.getEmail())
         .orElseGet(() -> userRepository.save(UserEntity.builder()
-            .email(kakaoUserDetails.getEmail())
-            .password(passwordEncoder.encode(String.valueOf(Math.random() * 8)))
-            .nickname(kakaoUserDetails.getNickname())
-            .provider("kakao")
-            .providerId(kakaoUserDetails.getProviderId())
-            .role(UserRole.USER)
+            .usrEmail(kakaoUserDetails.getEmail())
+            .usrPassword(passwordEncoder.encode(String.valueOf(Math.random() * 8)))
+            .usrNickname(kakaoUserDetails.getNickname())
+            .usrProvider("kakao")
+            .usrProviderSub(kakaoUserDetails.getProviderId())
+            .usrRole(UserRole.USER)
             .build()));
   }
 
@@ -90,7 +89,7 @@ public class UserAccessHandler {
 
   // 이메일 중복 체크
   public ResultResponse existsByEmail(String email) {
-    if (userRepository.existsByEmail(email)) {
+    if (userRepository.existsByUsrEmail(email)) {
       Optional<UserEntity> userOpt = userRepository.findByEmail(email);
 
       // 탈퇴한 사용자의 이메일인 경우
@@ -111,7 +110,7 @@ public class UserAccessHandler {
   // 닉네임 중복 체크
   public ResultResponse existsByNickname(String nickname) {
 
-    if (userRepository.existsByNickname(nickname)) {
+    if (userRepository.existsByUsrNickname(nickname)) {
       return ResultResponse.of(ResultCode.NICKNAME_ALREADY_IN_USE, false);
     }
 
@@ -168,9 +167,9 @@ public class UserAccessHandler {
     log.info("today : {}", LocalDate.now());
 
     users.forEach(user -> {
-      log.info("Delete All User Data -> user : {}", user.getEmail());
+      log.info("Delete All User Data -> user : {}", user.getUsrEmail());
       deleteRelatedUserData(user);
-      userRepository.deleteUserByUserId(user.getUserId());
+      userRepository.deleteUserByUserId(user.getUsrId());
     });
   }
 
@@ -195,7 +194,7 @@ public class UserAccessHandler {
     UserEntity user = findByEmail(email);
 
     Map<String, Object> responseData = new HashMap<>();
-    responseData.put("userId", user.getUserId());
+    responseData.put("userId", user.getUsrId());
     responseData.put("boolean", true);
     return ResultResponse.of(ResultCode.EMAIL_NICKNAME_MATCH, responseData);
   }

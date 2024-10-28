@@ -22,12 +22,12 @@ class RecipeIngredientMappingEntityTest {
 
     // given
     RecipeEntity recipe = RecipeEntity.builder()
-        .id(1L)
+        .rcpId(1L)
         .build();
 
     IngredientEntity ingredient = IngredientEntity.builder()
-        .ingredientId(1L)
-        .ingredientName("ingredient")
+        .ingId(1L)
+        .ingName("ingredient")
         .build();
 
     RecipeIngredientMappingEntity recipeIngredientMappingEntity = RecipeIngredientMappingEntity.builder()
@@ -42,6 +42,6 @@ class RecipeIngredientMappingEntityTest {
     RecipeIngredientMappingEntity savedMapping = recipeIngredientMappingRepository.save(recipeIngredientMappingEntity);
 
     // then
-    assertEquals(recipeIngredientMappingEntity.getRecipe().getId(), savedMapping.getRecipe().getId());
+    assertEquals(recipeIngredientMappingEntity.getRecipe().getRcpId(), savedMapping.getRecipe().getRcpId());
   }
 }

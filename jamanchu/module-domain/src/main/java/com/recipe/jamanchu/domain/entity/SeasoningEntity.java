@@ -21,12 +21,12 @@ public class SeasoningEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  private Long ssId;
 
   @Column(nullable = false, unique = true)
-  private String name;
+  private String ssName;
 
-  public SeasoningEntity(String seasoning) {
-    this.name = seasoning;
+  public SeasoningEntity(String ssName) {
+    this.ssName = ssName;
   }
 }

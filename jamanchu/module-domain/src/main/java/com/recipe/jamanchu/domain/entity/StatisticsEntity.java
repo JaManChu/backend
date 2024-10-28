@@ -22,23 +22,27 @@ public class StatisticsEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "stat_id")
-  private Long analyticsId;
+  @Column(name = "st_id")
+  private Long stId;
 
   @NotNull
-  @Column(name = "stat_days")
-  private Integer days;
+  @Column(name = "st_days")
+  private Integer stDays;
 
   @NotNull
-  @Column(name = "stat_months")
-  private Integer months;
+  @Column(name = "st_months")
+  private Integer stMonths;
 
   @NotNull
-  @Column(name = "stat_years")
-  private Integer years;
+  @Column(name = "st_years")
+  private Integer stYears;
 
   @NotNull
-  @Column(name = "stat_visitors")
-  private Long visitors;
+  @Column(name = "st_visitors")
+  private Long stVisitors;
+
+  public void addVisitors(Long visitors) {
+    this.visitors += visitors;
+  }
 
 }

@@ -12,18 +12,18 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface RecipeRatingRepository extends JpaRepository<RecipeRatingEntity, Long> {
 
-  @Query("SELECT AVG(r.rating) FROM RecipeRatingEntity r WHERE r.recipe.id = :recipeId")
-  Double findAverageRatingByRecipeId(@Param("recipeId") Long recipeId);
+  @Query("SELECT AVG(r.rrRating) FROM RecipeRatingEntity r WHERE r.recipe.rcpId = :recipeId")
+  Double findAverageRatingByRecipeRcpId(@Param("recipeId") Long recipeId);
 
   boolean existsByUser(UserEntity user);
 
-  @Query("SELECT rr.recipe FROM RecipeRatingEntity rr GROUP BY rr.recipe.id ORDER BY AVG(rr.rating) DESC LIMIT 3")
+  @Query("SELECT rr.recipe FROM RecipeRatingEntity rr GROUP BY rr.recipe.rcpId ORDER BY AVG(rr.rrRating) DESC LIMIT 3")
   List<RecipeEntity> findThreePopularRecipe();
 
   List<RecipeRatingEntity> findByUser(UserEntity user);
 
   void deleteAllByUser(UserEntity user);
 
-  @Query("SELECT rr FROM RecipeRatingEntity rr WHERE rr.rating >= 1.0")
+  @Query("SELECT rr FROM RecipeRatingEntity rr WHERE rr.rrRating >= 1.0")
   List<RecipeRatingEntity> findAllWhereRatingOverOne();
 }

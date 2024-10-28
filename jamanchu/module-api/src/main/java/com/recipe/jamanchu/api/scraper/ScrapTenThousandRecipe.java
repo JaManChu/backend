@@ -55,7 +55,7 @@ public class ScrapTenThousandRecipe {
 
   @Scheduled(cron = "0 0 0 * * SUN")
   public void weeklyRecipeScrape() {
-    Long lastRecipeId = tenThousandRecipeRepository.findMaxRecipeId();
+    Long lastRecipeId = tenThousandRecipeRepository.findMaxTrOriginId();
     scrap(lastRecipeId + 1, lastRecipeId + 200);
   }
 

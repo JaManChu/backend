@@ -14,7 +14,6 @@ import com.recipe.jamanchu.domain.model.dto.request.auth.PasswordCheckDTO;
 import com.recipe.jamanchu.domain.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.domain.model.type.ResultCode;
 import com.recipe.jamanchu.domain.model.type.TokenType;
-import com.recipe.jamanchu.domain.model.type.UserRole;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -66,8 +65,8 @@ class AuthServiceImplTest {
     cookies = new Cookie[] {refreshCookie};
 
     user = UserEntity.builder()
-        .userId(USERID)
-        .password(PASSWORD)
+        .usrId(USERID)
+        .usrPassword(PASSWORD)
         .build();
 
     passwordCheckDTO = new PasswordCheckDTO("password");
@@ -143,7 +142,7 @@ class AuthServiceImplTest {
     when(jwtUtil.isExpired(REFRESH_TOKEN)).thenReturn(false);
     when(jwtUtil.getUserId(REFRESH_TOKEN)).thenReturn(USERID);
     when(userAccessHandler.findByUserId(USERID)).thenReturn(user);
-    when(jwtUtil.createJwt(TOKEN_TYPE, user.getUserId(), user.getRole())).thenReturn(NEW_ACCESS_TOKEN);
+    when(jwtUtil.createJwt(TOKEN_TYPE, user.getUsrId(), user.getUsrRole())).thenReturn(NEW_ACCESS_TOKEN);
 
     // when
     ResultResponse resultResponse = authService.refreshToken(request, response);
@@ -185,7 +184,7 @@ class AuthServiceImplTest {
     when(userAccessHandler.findByUserId(USERID)).thenReturn(user);
 
     ResultResponse response = ResultResponse.of(ResultCode.PASSWORD_MATCH, true);
-    when(userAccessHandler.validateBeforePW(user.getPassword(), passwordCheckDTO.getPassword())).thenReturn(response);
+    when(userAccessHandler.validateBeforePW(user.getUsrPassword(), passwordCheckDTO.getPassword())).thenReturn(response);
 
     // when
     ResultResponse resultResponse = authService.checkPassword(passwordCheckDTO, request);
@@ -204,7 +203,7 @@ class AuthServiceImplTest {
     when(userAccessHandler.findByUserId(USERID)).thenReturn(user);
 
     ResultResponse response = ResultResponse.of(ResultCode.PASSWORD_MISMATCH, false);
-    when(userAccessHandler.validateBeforePW(user.getPassword(), passwordCheckDTO.getPassword())).thenReturn(response);
+    when(userAccessHandler.validateBeforePW(user.getUsrPassword(), passwordCheckDTO.getPassword())).thenReturn(response);
 
     // when
     ResultResponse resultResponse = authService.checkPassword(passwordCheckDTO, request);

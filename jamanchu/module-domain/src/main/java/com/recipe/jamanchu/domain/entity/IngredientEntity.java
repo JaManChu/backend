@@ -23,9 +23,9 @@ public class IngredientEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "ing_id")
-  private Long ingredientId;
+  private Long ingId;
 
   @NotNull
   @Column(name = "ing_name", unique = true)
-  private String ingredientName;
+  private String ingName;
 }

@@ -22,7 +22,7 @@ public class SeasoningDataInitializer implements CommandLineRunner {
         "물");
 
     for (String seasoning : seasonings) {
-      if (!seasoningRepository.existsByName(seasoning)) {
+      if (!seasoningRepository.existsBySsName(seasoning)) {
         seasoningRepository.save(new SeasoningEntity(seasoning));
       }
     }

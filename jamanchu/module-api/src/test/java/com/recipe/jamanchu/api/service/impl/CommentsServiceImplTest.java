@@ -75,13 +75,13 @@ class CommentsServiceImplTest {
     Long userId = 1L;
 
     UserEntity user = UserEntity.builder()
-        .userId(userId)
-        .nickname("heesang")
-        .email("test@gmail.com")
-        .password("1234")
-        .role(UserRole.USER)
-        .provider(null)
-        .providerId(null)
+        .usrId(userId)
+        .usrNickname("heesang")
+        .usrEmail("test@gmail.com")
+        .usrPassword("1234")
+        .usrRole(UserRole.USER)
+        .usrProvider(null)
+        .usrProviderSub(null)
         .build();
 
     Long recipeId = 1L;
@@ -89,19 +89,19 @@ class CommentsServiceImplTest {
     List<RecipeIngredientMappingEntity> mapping = List.of(
         RecipeIngredientMappingEntity.builder()
             .ingredient(IngredientEntity.builder()
-                .ingredientId(1L)
+                .ingId(1L)
                 .build())
             .build(),
         RecipeIngredientMappingEntity.builder()
             .ingredient(IngredientEntity.builder()
-                .ingredientId(2L)
+                .ingId(2L)
                 .build())
             .build()
     );
 
     RecipeEntity recipe = RecipeEntity.builder()
         .user(user)
-        .id(recipeId)
+        .rcpId(recipeId)
         .mapping(mapping)
         .user(user)
         .build();
@@ -131,13 +131,13 @@ class CommentsServiceImplTest {
     Long userId = 1L;
 
     UserEntity user = UserEntity.builder()
-        .userId(userId)
-        .nickname("heesang")
-        .email("test@gmail.com")
-        .password("1234")
-        .role(UserRole.USER)
-        .provider(null)
-        .providerId(null)
+        .usrId(userId)
+        .usrNickname("heesang")
+        .usrEmail("test@gmail.com")
+        .usrPassword("1234")
+        .usrRole(UserRole.USER)
+        .usrProvider(null)
+        .usrProviderSub(null)
         .build();
 
     Long recipeId = 1L;
@@ -145,20 +145,20 @@ class CommentsServiceImplTest {
     List<RecipeIngredientMappingEntity> mapping = List.of(
         RecipeIngredientMappingEntity.builder()
             .ingredient(IngredientEntity.builder()
-                .ingredientId(1L)
+                .ingId(1L)
                 .build())
             .build(),
         RecipeIngredientMappingEntity.builder()
             .ingredient(IngredientEntity.builder()
-                .ingredientId(2L)
+                .ingId(2L)
                 .build())
             .build()
     );
 
     RecipeEntity recipe = RecipeEntity.builder()
         .user(user)
-        .id(recipeId)
-        .provider(RecipeProvider.SCRAP)
+        .rcpId(recipeId)
+        .rcpProvider(RecipeProvider.SCRAP)
         .mapping(mapping)
         .build();
 
@@ -188,13 +188,13 @@ class CommentsServiceImplTest {
     Long userId = 1L;
 
     UserEntity user = UserEntity.builder()
-        .userId(userId)
-        .nickname("heesang")
-        .email("test@gmail.com")
-        .password("1234")
-        .role(UserRole.USER)
-        .provider(null)
-        .providerId(null)
+        .usrId(userId)
+        .usrNickname("heesang")
+        .usrEmail("test@gmail.com")
+        .usrPassword("1234")
+        .usrRole(UserRole.USER)
+        .usrProvider(null)
+        .usrProviderSub(null)
         .build();
 
     Long commentId = 1L;
@@ -202,8 +202,8 @@ class CommentsServiceImplTest {
     CommentEntity oldComment = CommentEntity.builder()
         .user(user)
         .recipe(any())
-        .commentContent("댓글 내용")
-        .commentLike(5.0)
+        .cmtContent("댓글 내용")
+        .cmtLike(5.0)
         .build();
 
     CommentsUpdateDTO requestDTO = new CommentsUpdateDTO(commentId, "새로운 댓글 내용", 4.0);
@@ -215,8 +215,8 @@ class CommentsServiceImplTest {
 
     // then
     assertEquals("댓글 수정 성공!", commentService.updateComment(request, requestDTO).getMessage());
-    assertEquals("새로운 댓글 내용", oldComment.getCommentContent());
-    assertEquals(4.0, oldComment.getCommentLike());
+    assertEquals("새로운 댓글 내용", oldComment.getCmtContent());
+    assertEquals(4.0, oldComment.getCmtLike());
 
   }
 
@@ -228,31 +228,31 @@ class CommentsServiceImplTest {
 
     Long commentUserId = 1L;
     UserEntity commentUser = UserEntity.builder()
-        .userId(commentUserId)
-        .nickname("heesang")
-        .email("test@gmail.com")
-        .password("1234")
-        .role(UserRole.USER)
-        .provider(null)
-        .providerId(null)
+        .usrId(commentUserId)
+        .usrNickname("heesang")
+        .usrEmail("test@gmail.com")
+        .usrPassword("1234")
+        .usrRole(UserRole.USER)
+        .usrProvider(null)
+        .usrProviderSub(null)
         .build();
 
     Long requestUserId = 2L;
     UserEntity requestUser = UserEntity.builder()
-        .userId(requestUserId)
-        .nickname("heesang")
-        .email("test@gmail.com")
-        .password("1234")
-        .role(UserRole.USER)
-        .provider(null)
-        .providerId(null)
+        .usrId(requestUserId)
+        .usrNickname("heesang")
+        .usrEmail("test@gmail.com")
+        .usrPassword("1234")
+        .usrRole(UserRole.USER)
+        .usrProvider(null)
+        .usrProviderSub(null)
         .build();
 
     CommentEntity oldComment = CommentEntity.builder()
         .user(commentUser)
         .recipe(any())
-        .commentContent("댓글 내용")
-        .commentLike(5.0)
+        .cmtContent("댓글 내용")
+        .cmtLike(5.0)
         .build();
 
     Long commentId = 1L;
@@ -275,9 +275,9 @@ class CommentsServiceImplTest {
     Long userId = 1L;
 
     UserEntity user = UserEntity.builder()
-        .userId(userId)
-        .nickname("heesang")
-        .email("test@gmail.com")
+        .usrId(userId)
+        .usrNickname("heesang")
+        .usrEmail("test@gmail.com")
         .build();
 
     Long commentId = 1L;
@@ -285,8 +285,8 @@ class CommentsServiceImplTest {
     CommentEntity comment = CommentEntity.builder()
         .user(user)
         .recipe(any())
-        .commentContent("댓글 내용")
-        .commentLike(5.0)
+        .cmtContent("댓글 내용")
+        .cmtLike(5.0)
         .build();
 
     CommentsDeleteDTO requestDTO = new CommentsDeleteDTO(commentId);
@@ -306,17 +306,17 @@ class CommentsServiceImplTest {
     Long requestUserId = 2L;
 
     UserEntity requestUser = UserEntity.builder()
-        .userId(requestUserId)
-        .nickname("heesang")
-        .email("test@gmail.com")
+        .usrId(requestUserId)
+        .usrNickname("heesang")
+        .usrEmail("test@gmail.com")
         .build();
 
     Long userId = 1L;
 
     UserEntity user = UserEntity.builder()
-        .userId(userId)
-        .nickname("heesang")
-        .email("test@gmail.com")
+        .usrId(userId)
+        .usrNickname("heesang")
+        .usrEmail("test@gmail.com")
         .build();
 
     Long commentId = 1L;
@@ -324,8 +324,8 @@ class CommentsServiceImplTest {
     CommentEntity comment = CommentEntity.builder()
         .user(user)
         .recipe(any())
-        .commentContent("댓글 내용")
-        .commentLike(5.0)
+        .cmtContent("댓글 내용")
+        .cmtLike(5.0)
         .build();
 
     CommentsDeleteDTO requestDTO = new CommentsDeleteDTO(commentId);
@@ -348,49 +348,49 @@ class CommentsServiceImplTest {
     Long recipeId = 1L;
 
     RecipeEntity recipe = RecipeEntity.builder()
-        .id(recipeId)
+        .rcpId(recipeId)
         .build();
 
     List<CommentEntity> allByRecipe = List.of(
         CommentEntity.builder()
             .user(
                 UserEntity.builder()
-                    .userId(1L)
+                    .usrId(1L)
                     .build()
             )
             .recipe(recipe)
-            .commentContent("댓글 내용1")
-            .commentLike(5.0)
+            .cmtContent("댓글 내용1")
+            .cmtLike(5.0)
             .build(),
         CommentEntity.builder()
             .user(
                 UserEntity.builder()
-                    .userId(1L)
+                    .usrId(1L)
                     .build()
             )
             .recipe(recipe)
-            .commentContent("댓글 내용2")
-            .commentLike(4.0)
+            .cmtContent("댓글 내용2")
+            .cmtLike(4.0)
             .build(),
         CommentEntity.builder()
             .user(
                 UserEntity.builder()
-                    .userId(1L)
+                    .usrId(1L)
                     .build()
             )
             .recipe(recipe)
-            .commentContent("댓글 내용3")
-            .commentLike(3.0)
+            .cmtContent("댓글 내용3")
+            .cmtLike(3.0)
             .build(),
         CommentEntity.builder()
             .user(
                 UserEntity.builder()
-                    .userId(1L)
+                    .usrId(1L)
                     .build()
             )
             .recipe(recipe)
-            .commentContent("댓글 내용4")
-            .commentLike(2.0)
+            .cmtContent("댓글 내용4")
+            .cmtLike(2.0)
             .build()
     );
 

@@ -23,23 +23,23 @@ class CommentEntityTest {
 
     // given
     UserEntity commentUser = UserEntity.builder()
-        .userId(1L)
-        .nickname("comment")
-        .email("comment@gmail.com")
-        .password("1234")
-        .role(USER)
+        .usrId(1L)
+        .usrNickname("comment")
+        .usrEmail("comment@gmail.com")
+        .usrPassword("1234")
+        .usrRole(USER)
         .build();
 
     RecipeEntity commentRecipe = RecipeEntity.builder()
-        .id(1L)
+        .rcpId(1L)
         .build();
 
     CommentEntity commentEntity = CommentEntity.builder()
-        .commentId(1L)
+        .cmtId(1L)
         .user(commentUser)
         .recipe(commentRecipe)
-        .commentContent("comment")
-        .commentLike(1.0)
+        .cmtContent("comment")
+        .cmtLike(1.0)
         .build();
 
     // when
@@ -49,11 +49,11 @@ class CommentEntityTest {
     CommentEntity savedComment = commentRepository.save(commentEntity);
 
     // then
-    assertEquals(1, savedComment.getCommentId());
-    assertEquals(commentUser.getUserId(), savedComment.getUser().getUserId());
-    assertEquals(commentRecipe.getId(), savedComment.getRecipe().getId());
-    assertEquals("comment", savedComment.getCommentContent());
-    assertEquals(1.0, savedComment.getCommentLike());
+    assertEquals(1, savedComment.getCmtId());
+    assertEquals(commentUser.getUsrId(), savedComment.getUser().getUsrId());
+    assertEquals(commentRecipe.getRcpId(), savedComment.getRecipe().getRcpId());
+    assertEquals("comment", savedComment.getCmtContent());
+    assertEquals(1.0, savedComment.getCmtLike());
 
   }
 }

@@ -25,10 +25,10 @@ public class Comment {
   }
 
   public Comment(CommentEntity commentEntity){
-    this.commentId = commentEntity.getCommentId();
-    this.commentAuthor = commentEntity.getUser().getNickname();
-    this.commentContent = commentEntity.getCommentContent();
-    this.rating = commentEntity.getCommentLike();
+    this.commentId = commentEntity.getCmtId();
+    this.commentAuthor = commentEntity.getUser().getUsrNickname();
+    this.commentContent = commentEntity.getCmtContent();
+    this.rating = commentEntity.getCmtLike();
     this.createdAt = commentEntity.getCreatedAt();
     this.updatedAt = commentEntity.getUpdatedAt();
   }

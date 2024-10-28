@@ -34,7 +34,7 @@ public class RecipeEntity extends BaseTimeEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "rcp_id")
-  private Long id;
+  private Long rcpId;
 
   @NotNull
   @ManyToOne
@@ -43,26 +43,26 @@ public class RecipeEntity extends BaseTimeEntity {
 
   @NotNull
   @Column(name = "rcp_name")
-  private String name;
+  private String rcpName;
 
   @Enumerated(EnumType.STRING)
   @Column(name = "rcp_level")
-  private LevelType level;
+  private LevelType rcpLevel;
 
   @Enumerated(EnumType.STRING)
   @Column(name = "rcp_time")
-  private CookingTimeType time;
+  private CookingTimeType rcpTime;
 
   @Column(name = "rcp_thumbnail")
-  private String thumbnail;
+  private String rcpThumbnail;
 
   @NotNull
   @Column(name = "rcp_provider")
   @Enumerated(EnumType.STRING)
-  private RecipeProvider provider;
+  private RecipeProvider rcpProvider;
 
-  @Column(name = "origin_rcp_id")
-  private Long originRcpId;
+  @Column(name = "rcp_origin_id")
+  private Long rcpOriginId;
 
   @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
   private List<ManualEntity> manuals;
@@ -79,10 +79,10 @@ public class RecipeEntity extends BaseTimeEntity {
   @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
   private List<CommentEntity> comments;
 
-  public void updateRecipe(String name, LevelType level, CookingTimeType time, String thumbnail) {
-    this.name = name;
-    this.level = level;
-    this.time = time;
-    this.thumbnail = thumbnail;
+  public void updateRecipe(String rcpName, LevelType rcpLevel, CookingTimeType rcpTime, String rcpThumbnail) {
+    this.rcpName = rcpName;
+    this.rcpLevel = rcpLevel;
+    this.rcpTime = rcpTime;
+    this.rcpThumbnail = rcpThumbnail;
   }
 }
