@@ -27,9 +27,9 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     LocalDate now = LocalDate.now();
 
-    StatisticsEntity daily = statisticsRepository.findVisitorsByYearsAndMonthsAndDays(now.getYear(), now.getMonthValue(), now.getDayOfMonth())
+    StatisticsEntity daily = statisticsRepository.findVisitorsByStYearsAndStMonthsAndStDays(now.getYear(), now.getMonthValue(), now.getDayOfMonth())
         .orElseGet(StatisticsEntity.builder().stVisitors(0L)::build);
-    return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_DAILY, daily.getVisitors());
+    return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_DAILY, daily.getStVisitors());
   }
 
   @Override
@@ -51,12 +51,12 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     LocalDateTime now = LocalDateTime.now();
 
-    Optional<StatisticsEntity> visitorsByYearsAndMonthsAndDays = statisticsRepository.findVisitorsByYearsAndMonthsAndDays(
+    Optional<StatisticsEntity> visitorsByYearsAndMonthsAndDays = statisticsRepository.findVisitorsByStYearsAndStMonthsAndStDays(
         now.getYear(), now.getMonthValue(), now.getDayOfMonth());
 
     if (visitorsByYearsAndMonthsAndDays.isPresent()) {
       StatisticsEntity statisticsEntity = visitorsByYearsAndMonthsAndDays.get();
-      statisticsEntity.addVisitors((long) visitors - statisticsEntity.getVisitors());
+      statisticsEntity.addVisitors((long) visitors - statisticsEntity.getStVisitors());
       statisticsRepository.save(statisticsEntity);
     }
     else{

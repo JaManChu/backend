@@ -9,4 +9,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface RecommendRecipeRepository extends JpaRepository<RecommendRecipeEntity, Long> {
   List<RecommendRecipeEntity> findAllByUser(UserEntity user);
+
+  boolean existsByUser(UserEntity user);
 }
