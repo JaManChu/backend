@@ -94,8 +94,7 @@ public class CommentsServiceImpl implements CommentsService {
               .ingredient(ingredient.getIngredient())
               .rating(commentsDTO.getRating())
               .point(
-                  ingredientRatingRepository.findAll().stream().mapToDouble(
-                      IngredientRatingEntity::getRating).sum() + commentsDTO.getRating() / (ingredientRatingRepository.findAll().size()+1)
+                  ingredientRatingRepository.findAllByIngredient(ingredient.getIngredient()).stream().mapToDouble(IngredientRatingEntity::getRating).sum() + commentsDTO.getRating() / (ingredientRatingRepository.findAll().size()+1)
               )
               .build();
           ingredientRatingRepository.save(ingredientRating);
