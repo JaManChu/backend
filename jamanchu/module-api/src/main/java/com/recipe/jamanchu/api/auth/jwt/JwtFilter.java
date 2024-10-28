@@ -132,6 +132,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
     return pathMatcher.match("/api/v1/recipes/**", requestURI)
         || pathMatcher.match("/api/v1/comments/**", requestURI)
-        || pathMatcher.match("/api/v1/notify/**", requestURI);
+        || pathMatcher.match("/api/v1/notify/**", requestURI)
+        || pathMatcher.match("/api/v1/statistics/**", requestURI);
   }
 }
