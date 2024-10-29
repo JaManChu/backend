@@ -271,10 +271,6 @@ public class RecipeServiceImpl implements RecipeService {
   @Override
   public ResultResponse getRecipes(HttpServletRequest request, int page, int size) {
 
-    // 페이지 네이션 처리할 범위 계산
-//    int[] pageRange = {(page - 1) * size, page * size - 1};
-
-
     // Pagination Request
     Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
     List<Long> scrapedRecipeIds = getScrapedRecipeIds(request);
