@@ -42,7 +42,7 @@ public class StatisticsEntity {
   private Long stVisitors;
 
   public void addVisitors(Long visitors) {
-    this.visitors += visitors;
+    this.stVisitors += visitors;
   }
 
 }
