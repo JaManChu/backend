@@ -270,9 +270,9 @@ public class RecipeServiceImpl implements RecipeService {
   @Cacheable(value = "AllRecipes", key = "#page-#size")
   @Override
   public ResultResponse getRecipes(HttpServletRequest request, int page, int size) {
+    
+    Pageable pageable = PageRequest.of(page, size, Sort.by("rcpId").descending());
 
-    // Pagination Request
-    Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
     List<Long> scrapedRecipeIds = getScrapedRecipeIds(request);
 
     // 만약 scrapedRecipeIds가 비어있지 않다면 SCRAPED한 레시피를 제외한 나머지 레시피 조회
@@ -296,7 +296,7 @@ public class RecipeServiceImpl implements RecipeService {
   @Override
   public ResultResponse searchRecipes(HttpServletRequest request, RecipesSearchDTO recipesSearchDTO,
       int page, int size) {
-    Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+    Pageable pageable = PageRequest.of(page, size, Sort.by("rcpId").descending());
     List<Long> scrapedRecipeIds = getScrapedRecipeIds(request);
 
     Page<RecipeEntity> recipes = recipeRepository.searchAndRecipesQueryDSL(
