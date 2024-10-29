@@ -124,7 +124,8 @@ public class JwtFilter extends OncePerRequestFilter {
         || pathMatcher.match("/v3/api-docs/**", requestURI)
         || pathMatcher.match("/swagger-ui/**", requestURI)
         || pathMatcher.match("/swagger-ui.html", requestURI)
-        || pathMatcher.match("/swagger-resources/**", requestURI);
+        || pathMatcher.match("/swagger-resources/**", requestURI)
+        || pathMatcher.match("/actuator/**", requestURI);
   }
 
   // 비 로그인 사용자 레시피, 댓글 조회 시 토큰 검증 제외 경로
