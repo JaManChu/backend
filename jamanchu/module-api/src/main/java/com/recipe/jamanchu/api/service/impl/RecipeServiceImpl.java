@@ -48,6 +48,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -150,6 +153,14 @@ public class RecipeServiceImpl implements RecipeService {
 
   @Override
   @Transactional
+  @Caching(
+      evict = {
+          @CacheEvict(value = "RecipeDetail", key = "#recipesUpdateDTO.getRecipeId()"),
+          @CacheEvict(value = "PopularRecipes", allEntries = true),
+          @CacheEvict(value = "AllRecipes", allEntries = true),
+          @CacheEvict(value = "SearchRecipes", allEntries = true)
+      }
+  )
   public ResultResponse updateRecipe(HttpServletRequest request,
       RecipesUpdateDTO recipesUpdateDTO, String thumbnail, List<String> orderImages) {
     Long userId = jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue()));
@@ -256,9 +267,12 @@ public class RecipeServiceImpl implements RecipeService {
     return ResultResponse.of(ResultCode.SUCCESS_DELETE_RECIPE);
   }
 
+  @Cacheable(value = "AllRecipes", key = "#page-#size")
   @Override
   public ResultResponse getRecipes(HttpServletRequest request, int page, int size) {
+    
     Pageable pageable = PageRequest.of(page, size, Sort.by("rcpId").descending());
+
     List<Long> scrapedRecipeIds = getScrapedRecipeIds(request);
 
     // 만약 scrapedRecipeIds가 비어있지 않다면 SCRAPED한 레시피를 제외한 나머지 레시피 조회
@@ -278,6 +292,7 @@ public class RecipeServiceImpl implements RecipeService {
     return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_ALL_RECIPES, convertToRecipesSummary(recipes));
   }
 
+  @Cacheable(value = "SearchRecipes", key = "#page-#size", condition = "#recipesSearchDTO != null")
   @Override
   public ResultResponse searchRecipes(HttpServletRequest request, RecipesSearchDTO recipesSearchDTO,
       int page, int size) {
@@ -299,6 +314,7 @@ public class RecipeServiceImpl implements RecipeService {
     return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_RECIPES, convertToRecipesSummary(recipes));
   }
 
+  @Cacheable(value = "RecipeDetail", key = "#recipeId")
   @Override
   public ResultResponse getRecipeDetail(Long recipeId) {
     RecipeEntity recipe = recipeRepository.findById(recipeId)
@@ -334,6 +350,7 @@ public class RecipeServiceImpl implements RecipeService {
     return ResultResponse.of(ResultCode.SUCCESS_RETRIEVE_RECIPES_DETAILS, recipesInfo);
   }
 
+  @Cacheable(value = "PopularRecipes", key = "#page-#size")
   @Override
   public ResultResponse getRecipesByRating(HttpServletRequest request, int page, int size) {
     Pageable pageable = PageRequest.of(page, size);
@@ -385,7 +402,6 @@ public class RecipeServiceImpl implements RecipeService {
             ? ResultCode.SUCCESS_SCRAPED_RECIPE
             : ResultCode.SUCCESS_CANCELED_SCRAP_RECIPE, scrapedRecipe.getScrapedType());
   }
-
 
   @Override
   public ResultResponse getRecommendRecipes(HttpServletRequest request) {
@@ -444,8 +460,6 @@ public class RecipeServiceImpl implements RecipeService {
           .toList()
         );
   }
-
-
 
   // 유저의 scrapedRecipeIds를 가져오는 메서드
   private List<Long> getScrapedRecipeIds(HttpServletRequest request) {
