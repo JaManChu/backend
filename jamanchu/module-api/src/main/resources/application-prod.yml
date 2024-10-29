@@ -1,6 +1,11 @@
 spring:
   config:
     import: classpath:secret.yml
+  data:
+    redis:
+      port: ${PROD.REDIS.PORT}
+      host: ${PROD.REDIS.HOST}
+      timeout: ${PROD.REDIS.TIMEOUT}
   jpa:
     hibernate:
       ddl-auto: update
