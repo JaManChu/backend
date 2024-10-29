@@ -77,7 +77,7 @@ services:
       - ./data/prometheus/config:/etc/prometheus
       - ./data/prometheus/volume:/prometheus
     ports:
-      - "9090:9090"
+      - "9010:9090"
     command:
       - '--web.enable-lifecycle'
       - '--storage.tsdb.path=/prometheus'
