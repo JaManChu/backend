@@ -916,9 +916,9 @@ class RecipeServiceImplTest {
       System.out.println(e.getRecipeAuthor());
       System.out.println(e.getRecipeName());
       System.out.println(e.getRecipeThumbnail());
-      System.out.println(e.getRating());
-      System.out.println(e.getCookingTime());
-      System.out.println(e.getDifficulty());
+      System.out.println(e.getRecipeRating());
+      System.out.println(e.getRecipeCookingTime());
+      System.out.println(e.getRecipeLevel());
       System.out.println();
     });
   }
