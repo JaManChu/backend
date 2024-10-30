@@ -1,6 +1,6 @@
 package com.recipe.jamanchu.batch.job;
 
-import com.recipe.jamanchu.batch.recommend.RecommendCalculate;
+import com.recipe.jamanchu.batch.component.recommend.RecommendCalculate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
