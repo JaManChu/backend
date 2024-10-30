@@ -1,7 +1,7 @@
-package com.recipe.jamanchu.batch.recommend;
+package com.recipe.jamanchu.batch.component.recommend;
 
-import com.recipe.jamanchu.batch.recommend.schedule.RecommendRecipeCountsMap;
-import com.recipe.jamanchu.batch.recommend.schedule.RecommendRecipeDifferencesMap;
+import com.recipe.jamanchu.batch.component.recommend.schedule.RecommendRecipeCountsMap;
+import com.recipe.jamanchu.batch.component.recommend.schedule.RecommendRecipeDifferencesMap;
 import com.recipe.jamanchu.core.exceptions.exception.RecipeNotFoundException;
 import com.recipe.jamanchu.domain.component.UserAccessHandler;
 import com.recipe.jamanchu.domain.entity.RecipeEntity;

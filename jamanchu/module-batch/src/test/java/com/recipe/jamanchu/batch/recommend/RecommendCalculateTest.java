@@ -7,8 +7,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.recipe.jamanchu.batch.recommend.schedule.RecommendRecipeCountsMap;
-import com.recipe.jamanchu.batch.recommend.schedule.RecommendRecipeDifferencesMap;
+import com.recipe.jamanchu.batch.component.recommend.RecommendCalculate;
+import com.recipe.jamanchu.batch.component.recommend.schedule.RecommendRecipeCountsMap;
+import com.recipe.jamanchu.batch.component.recommend.schedule.RecommendRecipeDifferencesMap;
 import com.recipe.jamanchu.domain.component.UserAccessHandler;
 import com.recipe.jamanchu.domain.entity.RecipeEntity;
 import com.recipe.jamanchu.domain.entity.RecipeRatingEntity;

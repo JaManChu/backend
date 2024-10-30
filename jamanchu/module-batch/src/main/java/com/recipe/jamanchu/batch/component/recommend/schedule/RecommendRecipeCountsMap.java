@@ -1,4 +1,4 @@
-package com.recipe.jamanchu.batch.recommend.schedule;
+package com.recipe.jamanchu.batch.component.recommend.schedule;
 
 import java.util.Collection;
 import java.util.Map;
