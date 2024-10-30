@@ -1,2 +1,7 @@
 .idea
 env.mysql
+grafana/
+!grafana/env.grafana
+prometheus/
+!prometheus/config/prometheus.yml
+!prometheus/config/rule.yml

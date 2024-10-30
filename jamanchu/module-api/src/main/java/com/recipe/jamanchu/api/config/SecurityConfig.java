@@ -62,7 +62,8 @@ public class SecurityConfig {
                 "/api/v1/recipes/**",
                 "/api/v1/comments/**",
                 "/api/v1/notify/**",
-                "/api/v1/statistics/**").permitAll()
+                "/api/v1/statistics/**",
+                "/actuator/**").permitAll()
             .anyRequest().authenticated());
     http
         .addFilterBefore(new JwtFilter(jwtUtil),
