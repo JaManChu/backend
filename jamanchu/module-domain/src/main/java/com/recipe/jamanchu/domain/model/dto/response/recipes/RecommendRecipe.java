@@ -18,20 +18,20 @@ public class RecommendRecipe {
 
   private final String recipeThumbnail;
 
-  private final Double rating;
+  private final Double recipeRating;
 
-  private final String difficulty;
+  private final LevelType recipeLevel;
 
-  private final String cookingTime;
+  private final CookingTimeType recipeCookingTime;
 
-  private RecommendRecipe(Long recipeId, String recipeName, String recipeAuthor, String recipeThumbnail, Double rating, LevelType difficulty, CookingTimeType cookingTime) {
+  private RecommendRecipe(Long recipeId, String recipeName, String recipeAuthor, String recipeThumbnail, Double recipeRating, LevelType recipeLevel, CookingTimeType recipeCookingTime) {
     this.recipeId = recipeId;
     this.recipeName = recipeName;
     this.recipeAuthor = recipeAuthor;
     this.recipeThumbnail = recipeThumbnail;
-    this.rating = rating;
-    this.difficulty = difficulty.getLevel();
-    this.cookingTime = cookingTime.getTime();
+    this.recipeRating = recipeRating;
+    this.recipeLevel = recipeLevel;
+    this.recipeCookingTime = recipeCookingTime;
   }
 
   public static RecommendRecipe of(RecipeEntity recipe, UserEntity author, LevelType difficulty, CookingTimeType cookingTime) {
