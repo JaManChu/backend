@@ -52,7 +52,7 @@ public class TenThousandRecipeEntity {
   @Column(name = "tr_thumbnail")
   private String trThumbnail;
 
-  @Column(name = "tr_ingredients")
+  @Column(name = "tr_ingredients", columnDefinition = "TEXT")
   private String trIngredients;
 
   @NotNull
