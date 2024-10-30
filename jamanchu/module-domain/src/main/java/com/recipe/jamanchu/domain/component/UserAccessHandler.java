@@ -169,7 +169,7 @@ public class UserAccessHandler {
     users.forEach(user -> {
       log.info("Delete All User Data -> user : {}", user.getUsrEmail());
       deleteRelatedUserData(user);
-      userRepository.deleteUserByUserId(user.getUsrId());
+      userRepository.deleteByUsrId(user.getUsrId());
     });
   }
 
