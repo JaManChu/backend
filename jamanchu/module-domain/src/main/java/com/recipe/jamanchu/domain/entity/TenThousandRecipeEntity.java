@@ -9,6 +9,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -52,6 +53,8 @@ public class TenThousandRecipeEntity {
   @Column(name = "tr_thumbnail")
   private String trThumbnail;
 
+  @NotNull
+  @Lob
   @Column(name = "tr_ingredients", columnDefinition = "TEXT")
   private String trIngredients;
 
