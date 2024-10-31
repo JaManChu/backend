@@ -46,7 +46,7 @@ public class RecommendCalculate {
   public void calculateAllRecommendations() {
 
     // 평점 데이터 전체 조회
-    List<RecipeRatingEntity> ratings = recipeRatingRepository.findAll();
+    List<RecipeRatingEntity> ratings = recipeRatingRepository.findAllWhereRatingOverOne();
 
     // 유저와 평가 데이터 그룹화
     Map<UserEntity, List<RecipeRatingEntity>> userRatings = ratings.stream()
