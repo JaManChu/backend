@@ -5,7 +5,7 @@ import lombok.Getter;
 @Getter
 public enum TokenType {
   ACCESS("access-token"),
-  REFRESH("refresh-token");
+  REFRESH("_refresh-token");
 
   private final String value;
 

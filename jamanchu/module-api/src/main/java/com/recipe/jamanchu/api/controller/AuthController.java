@@ -47,10 +47,12 @@ public class AuthController {
   }
 
   @GetMapping("/token/refresh")
-  public ResponseEntity<ResultResponse> refreshToken(HttpServletRequest request,
+  public ResponseEntity<ResultResponse> refreshToken(
+      @RequestParam("nickname") String nickname,
+      HttpServletRequest request,
       HttpServletResponse response) {
 
-    return ResponseEntity.ok(authService.refreshToken(request, response));
+    return ResponseEntity.ok(authService.refreshToken(nickname, request, response));
   }
 
   @PostMapping("/password-check")

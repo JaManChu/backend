@@ -73,7 +73,7 @@ public class UserServiceImpl implements UserService {
     String refresh = jwtUtil.createJwt("refresh", user.getUsrId(), user.getUsrRole());
 
     response.addHeader(TokenType.ACCESS.getValue(), "Bearer " + access);
-    response.addHeader(HttpHeaders.SET_COOKIE, createCookie(refresh).toString());
+    response.addHeader(HttpHeaders.SET_COOKIE, createCookie(refresh, user.getUsrNickname()).toString());
 
     return new ResultResponse(ResultCode.SUCCESS_LOGIN, user.getUsrNickname());
   }
@@ -94,7 +94,7 @@ public class UserServiceImpl implements UserService {
     String access = jwtUtil.createJwt("access", user.getUsrId(), user.getUsrRole());
     String refresh = jwtUtil.createJwt("refresh", user.getUsrId(), user.getUsrRole());
 
-    response.addHeader(HttpHeaders.SET_COOKIE, createCookie(refresh).toString());
+    response.addHeader(HttpHeaders.SET_COOKIE, createCookie(refresh, user.getUsrNickname()).toString());
 
     return UriComponentsBuilder.fromUriString(REDIRECT_URI)
         .queryParam(TokenType.ACCESS.getValue(), access)
@@ -139,7 +139,6 @@ public class UserServiceImpl implements UserService {
   // 회원 정보 조회
   @Override
   public ResultResponse getUserInfo(HttpServletRequest request) {
-    System.out.println("UserServiceImpl.getUserInfo");
 
     UserEntity user = userAccessHandler
         .findByUserId(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue())));
@@ -182,8 +181,8 @@ public class UserServiceImpl implements UserService {
   }
 
 
-  private ResponseCookie createCookie(String value) {
-    return ResponseCookie.from(TokenType.REFRESH.getValue(), value)
+  private ResponseCookie createCookie(String value, String nickname) {
+    return ResponseCookie.from(nickname + TokenType.REFRESH.getValue(), value)
         .httpOnly(true)
         .secure(true)
         .path("/")
