@@ -55,7 +55,7 @@ class AuthServiceImplTest {
 
   private UserEntity user;
   private PasswordCheckDTO passwordCheckDTO;
-  private String nickname;
+  private long usrId;
 
   @InjectMocks
   private AuthServiceImpl authService;
@@ -71,7 +71,7 @@ class AuthServiceImplTest {
 
     passwordCheckDTO = new PasswordCheckDTO("password");
 
-    nickname = "nickname";
+    usrId = 1L;
   }
 
   @Test
@@ -140,7 +140,7 @@ class AuthServiceImplTest {
   @DisplayName("Access-Token 재발급 성공")
   void success_Reissue_RefreshToken() {
     // given
-    Cookie mockCookie = new Cookie(nickname + TokenType.REFRESH.getValue(), REFRESH_TOKEN);
+    Cookie mockCookie = new Cookie(usrId + TokenType.REFRESH.getValue(), REFRESH_TOKEN);
     when(request.getCookies()).thenReturn(new Cookie[] { mockCookie });
     when(jwtUtil.isExpired(REFRESH_TOKEN)).thenReturn(false);
     when(jwtUtil.getUserId(REFRESH_TOKEN)).thenReturn(USERID);
@@ -148,7 +148,7 @@ class AuthServiceImplTest {
     when(jwtUtil.createJwt("access", user.getUsrId(), user.getUsrRole())).thenReturn(NEW_ACCESS_TOKEN);
 
     // when
-    ResultResponse resultResponse = authService.refreshToken(nickname, request, response);
+    ResultResponse resultResponse = authService.refreshToken(usrId, request, response);
 
     // then
     assertEquals(ResultCode.SUCCESS_REISSUE_REFRESH_TOKEN.getStatusCode(), resultResponse.getCode());
@@ -163,19 +163,19 @@ class AuthServiceImplTest {
     when(request.getCookies()).thenReturn(null);
 
     // when & then
-    assertThrows(CookieNotFoundException.class, () -> authService.refreshToken(nickname, request, response));
+    assertThrows(CookieNotFoundException.class, () -> authService.refreshToken(usrId, request, response));
   }
 
   @Test
   @DisplayName("Access-Token 재발급 실패 : refresh 토큰이 만료가 된경우")
   void reissue_RefreshToken_Expired() {
     // given
-    Cookie mockCookie = new Cookie(nickname + TokenType.REFRESH.getValue(), REFRESH_TOKEN);
+    Cookie mockCookie = new Cookie(usrId + TokenType.REFRESH.getValue(), REFRESH_TOKEN);
     when(request.getCookies()).thenReturn(new Cookie[] { mockCookie });
     when(jwtUtil.isExpired(REFRESH_TOKEN)).thenReturn(true);
 
     // when & then
-    assertThrows(RefreshTokenExpiredException.class, () -> authService.refreshToken(nickname, request, response));
+    assertThrows(RefreshTokenExpiredException.class, () -> authService.refreshToken(usrId, request, response));
   }
 
   @Test

@@ -1,16 +1,16 @@
 package com.recipe.jamanchu.api.service.impl;
 
 import com.recipe.jamanchu.api.auth.jwt.JwtUtil;
-import com.recipe.jamanchu.domain.component.UserAccessHandler;
-import com.recipe.jamanchu.domain.entity.UserEntity;
+import com.recipe.jamanchu.api.service.AuthService;
 import com.recipe.jamanchu.core.exceptions.exception.CookieNotFoundException;
 import com.recipe.jamanchu.core.exceptions.exception.RefreshTokenExpiredException;
+import com.recipe.jamanchu.domain.component.UserAccessHandler;
+import com.recipe.jamanchu.domain.entity.UserEntity;
 import com.recipe.jamanchu.domain.model.dto.request.auth.PasswordCheckDTO;
 import com.recipe.jamanchu.domain.model.dto.request.auth.PasswordUpdateDTO;
 import com.recipe.jamanchu.domain.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.domain.model.type.ResultCode;
 import com.recipe.jamanchu.domain.model.type.TokenType;
-import com.recipe.jamanchu.api.service.AuthService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -40,7 +40,7 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
-  public ResultResponse refreshToken(String nickname, HttpServletRequest request, HttpServletResponse response) {
+  public ResultResponse refreshToken(long usrId, HttpServletRequest request, HttpServletResponse response) {
     Cookie[] cookies = request.getCookies();
 
     // 쿠키 검증
@@ -51,7 +51,8 @@ public class AuthServiceImpl implements AuthService {
 
     log.info("cookies.length -> {}", cookies.length);
 
-    String cookieName = nickname + TokenType.REFRESH.getValue();
+    String cookieName = usrId + TokenType.REFRESH.getValue();
+
     // refresh-token 추출
     String refreshToken =  Arrays.stream(request.getCookies())
         .filter(cookie -> cookieName.equals(cookie.getName()))

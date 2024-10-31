@@ -4,9 +4,10 @@ import static com.recipe.jamanchu.domain.model.type.ResultCode.SUCCESS_GET_USER_
 
 import com.recipe.jamanchu.api.auth.jwt.JwtUtil;
 import com.recipe.jamanchu.api.auth.oauth2.CustomOauth2UserService;
+import com.recipe.jamanchu.api.service.UserService;
 import com.recipe.jamanchu.domain.component.UserAccessHandler;
-import com.recipe.jamanchu.domain.model.auth.KakaoUserDetails;
 import com.recipe.jamanchu.domain.entity.UserEntity;
+import com.recipe.jamanchu.domain.model.auth.KakaoUserDetails;
 import com.recipe.jamanchu.domain.model.dto.request.auth.LoginDTO;
 import com.recipe.jamanchu.domain.model.dto.request.auth.SignupDTO;
 import com.recipe.jamanchu.domain.model.dto.request.auth.UserUpdateDTO;
@@ -21,7 +22,6 @@ import com.recipe.jamanchu.domain.model.type.ScrapedType;
 import com.recipe.jamanchu.domain.model.type.TokenType;
 import com.recipe.jamanchu.domain.model.type.UserRole;
 import com.recipe.jamanchu.domain.repository.RecipeRepository;
-import com.recipe.jamanchu.api.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
@@ -73,9 +73,9 @@ public class UserServiceImpl implements UserService {
     String refresh = jwtUtil.createJwt("refresh", user.getUsrId(), user.getUsrRole());
 
     response.addHeader(TokenType.ACCESS.getValue(), "Bearer " + access);
-    response.addHeader(HttpHeaders.SET_COOKIE, createCookie(refresh, user.getUsrNickname()).toString());
+    response.addHeader(HttpHeaders.SET_COOKIE, createCookie(refresh, user.getUsrId()).toString());
 
-    return new ResultResponse(ResultCode.SUCCESS_LOGIN, user.getUsrNickname());
+    return new ResultResponse(ResultCode.SUCCESS_LOGIN, List.of(user.getUsrNickname(), user.getUsrId()));
   }
 
   // 카카오 로그인
@@ -94,12 +94,13 @@ public class UserServiceImpl implements UserService {
     String access = jwtUtil.createJwt("access", user.getUsrId(), user.getUsrRole());
     String refresh = jwtUtil.createJwt("refresh", user.getUsrId(), user.getUsrRole());
 
-    response.addHeader(HttpHeaders.SET_COOKIE, createCookie(refresh, user.getUsrNickname()).toString());
+    response.addHeader(HttpHeaders.SET_COOKIE, createCookie(refresh, user.getUsrId()).toString());
 
     return UriComponentsBuilder.fromUriString(REDIRECT_URI)
         .queryParam(TokenType.ACCESS.getValue(), access)
         .queryParam("nickname", user.getUsrNickname())
         .queryParam("provider", user.getUsrProvider())
+        .queryParam("userId", user.getUsrId())
         .build()
         .toUriString();
   }
@@ -181,8 +182,8 @@ public class UserServiceImpl implements UserService {
   }
 
 
-  private ResponseCookie createCookie(String value, String nickname) {
-    return ResponseCookie.from(nickname + TokenType.REFRESH.getValue(), value)
+  private ResponseCookie createCookie(String value, long userId) {
+    return ResponseCookie.from(userId + TokenType.REFRESH.getValue(), value)
         .httpOnly(true)
         .secure(true)
         .path("/")
