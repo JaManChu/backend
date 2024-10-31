@@ -155,6 +155,9 @@ public class RecommendCalculate {
       // 추천 점수가 4.0 이상인 레시피를 평점순으로 정렬하고, 가장 높은 3개만 추천
       // 3개는 변경될 수 있음.
       int topN = 3;
+
+      recommendRecipeRepository.deleteByUser(user);
+
       recommendations.entrySet()
           .stream()
           .filter(e -> e.getValue() >= 4.0)
