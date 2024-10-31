@@ -415,8 +415,8 @@ class UserAccessHandlerTest {
     verify(recipeRepository, times(1)).deleteAllByUser(user2);
 
     // user 삭제 검증
-    verify(userRepository, times(1)).deleteUserByUserId(user1.getUsrId());
-    verify(userRepository, times(1)).deleteUserByUserId(user2.getUsrId());
+    verify(userRepository, times(1)).deleteByUsrId(user1.getUsrId());
+    verify(userRepository, times(1)).deleteByUsrId(user2.getUsrId());
   }
 
   @Test

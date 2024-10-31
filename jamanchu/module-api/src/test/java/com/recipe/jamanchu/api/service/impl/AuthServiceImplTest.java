@@ -2,6 +2,7 @@ package com.recipe.jamanchu.api.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.recipe.jamanchu.api.auth.jwt.JwtUtil;
@@ -52,9 +53,9 @@ class AuthServiceImplTest {
   private static final String ACCESS_TOKEN = "access-token";
   private static final String PASSWORD = "password";
 
-  private Cookie[] cookies;
   private UserEntity user;
   private PasswordCheckDTO passwordCheckDTO;
+  private String nickname;
 
   @InjectMocks
   private AuthServiceImpl authService;
@@ -62,7 +63,6 @@ class AuthServiceImplTest {
   @BeforeEach
   void setUp() {
     Cookie refreshCookie = new Cookie(TokenType.REFRESH.getValue(), REFRESH_TOKEN);
-    cookies = new Cookie[] {refreshCookie};
 
     user = UserEntity.builder()
         .usrId(USERID)
@@ -70,6 +70,8 @@ class AuthServiceImplTest {
         .build();
 
     passwordCheckDTO = new PasswordCheckDTO("password");
+
+    nickname = "nickname";
   }
 
   @Test
@@ -138,19 +140,22 @@ class AuthServiceImplTest {
   @DisplayName("Access-Token 재발급 성공")
   void success_Reissue_RefreshToken() {
     // given
-    when(request.getCookies()).thenReturn(cookies);
+    Cookie mockCookie = new Cookie(nickname + TokenType.REFRESH.getValue(), REFRESH_TOKEN);
+    when(request.getCookies()).thenReturn(new Cookie[] { mockCookie });
     when(jwtUtil.isExpired(REFRESH_TOKEN)).thenReturn(false);
     when(jwtUtil.getUserId(REFRESH_TOKEN)).thenReturn(USERID);
     when(userAccessHandler.findByUserId(USERID)).thenReturn(user);
-    when(jwtUtil.createJwt(TOKEN_TYPE, user.getUsrId(), user.getUsrRole())).thenReturn(NEW_ACCESS_TOKEN);
+    when(jwtUtil.createJwt("access", user.getUsrId(), user.getUsrRole())).thenReturn(NEW_ACCESS_TOKEN);
 
     // when
-    ResultResponse resultResponse = authService.refreshToken(request, response);
+    ResultResponse resultResponse = authService.refreshToken(nickname, request, response);
 
     // then
     assertEquals(ResultCode.SUCCESS_REISSUE_REFRESH_TOKEN.getStatusCode(), resultResponse.getCode());
+    verify(response).addHeader(TokenType.ACCESS.getValue(), "Bearer " + NEW_ACCESS_TOKEN);
   }
 
+  // 실패 케이스: 쿠키 값이 null인 경우
   @Test
   @DisplayName("Access-Token 재발급 실패 : 쿠키값이 null인 경우")
   void reissue_RefreshToken_CookieIsNull() {
@@ -158,20 +163,19 @@ class AuthServiceImplTest {
     when(request.getCookies()).thenReturn(null);
 
     // when & then
-    assertThrows(CookieNotFoundException.class, () -> authService.refreshToken(request, response));
-
+    assertThrows(CookieNotFoundException.class, () -> authService.refreshToken(nickname, request, response));
   }
 
   @Test
   @DisplayName("Access-Token 재발급 실패 : refresh 토큰이 만료가 된경우")
   void reissue_RefreshToken_Expired() {
     // given
-    when(request.getCookies()).thenReturn(cookies);
+    Cookie mockCookie = new Cookie(nickname + TokenType.REFRESH.getValue(), REFRESH_TOKEN);
+    when(request.getCookies()).thenReturn(new Cookie[] { mockCookie });
     when(jwtUtil.isExpired(REFRESH_TOKEN)).thenReturn(true);
 
     // when & then
-    assertThrows(RefreshTokenExpiredException.class, () -> authService.refreshToken(request, response));
-
+    assertThrows(RefreshTokenExpiredException.class, () -> authService.refreshToken(nickname, request, response));
   }
 
   @Test
