@@ -40,20 +40,21 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
-  public ResultResponse refreshToken(HttpServletRequest request, HttpServletResponse response) {
+  public ResultResponse refreshToken(String nickname, HttpServletRequest request, HttpServletResponse response) {
     Cookie[] cookies = request.getCookies();
 
     // 쿠키 검증
     if (cookies == null || cookies.length == 0) {
-      log.info("No cookies found");
+      log.info("cookie is empty");
       throw new CookieNotFoundException();
     }
 
     log.info("cookies.length -> {}", cookies.length);
 
+    String cookieName = nickname + TokenType.REFRESH.getValue();
     // refresh-token 추출
     String refreshToken =  Arrays.stream(request.getCookies())
-        .filter(cookie -> TokenType.REFRESH.getValue().equals(cookie.getName()))
+        .filter(cookie -> cookieName.equals(cookie.getName()))
         .map(Cookie::getValue)
         .findFirst()
         .orElse(null);
