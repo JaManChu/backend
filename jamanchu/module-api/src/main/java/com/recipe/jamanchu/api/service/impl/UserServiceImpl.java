@@ -139,7 +139,6 @@ public class UserServiceImpl implements UserService {
   // 회원 정보 조회
   @Override
   public ResultResponse getUserInfo(HttpServletRequest request) {
-    System.out.println("UserServiceImpl.getUserInfo");
 
     UserEntity user = userAccessHandler
         .findByUserId(jwtUtil.getUserId(request.getHeader(TokenType.ACCESS.getValue())));
