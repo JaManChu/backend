@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,13 +47,13 @@ public class AuthController {
     return ResponseEntity.ok(authService.checkNickname(nickname));
   }
 
-  @GetMapping("/token/refresh")
+  @GetMapping("/token/refresh/{userId}")
   public ResponseEntity<ResultResponse> refreshToken(
-      @RequestParam("nickname") String nickname,
+      @PathVariable("userId") long userId,
       HttpServletRequest request,
       HttpServletResponse response) {
 
-    return ResponseEntity.ok(authService.refreshToken(nickname, request, response));
+    return ResponseEntity.ok(authService.refreshToken(userId, request, response));
   }
 
   @PostMapping("/password-check")

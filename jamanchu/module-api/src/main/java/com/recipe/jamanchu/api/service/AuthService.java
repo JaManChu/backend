@@ -12,7 +12,7 @@ public interface AuthService {
 
   ResultResponse checkNickname(String nickname);
 
-  ResultResponse refreshToken(String nickname, HttpServletRequest request, HttpServletResponse response);
+  ResultResponse refreshToken(long userId, HttpServletRequest request, HttpServletResponse response);
 
   ResultResponse checkPassword(PasswordCheckDTO passwordCheckDTO, HttpServletRequest request);
 

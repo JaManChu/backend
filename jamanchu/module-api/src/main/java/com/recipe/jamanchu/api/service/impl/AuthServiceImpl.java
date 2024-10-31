@@ -14,7 +14,9 @@ import com.recipe.jamanchu.api.service.AuthService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Base64;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -40,7 +42,7 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
-  public ResultResponse refreshToken(String nickname, HttpServletRequest request, HttpServletResponse response) {
+  public ResultResponse refreshToken(long usrId, HttpServletRequest request, HttpServletResponse response) {
     Cookie[] cookies = request.getCookies();
 
     // 쿠키 검증
@@ -51,7 +53,8 @@ public class AuthServiceImpl implements AuthService {
 
     log.info("cookies.length -> {}", cookies.length);
 
-    String cookieName = nickname + TokenType.REFRESH.getValue();
+    String cookieName = usrId + TokenType.REFRESH.getValue();
+
     // refresh-token 추출
     String refreshToken =  Arrays.stream(request.getCookies())
         .filter(cookie -> cookieName.equals(cookie.getName()))
