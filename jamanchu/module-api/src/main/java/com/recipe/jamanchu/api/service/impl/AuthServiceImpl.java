@@ -1,22 +1,20 @@
 package com.recipe.jamanchu.api.service.impl;
 
 import com.recipe.jamanchu.api.auth.jwt.JwtUtil;
-import com.recipe.jamanchu.domain.component.UserAccessHandler;
-import com.recipe.jamanchu.domain.entity.UserEntity;
+import com.recipe.jamanchu.api.service.AuthService;
 import com.recipe.jamanchu.core.exceptions.exception.CookieNotFoundException;
 import com.recipe.jamanchu.core.exceptions.exception.RefreshTokenExpiredException;
+import com.recipe.jamanchu.domain.component.UserAccessHandler;
+import com.recipe.jamanchu.domain.entity.UserEntity;
 import com.recipe.jamanchu.domain.model.dto.request.auth.PasswordCheckDTO;
 import com.recipe.jamanchu.domain.model.dto.request.auth.PasswordUpdateDTO;
 import com.recipe.jamanchu.domain.model.dto.response.ResultResponse;
 import com.recipe.jamanchu.domain.model.type.ResultCode;
 import com.recipe.jamanchu.domain.model.type.TokenType;
-import com.recipe.jamanchu.api.service.AuthService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.Base64;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
