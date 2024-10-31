@@ -75,7 +75,7 @@ public class UserServiceImpl implements UserService {
     response.addHeader(TokenType.ACCESS.getValue(), "Bearer " + access);
     response.addHeader(HttpHeaders.SET_COOKIE, createCookie(refresh, user.getUsrId()).toString());
 
-    return new ResultResponse(ResultCode.SUCCESS_LOGIN, user.getUsrNickname());
+    return new ResultResponse(ResultCode.SUCCESS_LOGIN, List.of(user.getUsrNickname(), user.getUsrId()));
   }
 
   // 카카오 로그인
@@ -100,6 +100,7 @@ public class UserServiceImpl implements UserService {
         .queryParam(TokenType.ACCESS.getValue(), access)
         .queryParam("nickname", user.getUsrNickname())
         .queryParam("provider", user.getUsrProvider())
+        .queryParam("userId", user.getUsrId())
         .build()
         .toUriString();
   }
