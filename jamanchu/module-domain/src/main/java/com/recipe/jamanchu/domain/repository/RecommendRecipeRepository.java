@@ -11,4 +11,6 @@ public interface RecommendRecipeRepository extends JpaRepository<RecommendRecipe
   List<RecommendRecipeEntity> findAllByUser(UserEntity user);
 
   boolean existsByUser(UserEntity user);
+
+  void deleteByUser(UserEntity user);
 }
